@@ -23,9 +23,28 @@ class Theme extends Model
         return data_get($this->config, $key, $default);
     }
 
-    /** The Blade layout slug (may differ from theme slug for shared layouts) */
+    /** The Blade layout slug, with fallback to an existing view folder */
     public function getLayoutSlug(): string
     {
-        return $this->config['layout'] ?? $this->slug;
+        $layout = $this->config['layout'] ?? $this->slug;
+
+        if (view()->exists("themes.{$layout}.layouts.app")) {
+            return $layout;
+        }
+
+        // Map layout tokens to the closest existing theme view folder
+        $fallbacks = [
+            'dashboard'  => 'contemporary',
+            'split'      => 'contemporary',
+            'grid'       => 'contemporary',
+            'minimal'    => 'modern-clean',
+            'classic'    => 'church-classic',
+            'editorial'  => 'modern-clean',
+            'magazine'   => 'modern-clean',
+        ];
+
+        $resolved = $fallbacks[$layout] ?? 'church-classic';
+
+        return view()->exists("themes.{$resolved}.layouts.app") ? $resolved : 'church-classic';
     }
 }

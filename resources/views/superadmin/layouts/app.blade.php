@@ -43,7 +43,8 @@
            class="hidden lg:flex flex-col bg-gray-950 transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 z-30">
 
         {{-- Brand --}}
-        <div class="flex items-center h-16 px-4 border-b border-white/10 gap-3 flex-shrink-0">
+        <div class="border-b border-white/10 flex-shrink-0 h-16 flex items-center"
+             :class="sidebarOpen ? 'px-4 gap-3' : 'justify-center'">
             <div class="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center flex-shrink-0 text-white font-black text-sm shadow-sm shadow-emerald-500/30">
                 FS
             </div>
@@ -52,13 +53,6 @@
                 <p class="text-white font-bold text-sm leading-none truncate">FaithStack</p>
                 <p class="text-emerald-400 text-xs mt-0.5 font-medium">Platform Admin</p>
             </div>
-            <button @click="toggleSidebar()"
-                    class="ml-auto p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-all flex-shrink-0">
-                <svg class="w-4 h-4 transition-transform duration-300" :class="sidebarOpen ? '' : 'rotate-180'"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                </svg>
-            </button>
         </div>
 
         {{-- Navigation --}}
@@ -152,6 +146,16 @@
             {{-- Mobile hamburger --}}
             <button @click="mobileOpen = true" class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+
+            {{-- Desktop sidebar toggle --}}
+            <button @click="toggleSidebar()"
+                    class="hidden lg:flex p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all flex-shrink-0"
+                    :title="sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'">
+                <svg class="w-4 h-4 transition-transform duration-300" :class="sidebarOpen ? '' : 'rotate-180'"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                </svg>
             </button>
 
             {{-- Breadcrumb --}}
