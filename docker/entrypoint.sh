@@ -3,15 +3,24 @@ set -e
 
 echo "==> FaithStack boot..."
 
-# Finish package discovery (skipped during build — needs .env)
-echo "==> Discovering packages..."
-php artisan package:discover --ansi || true
+# Clear stale host-generated bootstrap cache before anything else.
+# These files may reference dev-only providers not present in the container.
+echo "==> Clearing bootstrap cache..."
+rm -f /var/www/bootstrap/cache/packages.php
+rm -f /var/www/bootstrap/cache/services.php
+rm -f /var/www/bootstrap/cache/config.php
+rm -f /var/www/bootstrap/cache/routes-v7.php
+rm -f /var/www/bootstrap/cache/events.php
 
 # Generate app key if missing
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
     echo "==> Generating APP_KEY..."
     php artisan key:generate --force
 fi
+
+# Rebuild package manifest without dev-only providers
+echo "==> Discovering packages..."
+php artisan package:discover --ansi
 
 # Wait for MySQL (extra safety beyond healthcheck)
 echo "==> Waiting for MySQL..."

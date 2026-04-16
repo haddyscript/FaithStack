@@ -17,5 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Redirect unauthenticated users to the tenant admin login
+        $exceptions->shouldRenderJsonWhen(fn ($request) => $request->expectsJson());
+
+        $exceptions->renderable(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if (! $request->expectsJson()) {
+                return redirect()->guest(route('admin.login'));
+            }
+        });
     })->create();
