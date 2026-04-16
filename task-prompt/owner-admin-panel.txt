@@ -1,0 +1,150 @@
+Extend the existing FaithStack Laravel 13 multi-tenant CMS by implementing a Platform Super Admin Panel (SaaS Owner Panel).
+
+This panel is separate from tenant dashboards and is accessible at:
+
+👉 http://faithstack.test/admin (no subdomain)
+
+🎯 Goal
+
+Create a centralized admin system where the platform owner can:
+
+Manage all tenants
+Create and onboard new tenants
+Control subscriptions
+Monitor overall platform usage
+
+This panel must be completely independent from tenant-based routing and must bypass tenant scoping.
+
+🧱 Core Requirements
+1. Super Admin Authentication
+Implement authentication for platform admins
+Option 1: Separate guard (recommended)
+Option 2: Use users table with role = superadmin
+users table addition:
+role (admin, superadmin)
+Requirements:
+Only superadmins can access /admin
+Block normal tenant users
+2. SuperAdmin Middleware
+
+Create middleware:
+
+SuperAdminMiddleware
+Ensures user is authenticated AND role = superadmin
+Must bypass tenant resolution
+Should NOT rely on subdomain
+3. Separate Routing Structure
+
+Define routes outside tenant middleware group:
+
+Route::prefix('admin')->middleware(['auth', 'superadmin'])->group(function () {
+    Route::get('/', [SuperAdminDashboardController::class, 'index']);
+    Route::resource('tenants', TenantController::class);
+});
+
+Ensure:
+
+These routes do NOT use tenant_id filtering
+These routes operate globally
+🏢 4. Tenant Management सिस्टम
+
+Create full CRUD for tenants.
+
+tenants table:
+id
+name
+subdomain
+theme_id
+subscription_status
+subscription_ends_at
+created_at
+Features:
+List all tenants
+Create new tenant
+Edit tenant
+Delete tenant
+Tenant Creation Flow:
+
+When creating a tenant:
+
+Create tenant record
+Create default admin user for that tenant
+Assign subdomain
+Assign default theme
+Set subscription active by default
+💳 5. Subscription Management
+
+Allow superadmin to:
+
+Activate / deactivate subscription
+Extend subscription expiry
+View subscription status per tenant
+
+UI:
+
+Status badge (active, expired, trial)
+Date picker for expiry
+📊 6. Super Admin Dashboard
+
+Create a dashboard showing:
+
+Total tenants
+Active subscriptions
+Expired subscriptions
+Total donations (optional global metric)
+
+Use:
+
+cards
+simple charts (optional)
+🖥️ 7. Super Admin UI/UX
+
+Design a clean SaaS admin panel:
+
+Layout:
+Sidebar:
+Dashboard
+Tenants
+Subscriptions
+Topbar:
+Admin profile
+Logout
+Features:
+Table with search & pagination (tenants list)
+Status badges
+Action buttons (edit, delete, manage)
+
+Use:
+
+Tailwind CSS
+Alpine.js
+Reusable Blade components
+🧩 Technical Deliverables
+
+Generate:
+
+Middleware:
+SuperAdminMiddleware
+Controllers:
+SuperAdminDashboardController
+TenantController
+Routes:
+web.php (separate admin routes)
+Models updates:
+User (role support)
+Blade views:
+admin dashboard
+tenant list
+tenant create/edit forms
+⚠️ Constraints
+Must NOT interfere with tenant routing
+Must bypass tenant_id scoping
+Keep logic clean and maintainable
+Follow SaaS best practices
+🎯 Expected Outcome
+
+A fully functional platform-level admin panel where the SaaS owner can:
+
+Manage all tenants globally
+Control subscriptions
+Oversee the entire system

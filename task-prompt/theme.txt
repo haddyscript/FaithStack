@@ -1,0 +1,105 @@
+You are a senior Laravel architect and CMS system designer.
+
+I am building a scalable CMS theme system. Themes are stored via a Laravel seeder with this structure:
+
+* name (string)
+* slug (unique string)
+* category (string: industry/use-case)
+* config (JSON: layout + UI/UX design tokens)
+
+Example:
+
+[
+'name' => 'Modern Clean',
+'slug' => 'modern-clean',
+'category' => 'business',
+'config' => [
+'layout' => 'modern-clean',
+'primary_color' => '#0f172a',
+'secondary_color' => '#6366f1',
+'font_heading' => 'Inter',
+'font_body' => 'Inter',
+'button_radius' => 'rounded-lg',
+],
+]
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CORE RULES (STRICT)
+━━━━━━━━━━━━━━━━━━━━━━━
+
+1. "category" MUST represent ONLY industry/use-case.
+2. Layouts MUST be reusable across categories.
+3. Themes MUST NOT be simple color variations.
+4. Each theme MUST have meaningful UI/UX differences.
+5. Slugs MUST be unique across ALL categories.
+6. Avoid duplicate config combinations.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CATEGORIES REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Distribute a TOTAL of 60 themes across the following categories:
+
+* portfolio
+* restaurant
+* ecommerce
+* saas
+* education
+* health
+* real_estate
+* agency
+* blog
+* event
+* travel
+* beauty
+* automotive
+
+Rules:
+
+* Each category MUST have at least 3 themes
+* Higher-priority categories should have more themes (e.g. saas, ecommerce, portfolio, agency)
+* Balance distribution intelligently
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CONFIG REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Each theme MUST include:
+
+'config' => [
+'layout' => (modern-clean, contemporary, classic, minimal, grid, split, dashboard, etc.),
+'primary_color' => hex,
+'secondary_color' => hex,
+'font_heading' => valid font,
+'font_body' => valid font,
+'button_radius' => (rounded-none, rounded-sm, rounded-md, rounded-lg, rounded-xl, rounded-full),
+
+'hero_variant' => (centered, split, image-left, image-right, video, carousel),
+'nav_style' => (transparent, solid, bordered, floating),
+'section_spacing' => (compact, normal, spacious),
+'card_style' => (shadow, outline, flat, glass),
+'footer_style' => (minimal, multi-column, centered, stacked),
+]
+
+━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━
+
+* Output ONLY a PHP array: $themes = [ ... ];
+* No explanations
+* No comments
+* Ready to paste into ThemeSeeder
+* Clean formatting
+
+━━━━━━━━━━━━━━━━━━━━━━━
+QUALITY REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━
+
+* Each category must feel tailored to its industry
+* Strong variation in layout behavior and UX structure
+* Avoid repetition patterns
+* Use professional, realistic naming (e.g. "Apex SaaS", "Bistro Noir", "EduPrime")
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Generate now.
