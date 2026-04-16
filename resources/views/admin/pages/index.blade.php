@@ -2,6 +2,9 @@
 
 @section('title', 'Pages')
 @section('heading', 'Pages')
+@section('breadcrumbs')
+    <x-breadcrumb :items="[['label'=>'Dashboard','url'=>route('admin.dashboard')],['label'=>'Pages']]" />
+@endsection
 
 @section('header-actions')
     <a href="{{ route('admin.pages.create') }}"

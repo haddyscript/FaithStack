@@ -1,7 +1,20 @@
+## -- configure local to create proxy run this
+- sudo nano /etc/hosts
+- paste this ;
+127.0.0.1  faithstack.app
+127.0.0.1  church1.faithstack.test
+127.0.0.1  faithstack.app
+127.0.0.1  church1.faithstack.test
+127.0.0.1  faithstack.test
+127.0.0.1  church1.faithstack.test
+
 
 ### --- local dev test rout --- ###
 format : http://{tenants->subdomain}.faithstack.test/admin/login
 - http://church1.faithstack.test/admin/login
+
+### SUper Admin login
+- http://faithstack.test/superadmin/login
 
 
 ### Migration to terminal execution ###

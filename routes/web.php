@@ -1,9 +1,34 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Super-admin routes — root domain only, no tenant context
+|--------------------------------------------------------------------------
+*/
+Route::domain(config('app.base_domain', 'faithstack.test'))
+    ->prefix('superadmin')
+    ->name('superadmin.')
+    ->group(function () {
+
+        Route::middleware('guest')->group(function () {
+            Route::get('/login', [SuperAdmin\AuthController::class, 'showLogin'])->name('login');
+            Route::post('/login', [SuperAdmin\AuthController::class, 'login']);
+        });
+
+        Route::middleware(['auth', 'superadmin'])->group(function () {
+            Route::post('/logout', [SuperAdmin\AuthController::class, 'logout'])->name('logout');
+            Route::get('/', [SuperAdmin\DashboardController::class, 'index'])->name('dashboard');
+            Route::resource('tenants', SuperAdmin\TenantController::class);
+            Route::post('/tenants/{tenant}/toggle-subscription', [SuperAdmin\TenantController::class, 'toggleSubscription'])
+                ->name('tenants.toggle-subscription');
+        });
+    });
 
 /*
 |--------------------------------------------------------------------------

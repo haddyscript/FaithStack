@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant'       => \App\Http\Middleware\IdentifyTenant::class,
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'superadmin'   => \App\Http\Middleware\SuperAdminOnly::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -22,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->renderable(function (\Illuminate\Auth\AuthenticationException $e, $request) {
             if (! $request->expectsJson()) {
+                // Super-admin routes redirect to the super-admin login
+                if (str_starts_with($request->route()?->getName() ?? '', 'superadmin.')) {
+                    return redirect()->guest(route('superadmin.login'));
+                }
                 return redirect()->guest(route('admin.login'));
             }
         });

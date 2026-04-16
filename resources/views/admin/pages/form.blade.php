@@ -2,6 +2,13 @@
 
 @section('title', $page->exists ? 'Edit Page' : 'New Page')
 @section('heading', $page->exists ? 'Edit Page' : 'New Page')
+@section('breadcrumbs')
+    <x-breadcrumb :items="[
+        ['label'=>'Dashboard','url'=>route('admin.dashboard')],
+        ['label'=>'Pages','url'=>route('admin.pages.index')],
+        ['label'=> $page->exists ? $page->title : 'New Page'],
+    ]" />
+@endsection
 
 @section('header-actions')
     <div class="flex items-center gap-2">

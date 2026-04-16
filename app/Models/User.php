@@ -41,4 +41,9 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'superadmin' && $this->tenant_id === null;
+    }
 }

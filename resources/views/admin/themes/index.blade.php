@@ -2,6 +2,9 @@
 
 @section('title', 'Themes')
 @section('heading', 'Theme Gallery')
+@section('breadcrumbs')
+    <x-breadcrumb :items="[['label'=>'Dashboard','url'=>route('admin.dashboard')],['label'=>'Themes']]" />
+@endsection
 
 @section('content')
 
