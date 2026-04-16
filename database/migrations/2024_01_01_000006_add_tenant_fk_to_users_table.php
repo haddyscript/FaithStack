@@ -9,6 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            // Add the column first, then the FK (tenants table already exists at this point)
+            $table->unsignedBigInteger('tenant_id')->nullable()->after('id');
+            $table->string('role')->default('admin')->after('password');
             $table->foreign('tenant_id')->references('id')->on('tenants')->nullOnDelete();
         });
     }
@@ -17,6 +20,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['tenant_id']);
+            $table->dropColumn(['tenant_id', 'role']);
         });
     }
 };
