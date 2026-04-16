@@ -55,6 +55,10 @@ Route::middleware(['tenant'])->group(function () {
             Route::put('/navigation/{navigation}', [Admin\NavigationController::class, 'update'])->name('navigation.update');
             Route::delete('/navigation/{navigation}', [Admin\NavigationController::class, 'destroy'])->name('navigation.destroy');
 
+            // Themes
+            Route::get('/themes', [Admin\ThemeController::class, 'index'])->name('themes.index');
+            Route::post('/themes/activate', [Admin\ThemeController::class, 'activate'])->name('themes.activate');
+
             // Settings
             Route::get('/settings', [Admin\SettingsController::class, 'index'])->name('settings');
             Route::put('/settings', [Admin\SettingsController::class, 'update'])->name('settings.update');

@@ -72,6 +72,6 @@ class Tenant extends Model
 
     public function getThemeSlug(): string
     {
-        return $this->theme?->slug ?? 'church-classic';
+        return $this->theme?->getLayoutSlug() ?? 'church-classic';
     }
 }
