@@ -22,7 +22,7 @@ $label = $labels[$type] ?? ucfirst($type);
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
             </svg>
         </div>
-        <button type="button" @click.stop="this.closest('[x-data]').remove(); updateEmptyState()"
+        <button type="button" @click.stop="$event.currentTarget.closest('[x-data]').remove(); updateEmptyState()"
             class="text-xs font-medium text-red-400 hover:text-red-600 transition-colors px-2 py-0.5 rounded hover:bg-red-50">
             Remove
         </button>

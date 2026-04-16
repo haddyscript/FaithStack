@@ -49,8 +49,24 @@
     @endforeach
 </main>
 
-{{-- Footer --}}
-<footer class="border-t border-gray-100 py-10 mt-16">
+{{-- Page-level footer (only if enabled for this page) --}}
+@if($page->getFooterEnabled() && $page->getFooterContent())
+<section class="border-t border-gray-100 bg-gray-50 py-8 mt-0">
+    <div class="max-w-6xl mx-auto px-6 text-gray-500 text-sm leading-relaxed
+                [&_a]:text-indigo-600 [&_a:hover]:text-indigo-800 [&_a]:underline
+                [&_strong]:text-gray-800
+                [&_hr]:border-gray-200 [&_hr]:my-4
+                [&_p]:mb-2 [&_p:last-child]:mb-0
+                [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1
+                [&_h2]:text-gray-800 [&_h2]:font-bold [&_h2]:text-base [&_h2]:mb-3
+                [&_h3]:text-gray-700 [&_h3]:font-semibold [&_h3]:mb-2">
+        {!! $page->getFooterContent() !!}
+    </div>
+</section>
+@endif
+
+{{-- Global footer --}}
+<footer class="border-t border-gray-100 py-10 mt-0">
     <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-4 text-sm text-gray-400">
         <div>
             <p class="font-semibold text-gray-700">{{ $tenant->name }}</p>

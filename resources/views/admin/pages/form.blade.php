@@ -123,6 +123,164 @@
                 </div>
             </div>
 
+            {{-- Footer Configuration --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+                 x-data="{
+                     open: {{ old('footer_enabled', $page->getFooterEnabled()) ? 'true' : 'false' }},
+                     enabled: {{ old('footer_enabled', $page->getFooterEnabled()) ? 'true' : 'false' }},
+                     content: @js(old('footer_content', $page->getFooterContent())),
+                     showPreview: false
+                 }">
+
+                {{-- Panel header --}}
+                <div class="flex items-center justify-between px-6 py-4 cursor-pointer select-none border-b border-gray-100"
+                     :class="open ? 'bg-teal-50/60' : 'bg-white hover:bg-gray-50'"
+                     @click="open = !open">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                             :class="enabled ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-400'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h8M4 18h8"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">Footer Configuration</p>
+                            <p class="text-xs text-gray-400" x-text="enabled ? 'Footer enabled for this page' : 'No footer on this page'"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span x-show="enabled" class="px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold uppercase tracking-wider">On</span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"
+                             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- Panel body --}}
+                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                    <div class="p-6 space-y-5">
+
+                        {{-- Info banner --}}
+                        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 border border-amber-100">
+                            <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <p class="text-xs text-amber-700 leading-relaxed">
+                                This footer will <strong>only appear on this page</strong> — it won't affect other pages or your theme's global footer.
+                            </p>
+                        </div>
+
+                        {{-- Enable toggle --}}
+                        <label class="flex items-center gap-4 cursor-pointer group">
+                            <div class="relative flex-shrink-0">
+                                <input type="hidden" name="footer_enabled" value="0">
+                                <input type="checkbox" name="footer_enabled" id="footer_enabled" value="1"
+                                       x-model="enabled"
+                                       @change="if (enabled) open = true"
+                                       {{ old('footer_enabled', $page->getFooterEnabled()) ? 'checked' : '' }}
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-checked:bg-teal-500 rounded-full transition-colors duration-200"></div>
+                                <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-5"></div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-800">Enable Footer</p>
+                                <p class="text-xs text-gray-400">Show custom footer at the bottom of this page</p>
+                            </div>
+                        </label>
+
+                        {{-- Content editor (shown only when enabled) --}}
+                        <div x-show="enabled"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-1"
+                             x-transition:enter-end="opacity-100 translate-y-0">
+
+                            {{-- Toolbar hint --}}
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-medium text-gray-700">Footer Content</label>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs text-gray-400">Basic HTML supported</span>
+                                    <button type="button" @click="showPreview = !showPreview"
+                                            class="text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors"
+                                            :class="showPreview ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                                        <span x-text="showPreview ? 'Hide Preview' : 'Show Preview'"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Quick format bar --}}
+                            <div class="flex items-center gap-1 mb-1.5 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-t-xl border-b-0">
+                                @foreach([
+                                    ['<strong>B</strong>', '<strong>|</strong>', 'font-bold'],
+                                    ['<em>I</em>',        '<em>|</em>',        'italic'],
+                                    ['<u>U</u>',          '<u>|</u>',          ''],
+                                ] as [$display, $wrap, $cls])
+                                    <button type="button"
+                                            onclick="wrapSelection(this.dataset.open, this.dataset.close)"
+                                            data-open="{{ $wrap === '<strong>|</strong>' ? '<strong>' : ($wrap === '<em>|</em>' ? '<em>' : '<u>') }}"
+                                            data-close="{{ $wrap === '<strong>|</strong>' ? '</strong>' : ($wrap === '<em>|</em>' ? '</em>' : '</u>') }}"
+                                            class="px-2 py-1 text-xs {{ $cls }} text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all">{!! $display !!}</button>
+                                @endforeach
+                                <div class="w-px h-4 bg-gray-200 mx-1"></div>
+                                <button type="button" onclick="insertTag('footer-content-input', '<a href=&quot;&quot;>', '</a>')"
+                                        class="px-2 py-1 text-xs text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all">Link</button>
+                                <button type="button" onclick="insertTag('footer-content-input', '<p>', '</p>')"
+                                        class="px-2 py-1 text-xs text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all">Para</button>
+                                <button type="button" onclick="insertTag('footer-content-input', '<ul>\n  <li>', '</li>\n</ul>')"
+                                        class="px-2 py-1 text-xs text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all">List</button>
+                                <button type="button" onclick="insertTag('footer-content-input', '<hr>', '')"
+                                        class="px-2 py-1 text-xs text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all">HR</button>
+                            </div>
+
+                            <textarea name="footer_content"
+                                      id="footer-content-input"
+                                      rows="5"
+                                      x-model="content"
+                                      placeholder="<p>© {{ date('Y') }} Your Organization. All rights reserved.</p>&#10;<p>123 Main St · (555) 000-0000 · <a href=&quot;mailto:info@org.com&quot;>info@org.com</a></p>"
+                                      class="w-full border border-gray-200 rounded-b-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 transition-all resize-y leading-relaxed">{{ old('footer_content', $page->getFooterContent()) }}</textarea>
+
+                            <p class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Allowed: &lt;p&gt; &lt;strong&gt; &lt;em&gt; &lt;a&gt; &lt;ul&gt; &lt;li&gt; &lt;h2–h5&gt; &lt;br&gt; &lt;hr&gt;
+                            </p>
+
+                            {{-- Live preview --}}
+                            <div x-show="showPreview"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="mt-4">
+                                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Preview</p>
+                                <div class="rounded-xl border border-gray-200 overflow-hidden">
+                                    {{-- Fake page bottom --}}
+                                    <div class="h-8 bg-gradient-to-b from-gray-50 to-gray-100 border-b border-gray-200 flex items-center px-4">
+                                        <div class="flex gap-1">
+                                            <div class="h-1.5 w-12 rounded bg-gray-300"></div>
+                                            <div class="h-1.5 w-8 rounded bg-gray-200"></div>
+                                        </div>
+                                    </div>
+                                    {{-- Rendered footer --}}
+                                    <div class="bg-gray-900 text-gray-300 px-6 py-5 text-sm leading-relaxed
+                                                [&_a]:text-teal-400 [&_a]:underline [&_a:hover]:text-teal-300
+                                                [&_strong]:text-white [&_h2]:text-white [&_h2]:text-base [&_h2]:font-bold [&_h2]:mb-2
+                                                [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1
+                                                [&_hr]:border-white/10 [&_hr]:my-3
+                                                [&_p]:mb-2 [&_p:last-child]:mb-0"
+                                         x-html="content || '<p class=\'text-gray-600 text-xs italic\'>Start typing to see preview…</p>'">
+                                    </div>
+                                    {{-- Mock powered-by bar --}}
+                                    <div class="bg-gray-950 px-6 py-2 flex justify-between text-[10px] text-gray-600 border-t border-white/5">
+                                        <span>© {{ date('Y') }} — <span class="text-gray-500">{{ $tenant->name ?? 'Your Organization' }}</span></span>
+                                        <span>Powered by FaithStack</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>{{-- /enabled --}}
+
+                    </div>
+                </div>{{-- /panel body --}}
+
+            </div>
+
         </div>
 
         {{-- Sidebar --}}
@@ -300,6 +458,29 @@ const sectionLabels = {
     cta: '📣 Call to Action',
 };
 
+// Footer toolbar helpers
+function wrapSelection(openTag, closeTag) {
+    const el = document.getElementById('footer-content-input');
+    if (!el) return;
+    const start = el.selectionStart, end = el.selectionEnd;
+    const selected = el.value.substring(start, end);
+    const replacement = openTag + (selected || 'text') + closeTag;
+    el.setRangeText(replacement, start, end, 'end');
+    el.dispatchEvent(new Event('input'));
+    el.focus();
+}
+
+function insertTag(id, openTag, closeTag) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const pos = el.selectionStart;
+    const replacement = openTag + closeTag;
+    el.setRangeText(replacement, pos, pos, 'end');
+    el.selectionStart = el.selectionEnd = pos + openTag.length;
+    el.dispatchEvent(new Event('input'));
+    el.focus();
+}
+
 function addSection(type) {
     const container = document.getElementById('sections-container');
     const idx = sectionIndex++;
@@ -311,7 +492,7 @@ function addSection(type) {
                     <span class="text-xs font-bold text-gray-500 tracking-wider">${label}</span>
                     <svg :class="collapsed ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </div>
-                <button type="button" @click.stop="this.closest('.border').remove(); updateEmptyState()"
+                <button type="button" @click.stop="$event.currentTarget.closest('[x-data]').remove(); updateEmptyState()"
                     class="text-xs font-medium text-red-400 hover:text-red-600 transition-colors px-2 py-0.5 rounded hover:bg-red-50">
                     Remove
                 </button>

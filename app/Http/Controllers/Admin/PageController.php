@@ -92,7 +92,28 @@ class PageController extends Controller
             $sections[] = array_filter($section, fn($v) => $v !== null && $v !== '');
         }
 
-        return ['sections' => $sections];
+        $footerEnabled = $request->boolean('footer_enabled');
+        $footerContent = $footerEnabled
+            ? $this->sanitizeFooterHtml($request->input('footer_content', ''))
+            : '';
+
+        return [
+            'sections'       => $sections,
+            'footer_enabled' => $footerEnabled,
+            'footer_content' => $footerContent,
+        ];
+    }
+
+    /** Strip scripts and event handlers; allow basic formatting tags. */
+    private function sanitizeFooterHtml(string $html): string
+    {
+        $allowed = '<p><br><strong><em><b><i><u><ul><ol><li><a><h2><h3><h4><h5><span><div><hr><small>';
+        $clean   = strip_tags($html, $allowed);
+        // Remove on* event handlers and javascript: URIs
+        $clean   = preg_replace('/\s+on\w+\s*=\s*(["\'])[^"\']*\1/i', '', $clean);
+        $clean   = preg_replace('/javascript\s*:/i', '', $clean);
+
+        return trim($clean);
     }
 
     private function authorizePage(Page $page): void

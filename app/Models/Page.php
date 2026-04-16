@@ -46,4 +46,14 @@ class Page extends Model
     {
         return $this->content['sections'] ?? [];
     }
+
+    public function getFooterEnabled(): bool
+    {
+        return (bool) ($this->content['footer_enabled'] ?? false);
+    }
+
+    public function getFooterContent(): string
+    {
+        return $this->content['footer_content'] ?? '';
+    }
 }

@@ -92,7 +92,22 @@
     @endforeach
 </main>
 
-{{-- Footer --}}
+{{-- Page-level footer (only if enabled for this page) --}}
+@if($page->getFooterEnabled() && $page->getFooterContent())
+<section class="border-t border-white/10 py-8 mt-0" style="background-color: var(--dark);">
+    <div class="max-w-6xl mx-auto px-6
+                prose prose-sm prose-invert max-w-none
+                [&_a]:text-cyan-400 [&_a:hover]:text-cyan-300
+                [&_hr]:border-white/10
+                [&_p]:text-gray-400 [&_p]:leading-relaxed
+                [&_ul]:text-gray-400 [&_li]:marker:text-gray-600
+                [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white">
+        {!! $page->getFooterContent() !!}
+    </div>
+</section>
+@endif
+
+{{-- Global footer --}}
 <footer style="background-color: var(--dark);" class="text-gray-400 py-12 mt-0">
     <div class="max-w-6xl mx-auto px-6">
         <div class="flex flex-col md:flex-row justify-between gap-8 mb-8">
