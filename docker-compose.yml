@@ -23,9 +23,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' && echo ok"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   # ── Nginx ─────────────────────────────────────────────────────────────────
   nginx:
@@ -42,6 +42,8 @@ services:
       - faithstack
     depends_on:
       app:
+        condition: service_healthy
+      mysql:
         condition: service_healthy
 
   # ── MySQL 8 ───────────────────────────────────────────────────────────────

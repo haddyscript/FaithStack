@@ -18,7 +18,7 @@ Route::middleware(['tenant'])->group(function () {
     Route::get('/expired', fn () => view('errors.subscription_expired'))
         ->name('subscription.expired');
 
-    // ── Public frontend ───────────────────────────────────────────────────
+    // ── Public frontend (exact routes first) ─────────────────────────────
     Route::middleware(['subscription'])->group(function () {
 
         // Homepage
@@ -28,8 +28,7 @@ Route::middleware(['tenant'])->group(function () {
         Route::get('/donate', [DonationController::class, 'create'])->name('donate');
         Route::post('/donate', [DonationController::class, 'store'])->name('donate.store');
 
-        // Dynamic page by slug — keep last to avoid swallowing other routes
-        Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
+        // /{slug} is registered AFTER admin routes (see bottom of file)
     });
 
     // ── Admin panel ───────────────────────────────────────────────────────
@@ -63,5 +62,10 @@ Route::middleware(['tenant'])->group(function () {
             // Donations (read-only in admin)
             Route::get('/donations', [Admin\DonationController::class, 'index'])->name('donations.index');
         });
+    });
+
+    // ── Slug catch-all — MUST be last so it never shadows /admin/* ────────
+    Route::middleware(['subscription'])->group(function () {
+        Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
     });
 });

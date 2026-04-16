@@ -1,0 +1,3 @@
+
+### --- local dev test rout --- ###
+- http://church1.faithstack.test/admin/login
