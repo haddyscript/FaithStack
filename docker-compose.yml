@@ -1,0 +1,98 @@
+services:
+
+  # ── PHP-FPM (Laravel app) ────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: faithstack_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      # Named volume keeps the image-built vendor isolated from the host
+      - vendor_data:/var/www/vendor
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+    networks:
+      - faithstack
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t 2>&1 | grep -q 'configuration file' && echo ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Nginx ─────────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: faithstack_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - faithstack
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # ── MySQL 8 ───────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: faithstack_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE:      ${DB_DATABASE:-faithstack}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER:          ${DB_USERNAME:-faithstack}
+      MYSQL_PASSWORD:      ${DB_PASSWORD:-secret}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - faithstack
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── phpMyAdmin ────────────────────────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: faithstack_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST:     mysql
+      PMA_PORT:     3306
+      PMA_USER:     root
+      PMA_PASSWORD: ${DB_PASSWORD:-secret}
+      UPLOAD_LIMIT: 64M
+    networks:
+      - faithstack
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+# ── Volumes & Networks ───────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+  vendor_data:
+    driver: local
+
+networks:
+  faithstack:
+    driver: bridge

@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Page extends Model
+{
+    protected $fillable = [
+        'tenant_id',
+        'title',
+        'slug',
+        'content',
+        'is_published',
+    ];
+
+    protected $casts = [
+        'content'      => 'array',
+        'is_published' => 'boolean',
+    ];
+
+    // ─── Relationships ────────────────────────────────────────────────────────
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    // ─── Scopes ───────────────────────────────────────────────────────────────
+
+    public function scopeForTenant(Builder $query, int $tenantId): Builder
+    {
+        return $query->where('tenant_id', $tenantId);
+    }
+
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('is_published', true);
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    public function getSections(): array
+    {
+        return $this->content['sections'] ?? [];
+    }
+}
