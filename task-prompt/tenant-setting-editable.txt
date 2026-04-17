@@ -1,0 +1,43 @@
+Task: Build a Dynamic Theme Customizer for Tenant Admin
+
+I want to enhance my "Site Settings" to allow tenant admins to customize the specific colors of their dashboard and public site.
+
+Feature Requirements:
+
+    Color Picker Integration:
+
+        Add a "Branding & Colors" section to the settings page.
+
+        Include visual color pickers (input type="color") for the following variables:
+
+            Sidebar Background: The primary color of the navigation rail.
+
+            Sidebar Text/Icons: The contrast color for nav links.
+
+            Primary Action Color: Used for buttons, active states, and focus rings.
+
+            Accent Color: For badges, toggles, or secondary highlights.
+
+    Live Preview Window:
+
+        Create a "Mini Preview" iframe or component on the right side of the screen.
+
+        As the admin changes a color in the picker, the preview should update in real-time (using CSS Variables) so they can see how the Sidebar and Buttons will look before hitting "Save."
+
+    Technical Implementation (CSS Variables):
+
+        Please provide a strategy to inject these colors into the layout.
+
+        I need the code to generate an inline <style> block that maps database-stored hex codes to CSS variables like --sidebar-bg and --primary-btn.
+
+        Example: background-color: var(--sidebar-bg);
+
+    UX Features:
+
+        Contrast Checker: A small warning if the admin chooses a background/text combination that is unreadable (poor accessibility).
+
+        "Reset to Default" Button: To quickly revert to the platform's original colors.
+
+        Preset Palettes: Provide 3 "Quick Start" color palettes (Professional Blue, Dark Mode, Forest Green) that set all values at once.
+
+Output Style: > Provide the UI code for the settings form and the CSS logic for implementing the dynamic theme across the application.

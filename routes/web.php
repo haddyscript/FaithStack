@@ -16,13 +16,12 @@ Route::domain(config('app.base_domain', 'faithstack.test'))
     ->name('superadmin.')
     ->group(function () {
 
-        Route::middleware('guest')->group(function () {
-            Route::get('/login', [SuperAdmin\AuthController::class, 'showLogin'])->name('login');
-            Route::post('/login', [SuperAdmin\AuthController::class, 'login']);
-        });
+        Route::get('/login', [SuperAdmin\AuthController::class, 'showLogin'])->name('login');
+        Route::post('/login', [SuperAdmin\AuthController::class, 'login']);
 
         Route::middleware(['auth', 'superadmin'])->group(function () {
             Route::post('/logout', [SuperAdmin\AuthController::class, 'logout'])->name('logout');
+            Route::get('/logout', fn () => redirect()->route('superadmin.dashboard'));
             Route::get('/', [SuperAdmin\DashboardController::class, 'index'])->name('dashboard');
             Route::resource('tenants', SuperAdmin\TenantController::class);
             Route::post('/tenants/{tenant}/toggle-subscription', [SuperAdmin\TenantController::class, 'toggleSubscription'])
