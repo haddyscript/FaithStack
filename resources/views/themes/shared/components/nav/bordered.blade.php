@@ -9,7 +9,7 @@
         </a>
         <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
             @foreach($navItems as $item)
-                <a href="{{ $item->url }}" class="hover:text-gray-900 transition-colors border-b-2 border-transparent hover:border-current pb-0.5">{{ $item->name }}</a>
+                <a href="{{ $item->url }}" class="nav-link hover:text-gray-900 transition-colors">{{ $item->name }}</a>
             @endforeach
             <a href="{{ route('donate') }}"
                class="btn-primary px-5 py-2 {{ $config['button_radius'] ?? 'rounded-lg' }} text-sm font-semibold shadow transition-all text-white">

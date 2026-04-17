@@ -8,15 +8,15 @@
     <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
         <div>
             @if(!empty($data['badge']))
-                <span class="text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-current opacity-60 mb-6 inline-block" style="color:{{ $textVal }};">{{ $data['badge'] }}</span>
+                <span class="hero-enter hero-enter-1 text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-current opacity-60 mb-6 inline-block" style="color:{{ $textVal }};">{{ $data['badge'] }}</span>
             @endif
-            <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6" style="color:{{ $textVal }};">
+            <h1 class="hero-enter hero-enter-2 text-4xl md:text-5xl font-bold leading-tight mb-6" style="color:{{ $textVal }};">
                 {!! nl2br(e($data['title'] ?? $page->title)) !!}
             </h1>
             @if(!empty($data['subtitle']))
-                <p class="text-lg mb-10 leading-relaxed" style="color:{{ $subVal }};">{{ $data['subtitle'] }}</p>
+                <p class="hero-enter hero-enter-3 text-lg mb-10 leading-relaxed" style="color:{{ $subVal }};">{{ $data['subtitle'] }}</p>
             @endif
-            <div class="flex flex-wrap gap-4">
+            <div class="hero-enter hero-enter-4 flex flex-wrap gap-4">
                 @if(!empty($data['button_text']))
                     <a href="{{ $data['button_url'] ?? '#' }}"
                        class="btn-primary px-8 py-3.5 {{ $config['button_radius'] ?? 'rounded-lg' }} text-base font-semibold shadow-xl transition-all">

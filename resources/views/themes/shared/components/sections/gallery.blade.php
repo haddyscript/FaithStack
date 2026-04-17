@@ -26,12 +26,12 @@
     <div class="max-w-7xl mx-auto px-6">
         @if(!empty($data['heading']))
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold" style="color:{{ $textColor }};">{{ $data['heading'] }}</h2>
+                <h2 class="text-3xl md:text-4xl font-bold" data-animate="fade-up" style="color:{{ $textColor }};">{{ $data['heading'] }}</h2>
             </div>
         @endif
 
         @if(count($images))
-            <div class="grid {{ $gridCols }} gap-4">
+            <div class="grid {{ $gridCols }} gap-4" data-stagger>
                 @foreach($images as $img)
                     <div class="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
                         <img src="{{ $img }}" alt="" class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300">

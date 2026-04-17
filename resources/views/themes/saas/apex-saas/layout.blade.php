@@ -18,6 +18,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family={{ urlencode($config['font_heading'] ?? 'Space Grotesk') }}:wght@400;500;600;700;800&family={{ urlencode($config['font_body'] ?? 'Inter') }}:wght@400;500;600&display=swap" rel="stylesheet">
+    @include('themes.shared._animations')
     <style>
         :root {
             --primary:    {{ $config['primary_color']        ?? '#0f0f23' }};

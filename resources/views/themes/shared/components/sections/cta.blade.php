@@ -24,14 +24,15 @@
     <div class="max-w-4xl mx-auto px-6">
         <div class="rounded-2xl p-10 md:p-16 text-center" style="background:{{ $bg }};">
             @if(!empty($data['heading']))
-                <h2 class="text-3xl md:text-4xl font-bold mb-4" style="color:{{ $textColor }};">{{ $data['heading'] }}</h2>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-animate="fade-up" style="color:{{ $textColor }};">{{ $data['heading'] }}</h2>
             @endif
             @if(!empty($data['subtext']))
-                <p class="text-lg mb-10 max-w-xl mx-auto" style="color:{{ $subColor }};">{{ $data['subtext'] }}</p>
+                <p class="text-lg mb-10 max-w-xl mx-auto" data-animate="fade-up" data-delay="100" style="color:{{ $subColor }};">{{ $data['subtext'] }}</p>
             @endif
             @if(!empty($data['button_text']))
                 <a href="{{ $data['button_url'] ?? '#' }}"
                    class="inline-block px-10 py-4 {{ $radius }} font-semibold text-base shadow-xl transition-all hover:opacity-90"
+                   data-animate="fade-up" data-delay="200"
                    style="background:var(--secondary); color:var(--text-inv);">
                     {{ $data['button_text'] }}
                 </a>
@@ -45,14 +46,15 @@
     <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 60% 50%, var(--secondary), transparent 70%);"></div>
     <div class="relative max-w-4xl mx-auto px-6">
         @if(!empty($data['heading']))
-            <h2 class="text-3xl md:text-5xl font-bold mb-5" style="color:{{ $textColor }};">{{ $data['heading'] }}</h2>
+            <h2 class="text-3xl md:text-5xl font-bold mb-5" data-animate="fade-up" style="color:{{ $textColor }};">{{ $data['heading'] }}</h2>
         @endif
         @if(!empty($data['subtext']))
-            <p class="text-lg md:text-xl mb-10 max-w-2xl mx-auto" style="color:{{ $subColor }};">{{ $data['subtext'] }}</p>
+            <p class="text-lg md:text-xl mb-10 max-w-2xl mx-auto" data-animate="fade-up" data-delay="120" style="color:{{ $subColor }};">{{ $data['subtext'] }}</p>
         @endif
         @if(!empty($data['button_text']))
             <a href="{{ $data['button_url'] ?? '#' }}"
-               class="inline-block btn-primary px-10 py-4 {{ $radius }} font-semibold text-base shadow-xl transition-all">
+               class="inline-block btn-primary px-10 py-4 {{ $radius }} font-semibold text-base shadow-xl transition-all"
+               data-animate="scale-in" data-delay="200">
                 {{ $data['button_text'] }}
             </a>
         @endif

@@ -19,7 +19,7 @@
 @endphp
 <section style="background:{{ $bg }};" class="{{ $spacing }}">
     <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-        <div class="{{ $textOrder }}">
+        <div class="{{ $textOrder }}" data-animate="{{ $imageSide === 'right' ? 'slide-right' : 'slide-left' }}">
             @if(!empty($data['heading']))
                 <h2 class="text-3xl md:text-4xl font-bold mb-5" style="color:{{ $textColor }};">
                     {{ $data['heading'] }}
@@ -29,7 +29,7 @@
                 <p class="text-lg leading-relaxed" style="color:{{ $subColor }};">{{ $data['text'] }}</p>
             @endif
         </div>
-        <div class="{{ $imgOrder }} relative h-64 md:h-80 rounded-2xl overflow-hidden bg-gray-100">
+        <div class="{{ $imgOrder }} relative h-64 md:h-80 rounded-2xl overflow-hidden bg-gray-100 img-zoom" data-animate="{{ $imageSide === 'right' ? 'slide-left' : 'slide-right' }}">
             @if(!empty($data['image']))
                 <img src="{{ $data['image'] }}" alt="{{ $data['heading'] ?? '' }}"
                      class="absolute inset-0 w-full h-full object-cover">
