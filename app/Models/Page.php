@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Theme;
 
 class Page extends Model
 {
@@ -14,6 +15,7 @@ class Page extends Model
         'slug',
         'content',
         'is_published',
+        'theme_id',
     ];
 
     protected $casts = [
@@ -26,6 +28,11 @@ class Page extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function theme(): BelongsTo
+    {
+        return $this->belongsTo(Theme::class);
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────

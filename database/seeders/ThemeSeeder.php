@@ -13,10 +13,11 @@ class ThemeSeeder extends Seeder
 
             // ── SaaS (7) ──────────────────────────────────────────────────────
             [
-                'name'     => 'Apex SaaS',
-                'slug'     => 'apex-saas',
-                'category' => 'saas',
-                'config'   => [
+                'name'      => 'Apex SaaS',
+                'slug'      => 'apex-saas',
+                'category'  => 'saas',
+                'view_path' => 'themes.saas.apex-saas',
+                'config'    => [
                     'layout'          => 'dashboard',
                     'primary_color'   => '#0f0f23',
                     'secondary_color' => '#7c3aed',
@@ -31,10 +32,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'CloudDeck',
-                'slug'     => 'cloud-deck',
-                'category' => 'saas',
-                'config'   => [
+                'name'      => 'CloudDeck',
+                'slug'      => 'cloud-deck',
+                'category'  => 'saas',
+                'view_path' => 'themes.saas.cloud-deck',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#0ea5e9',
                     'secondary_color' => '#06b6d4',
@@ -49,10 +51,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'LaunchPad Pro',
-                'slug'     => 'launchpad-pro',
-                'category' => 'saas',
-                'config'   => [
+                'name'      => 'LaunchPad Pro',
+                'slug'      => 'launchpad-pro',
+                'category'  => 'saas',
+                'view_path' => 'themes.saas.launchpad-pro',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#4f46e5',
                     'secondary_color' => '#f59e0b',
@@ -67,10 +70,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Metric Flow',
-                'slug'     => 'metric-flow',
-                'category' => 'saas',
-                'config'   => [
+                'name'      => 'Metric Flow',
+                'slug'      => 'metric-flow',
+                'category'  => 'saas',
+                'view_path' => 'themes.saas.metric-flow',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#1e293b',
                     'secondary_color' => '#10b981',
@@ -85,10 +89,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'SaaSify',
-                'slug'     => 'saasify',
-                'category' => 'saas',
-                'config'   => [
+                'name'      => 'SaaSify',
+                'slug'      => 'saasify',
+                'category'  => 'saas',
+                'view_path' => 'themes.saas.saasify',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#0d9488',
                     'secondary_color' => '#f43f5e',
@@ -103,10 +108,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'VaultOS',
-                'slug'     => 'vault-os',
-                'category' => 'saas',
-                'config'   => [
+                'name'      => 'VaultOS',
+                'slug'      => 'vault-os',
+                'category'  => 'saas',
+                'view_path' => 'themes.saas.vault-os',
+                'config'    => [
                     'layout'          => 'dashboard',
                     'primary_color'   => '#0d1b2a',
                     'secondary_color' => '#d4a017',
@@ -121,10 +127,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Orbit Platform',
-                'slug'     => 'orbit-platform',
-                'category' => 'saas',
-                'config'   => [
+                'name'      => 'Orbit Platform',
+                'slug'      => 'orbit-platform',
+                'category'  => 'saas',
+                'view_path' => 'themes.saas.orbit-platform',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#312e81',
                     'secondary_color' => '#fb923c',
@@ -141,10 +148,11 @@ class ThemeSeeder extends Seeder
 
             // ── Ecommerce (7) ─────────────────────────────────────────────────
             [
-                'name'     => 'ShopElite',
-                'slug'     => 'shop-elite',
-                'category' => 'ecommerce',
-                'config'   => [
+                'name'      => 'ShopElite',
+                'slug'      => 'shop-elite',
+                'category'  => 'ecommerce',
+                'view_path' => 'themes.ecommerce.shop-elite',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#0a0a0a',
                     'secondary_color' => '#b8860b',
@@ -159,10 +167,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Luxe Cart',
-                'slug'     => 'luxe-cart',
-                'category' => 'ecommerce',
-                'config'   => [
+                'name'      => 'Luxe Cart',
+                'slug'      => 'luxe-cart',
+                'category'  => 'ecommerce',
+                'view_path' => 'themes.ecommerce.luxe-cart',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#fdf6ec',
                     'secondary_color' => '#c2185b',
@@ -177,10 +186,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Pixel Market',
-                'slug'     => 'pixel-market',
-                'category' => 'ecommerce',
-                'config'   => [
+                'name'      => 'Pixel Market',
+                'slug'      => 'pixel-market',
+                'category'  => 'ecommerce',
+                'view_path' => 'themes.ecommerce.pixel-market',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#7b2ff7',
                     'secondary_color' => '#f9e000',
@@ -195,10 +205,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'StoreFront Pro',
-                'slug'     => 'storefront-pro',
-                'category' => 'ecommerce',
-                'config'   => [
+                'name'      => 'StoreFront Pro',
+                'slug'      => 'storefront-pro',
+                'category'  => 'ecommerce',
+                'view_path' => 'themes.ecommerce.storefront-pro',
+                'config'    => [
                     'layout'          => 'classic',
                     'primary_color'   => '#1a3a5c',
                     'secondary_color' => '#e74c3c',
@@ -213,10 +224,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'NovaBuy',
-                'slug'     => 'nova-buy',
-                'category' => 'ecommerce',
-                'config'   => [
+                'name'      => 'NovaBuy',
+                'slug'      => 'nova-buy',
+                'category'  => 'ecommerce',
+                'view_path' => 'themes.ecommerce.nova-buy',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#1a0533',
                     'secondary_color' => '#84cc16',
@@ -231,10 +243,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'CraftMart',
-                'slug'     => 'craft-mart',
-                'category' => 'ecommerce',
-                'config'   => [
+                'name'      => 'CraftMart',
+                'slug'      => 'craft-mart',
+                'category'  => 'ecommerce',
+                'view_path' => 'themes.ecommerce.craft-mart',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#5c3317',
                     'secondary_color' => '#f97316',
@@ -249,10 +262,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'DropZone',
-                'slug'     => 'drop-zone',
-                'category' => 'ecommerce',
-                'config'   => [
+                'name'      => 'DropZone',
+                'slug'      => 'drop-zone',
+                'category'  => 'ecommerce',
+                'view_path' => 'themes.ecommerce.drop-zone',
+                'config'    => [
                     'layout'          => 'dashboard',
                     'primary_color'   => '#111827',
                     'secondary_color' => '#22d3ee',
@@ -269,10 +283,11 @@ class ThemeSeeder extends Seeder
 
             // ── Portfolio (6) ─────────────────────────────────────────────────
             [
-                'name'     => 'Folio Noir',
-                'slug'     => 'folio-noir',
-                'category' => 'portfolio',
-                'config'   => [
+                'name'      => 'Folio Noir',
+                'slug'      => 'folio-noir',
+                'category'  => 'portfolio',
+                'view_path' => 'themes.portfolio.folio-noir',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#0d0d0d',
                     'secondary_color' => '#ffffff',
@@ -287,10 +302,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Luminary',
-                'slug'     => 'luminary',
-                'category' => 'portfolio',
-                'config'   => [
+                'name'      => 'Luminary',
+                'slug'      => 'luminary',
+                'category'  => 'portfolio',
+                'view_path' => 'themes.portfolio.luminary',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#c8a96e',
                     'secondary_color' => '#f5f0e8',
@@ -305,10 +321,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Canvas Pro',
-                'slug'     => 'canvas-pro',
-                'category' => 'portfolio',
-                'config'   => [
+                'name'      => 'Canvas Pro',
+                'slug'      => 'canvas-pro',
+                'category'  => 'portfolio',
+                'view_path' => 'themes.portfolio.canvas-pro',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#b5a99a',
                     'secondary_color' => '#2d2d2d',
@@ -323,10 +340,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Pixel Frame',
-                'slug'     => 'pixel-frame',
-                'category' => 'portfolio',
-                'config'   => [
+                'name'      => 'Pixel Frame',
+                'slug'      => 'pixel-frame',
+                'category'  => 'portfolio',
+                'view_path' => 'themes.portfolio.pixel-frame',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#0033ff',
                     'secondary_color' => '#ff2d78',
@@ -341,10 +359,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Studio One',
-                'slug'     => 'studio-one',
-                'category' => 'portfolio',
-                'config'   => [
+                'name'      => 'Studio One',
+                'slug'      => 'studio-one',
+                'category'  => 'portfolio',
+                'view_path' => 'themes.portfolio.studio-one',
+                'config'    => [
                     'layout'          => 'classic',
                     'primary_color'   => '#f8f8f8',
                     'secondary_color' => '#334155',
@@ -359,10 +378,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Persona',
-                'slug'     => 'persona',
-                'category' => 'portfolio',
-                'config'   => [
+                'name'      => 'Persona',
+                'slug'      => 'persona',
+                'category'  => 'portfolio',
+                'view_path' => 'themes.portfolio.persona',
+                'config'    => [
                     'layout'          => 'editorial',
                     'primary_color'   => '#e8d5d0',
                     'secondary_color' => '#5c7a5e',
@@ -379,10 +399,11 @@ class ThemeSeeder extends Seeder
 
             // ── Agency (6) ────────────────────────────────────────────────────
             [
-                'name'     => 'Velocity Agency',
-                'slug'     => 'velocity-agency',
-                'category' => 'agency',
-                'config'   => [
+                'name'      => 'Velocity Agency',
+                'slug'      => 'velocity-agency',
+                'category'  => 'agency',
+                'view_path' => 'themes.agency.velocity-agency',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#0a0a0a',
                     'secondary_color' => '#ffe600',
@@ -397,10 +418,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Boldline',
-                'slug'     => 'boldline',
-                'category' => 'agency',
-                'config'   => [
+                'name'      => 'Boldline',
+                'slug'      => 'boldline',
+                'category'  => 'agency',
+                'view_path' => 'themes.agency.boldline',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#1a1a1a',
                     'secondary_color' => '#f5c518',
@@ -415,10 +437,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Bureau Creative',
-                'slug'     => 'bureau-creative',
-                'category' => 'agency',
-                'config'   => [
+                'name'      => 'Bureau Creative',
+                'slug'      => 'bureau-creative',
+                'category'  => 'agency',
+                'view_path' => 'themes.agency.bureau-creative',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#374151',
                     'secondary_color' => '#4f46e5',
@@ -433,10 +456,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Stratosphere',
-                'slug'     => 'stratosphere',
-                'category' => 'agency',
-                'config'   => [
+                'name'      => 'Stratosphere',
+                'slug'      => 'stratosphere',
+                'category'  => 'agency',
+                'view_path' => 'themes.agency.stratosphere',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#0050ff',
                     'secondary_color' => '#f0f4ff',
@@ -451,10 +475,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'The Agency',
-                'slug'     => 'the-agency',
-                'category' => 'agency',
-                'config'   => [
+                'name'      => 'The Agency',
+                'slug'      => 'the-agency',
+                'category'  => 'agency',
+                'view_path' => 'themes.agency.the-agency',
+                'config'    => [
                     'layout'          => 'classic',
                     'primary_color'   => '#2c2c2c',
                     'secondary_color' => '#c9a84c',
@@ -469,10 +494,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Nexus Studio',
-                'slug'     => 'nexus-studio',
-                'category' => 'agency',
-                'config'   => [
+                'name'      => 'Nexus Studio',
+                'slug'      => 'nexus-studio',
+                'category'  => 'agency',
+                'view_path' => 'themes.agency.nexus-studio',
+                'config'    => [
                     'layout'          => 'dashboard',
                     'primary_color'   => '#0d2137',
                     'secondary_color' => '#a3e635',
@@ -489,10 +515,11 @@ class ThemeSeeder extends Seeder
 
             // ── Blog (5) ──────────────────────────────────────────────────────
             [
-                'name'     => 'Inkwell',
-                'slug'     => 'inkwell',
-                'category' => 'blog',
-                'config'   => [
+                'name'      => 'Inkwell',
+                'slug'      => 'inkwell',
+                'category'  => 'blog',
+                'view_path' => 'themes.blog.inkwell',
+                'config'    => [
                     'layout'          => 'editorial',
                     'primary_color'   => '#2d1b0e',
                     'secondary_color' => '#d4a96a',
@@ -507,10 +534,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Chronicle',
-                'slug'     => 'chronicle',
-                'category' => 'blog',
-                'config'   => [
+                'name'      => 'Chronicle',
+                'slug'      => 'chronicle',
+                'category'  => 'blog',
+                'view_path' => 'themes.blog.chronicle',
+                'config'    => [
                     'layout'          => 'magazine',
                     'primary_color'   => '#1a1a2e',
                     'secondary_color' => '#c0392b',
@@ -525,10 +553,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Thoughtspace',
-                'slug'     => 'thoughtspace',
-                'category' => 'blog',
-                'config'   => [
+                'name'      => 'Thoughtspace',
+                'slug'      => 'thoughtspace',
+                'category'  => 'blog',
+                'view_path' => 'themes.blog.thoughtspace',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#fafaf9',
                     'secondary_color' => '#292524',
@@ -543,10 +572,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Perspective',
-                'slug'     => 'perspective',
-                'category' => 'blog',
-                'config'   => [
+                'name'      => 'Perspective',
+                'slug'      => 'perspective',
+                'category'  => 'blog',
+                'view_path' => 'themes.blog.perspective',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#111111',
                     'secondary_color' => '#ff5f1f',
@@ -561,10 +591,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'The Daily Note',
-                'slug'     => 'the-daily-note',
-                'category' => 'blog',
-                'config'   => [
+                'name'      => 'The Daily Note',
+                'slug'      => 'the-daily-note',
+                'category'  => 'blog',
+                'view_path' => 'themes.blog.the-daily-note',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#1c1c1c',
                     'secondary_color' => '#ffd700',
@@ -581,10 +612,11 @@ class ThemeSeeder extends Seeder
 
             // ── Restaurant (4) ────────────────────────────────────────────────
             [
-                'name'     => 'Bistro Noir',
-                'slug'     => 'bistro-noir',
-                'category' => 'restaurant',
-                'config'   => [
+                'name'      => 'Bistro Noir',
+                'slug'      => 'bistro-noir',
+                'category'  => 'restaurant',
+                'view_path' => 'themes.restaurant.bistro-noir',
+                'config'    => [
                     'layout'          => 'classic',
                     'primary_color'   => '#1a0a0a',
                     'secondary_color' => '#c9a84c',
@@ -599,10 +631,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Harvest Table',
-                'slug'     => 'harvest-table',
-                'category' => 'restaurant',
-                'config'   => [
+                'name'      => 'Harvest Table',
+                'slug'      => 'harvest-table',
+                'category'  => 'restaurant',
+                'view_path' => 'themes.restaurant.harvest-table',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#b85c38',
                     'secondary_color' => '#f5e6d3',
@@ -617,10 +650,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Savor',
-                'slug'     => 'savor',
-                'category' => 'restaurant',
-                'config'   => [
+                'name'      => 'Savor',
+                'slug'      => 'savor',
+                'category'  => 'restaurant',
+                'view_path' => 'themes.restaurant.savor',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#7b3f1e',
                     'secondary_color' => '#f4a261',
@@ -635,10 +669,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'The Plated',
-                'slug'     => 'the-plated',
-                'category' => 'restaurant',
-                'config'   => [
+                'name'      => 'The Plated',
+                'slug'      => 'the-plated',
+                'category'  => 'restaurant',
+                'view_path' => 'themes.restaurant.the-plated',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#2d3436',
                     'secondary_color' => '#e17055',
@@ -655,10 +690,11 @@ class ThemeSeeder extends Seeder
 
             // ── Education (4) ─────────────────────────────────────────────────
             [
-                'name'     => 'EduPrime',
-                'slug'     => 'edu-prime',
-                'category' => 'education',
-                'config'   => [
+                'name'      => 'EduPrime',
+                'slug'      => 'edu-prime',
+                'category'  => 'education',
+                'view_path' => 'themes.education.edu-prime',
+                'config'    => [
                     'layout'          => 'dashboard',
                     'primary_color'   => '#1d4ed8',
                     'secondary_color' => '#16a34a',
@@ -673,10 +709,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Scholar Hub',
-                'slug'     => 'scholar-hub',
-                'category' => 'education',
-                'config'   => [
+                'name'      => 'Scholar Hub',
+                'slug'      => 'scholar-hub',
+                'category'  => 'education',
+                'view_path' => 'themes.education.scholar-hub',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#3730a3',
                     'secondary_color' => '#f59e0b',
@@ -691,10 +728,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'LearnSpace',
-                'slug'     => 'learn-space',
-                'category' => 'education',
-                'config'   => [
+                'name'      => 'LearnSpace',
+                'slug'      => 'learn-space',
+                'category'  => 'education',
+                'view_path' => 'themes.education.learn-space',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#0f766e',
                     'secondary_color' => '#f8fafc',
@@ -709,10 +747,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Campus Pro',
-                'slug'     => 'campus-pro',
-                'category' => 'education',
-                'config'   => [
+                'name'      => 'Campus Pro',
+                'slug'      => 'campus-pro',
+                'category'  => 'education',
+                'view_path' => 'themes.education.campus-pro',
+                'config'    => [
                     'layout'          => 'classic',
                     'primary_color'   => '#7f1d1d',
                     'secondary_color' => '#94a3b8',
@@ -729,10 +768,11 @@ class ThemeSeeder extends Seeder
 
             // ── Health (4) ────────────────────────────────────────────────────
             [
-                'name'     => 'WellnessCore',
-                'slug'     => 'wellness-core',
-                'category' => 'health',
-                'config'   => [
+                'name'      => 'WellnessCore',
+                'slug'      => 'wellness-core',
+                'category'  => 'health',
+                'view_path' => 'themes.health.wellness-core',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#4a7c59',
                     'secondary_color' => '#f0fdf4',
@@ -747,10 +787,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'MedVault',
-                'slug'     => 'med-vault',
-                'category' => 'health',
-                'config'   => [
+                'name'      => 'MedVault',
+                'slug'      => 'med-vault',
+                'category'  => 'health',
+                'view_path' => 'themes.health.med-vault',
+                'config'    => [
                     'layout'          => 'dashboard',
                     'primary_color'   => '#0369a1',
                     'secondary_color' => '#e2e8f0',
@@ -765,10 +806,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Vitality',
-                'slug'     => 'vitality',
-                'category' => 'health',
-                'config'   => [
+                'name'      => 'Vitality',
+                'slug'      => 'vitality',
+                'category'  => 'health',
+                'view_path' => 'themes.health.vitality',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#15803d',
                     'secondary_color' => '#f97316',
@@ -783,10 +825,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'CareLink',
-                'slug'     => 'care-link',
-                'category' => 'health',
-                'config'   => [
+                'name'      => 'CareLink',
+                'slug'      => 'care-link',
+                'category'  => 'health',
+                'view_path' => 'themes.health.care-link',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#7c3aed',
                     'secondary_color' => '#6ee7b7',
@@ -803,10 +846,11 @@ class ThemeSeeder extends Seeder
 
             // ── Real Estate (4) ───────────────────────────────────────────────
             [
-                'name'     => 'Prestige Realty',
-                'slug'     => 'prestige-realty',
-                'category' => 'real_estate',
-                'config'   => [
+                'name'      => 'Prestige Realty',
+                'slug'      => 'prestige-realty',
+                'category'  => 'real_estate',
+                'view_path' => 'themes.real_estate.prestige-realty',
+                'config'    => [
                     'layout'          => 'classic',
                     'primary_color'   => '#0f2942',
                     'secondary_color' => '#b8860b',
@@ -821,10 +865,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'OpenDoor Pro',
-                'slug'     => 'opendoor-pro',
-                'category' => 'real_estate',
-                'config'   => [
+                'name'      => 'OpenDoor Pro',
+                'slug'      => 'opendoor-pro',
+                'category'  => 'real_estate',
+                'view_path' => 'themes.real_estate.opendoor-pro',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#f8fafc',
                     'secondary_color' => '#1e293b',
@@ -839,10 +884,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'EstateMark',
-                'slug'     => 'estate-mark',
-                'category' => 'real_estate',
-                'config'   => [
+                'name'      => 'EstateMark',
+                'slug'      => 'estate-mark',
+                'category'  => 'real_estate',
+                'view_path' => 'themes.real_estate.estate-mark',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#1c1c1e',
                     'secondary_color' => '#b07d62',
@@ -857,10 +903,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Keystone Homes',
-                'slug'     => 'keystone-homes',
-                'category' => 'real_estate',
-                'config'   => [
+                'name'      => 'Keystone Homes',
+                'slug'      => 'keystone-homes',
+                'category'  => 'real_estate',
+                'view_path' => 'themes.real_estate.keystone-homes',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#d6cfc4',
                     'secondary_color' => '#3d3d3d',
@@ -877,10 +924,11 @@ class ThemeSeeder extends Seeder
 
             // ── Event (4) ─────────────────────────────────────────────────────
             [
-                'name'     => 'Gala Pro',
-                'slug'     => 'gala-pro',
-                'category' => 'event',
-                'config'   => [
+                'name'      => 'Gala Pro',
+                'slug'      => 'gala-pro',
+                'category'  => 'event',
+                'view_path' => 'themes.event.gala-pro',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#3b0764',
                     'secondary_color' => '#eab308',
@@ -895,10 +943,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'EventFlow',
-                'slug'     => 'event-flow',
-                'category' => 'event',
-                'config'   => [
+                'name'      => 'EventFlow',
+                'slug'      => 'event-flow',
+                'category'  => 'event',
+                'view_path' => 'themes.event.event-flow',
+                'config'    => [
                     'layout'          => 'dashboard',
                     'primary_color'   => '#0f172a',
                     'secondary_color' => '#e11d48',
@@ -913,10 +962,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Summit Events',
-                'slug'     => 'summit-events',
-                'category' => 'event',
-                'config'   => [
+                'name'      => 'Summit Events',
+                'slug'      => 'summit-events',
+                'category'  => 'event',
+                'view_path' => 'themes.event.summit-events',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#1e3a8a',
                     'secondary_color' => '#f97316',
@@ -931,10 +981,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Festive',
-                'slug'     => 'festive',
-                'category' => 'event',
-                'config'   => [
+                'name'      => 'Festive',
+                'slug'      => 'festive',
+                'category'  => 'event',
+                'view_path' => 'themes.event.festive',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#db2777',
                     'secondary_color' => '#fde68a',
@@ -951,10 +1002,11 @@ class ThemeSeeder extends Seeder
 
             // ── Travel (3) ────────────────────────────────────────────────────
             [
-                'name'     => 'Wanderlust',
-                'slug'     => 'wanderlust',
-                'category' => 'travel',
-                'config'   => [
+                'name'      => 'Wanderlust',
+                'slug'      => 'wanderlust',
+                'category'  => 'travel',
+                'view_path' => 'themes.travel.wanderlust',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#7c2d12',
                     'secondary_color' => '#fb923c',
@@ -969,10 +1021,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Atlas Pro',
-                'slug'     => 'atlas-pro',
-                'category' => 'travel',
-                'config'   => [
+                'name'      => 'Atlas Pro',
+                'slug'      => 'atlas-pro',
+                'category'  => 'travel',
+                'view_path' => 'themes.travel.atlas-pro',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#1a3a2a',
                     'secondary_color' => '#c8a96e',
@@ -987,10 +1040,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Journey Hub',
-                'slug'     => 'journey-hub',
-                'category' => 'travel',
-                'config'   => [
+                'name'      => 'Journey Hub',
+                'slug'      => 'journey-hub',
+                'category'  => 'travel',
+                'view_path' => 'themes.travel.journey-hub',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#0c4a6e',
                     'secondary_color' => '#e2c786',
@@ -1007,10 +1061,11 @@ class ThemeSeeder extends Seeder
 
             // ── Beauty (3) ────────────────────────────────────────────────────
             [
-                'name'     => 'Gloss Studio',
-                'slug'     => 'gloss-studio',
-                'category' => 'beauty',
-                'config'   => [
+                'name'      => 'Gloss Studio',
+                'slug'      => 'gloss-studio',
+                'category'  => 'beauty',
+                'view_path' => 'themes.beauty.gloss-studio',
+                'config'    => [
                     'layout'          => 'minimal',
                     'primary_color'   => '#fce4ec',
                     'secondary_color' => '#ad1457',
@@ -1025,10 +1080,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Velvet Salon',
-                'slug'     => 'velvet-salon',
-                'category' => 'beauty',
-                'config'   => [
+                'name'      => 'Velvet Salon',
+                'slug'      => 'velvet-salon',
+                'category'  => 'beauty',
+                'view_path' => 'themes.beauty.velvet-salon',
+                'config'    => [
                     'layout'          => 'classic',
                     'primary_color'   => '#1e0a2e',
                     'secondary_color' => '#d4af7a',
@@ -1043,10 +1099,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Bloom Beauty',
-                'slug'     => 'bloom-beauty',
-                'category' => 'beauty',
-                'config'   => [
+                'name'      => 'Bloom Beauty',
+                'slug'      => 'bloom-beauty',
+                'category'  => 'beauty',
+                'view_path' => 'themes.beauty.bloom-beauty',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#f9a8d4',
                     'secondary_color' => '#6b8f71',
@@ -1063,10 +1120,11 @@ class ThemeSeeder extends Seeder
 
             // ── Automotive (3) ────────────────────────────────────────────────
             [
-                'name'     => 'AutoForge',
-                'slug'     => 'auto-forge',
-                'category' => 'automotive',
-                'config'   => [
+                'name'      => 'AutoForge',
+                'slug'      => 'auto-forge',
+                'category'  => 'automotive',
+                'view_path' => 'themes.automotive.auto-forge',
+                'config'    => [
                     'layout'          => 'split',
                     'primary_color'   => '#0d0d0d',
                     'secondary_color' => '#dc2626',
@@ -1081,10 +1139,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'DrivePro',
-                'slug'     => 'drive-pro',
-                'category' => 'automotive',
-                'config'   => [
+                'name'      => 'DrivePro',
+                'slug'      => 'drive-pro',
+                'category'  => 'automotive',
+                'view_path' => 'themes.automotive.drive-pro',
+                'config'    => [
                     'layout'          => 'grid',
                     'primary_color'   => '#1a1a2e',
                     'secondary_color' => '#2563eb',
@@ -1099,10 +1158,11 @@ class ThemeSeeder extends Seeder
                 ],
             ],
             [
-                'name'     => 'Torque Studio',
-                'slug'     => 'torque-studio',
-                'category' => 'automotive',
-                'config'   => [
+                'name'      => 'Torque Studio',
+                'slug'      => 'torque-studio',
+                'category'  => 'automotive',
+                'view_path' => 'themes.automotive.torque-studio',
+                'config'    => [
                     'layout'          => 'contemporary',
                     'primary_color'   => '#18181b',
                     'secondary_color' => '#ea580c',
@@ -1123,9 +1183,10 @@ class ThemeSeeder extends Seeder
             Theme::updateOrCreate(
                 ['slug' => $theme['slug']],
                 [
-                    'name'     => $theme['name'],
-                    'category' => $theme['category'],
-                    'config'   => $theme['config'],
+                    'name'      => $theme['name'],
+                    'category'  => $theme['category'],
+                    'config'    => $theme['config'],
+                    'view_path' => $theme['view_path'] ?? null,
                 ]
             );
         }

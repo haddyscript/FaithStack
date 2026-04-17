@@ -36,6 +36,7 @@ class IdentifyTenant
         view()->share('tenant', $tenant);
         view()->share('navItems', $tenant->navigation);
         view()->share('themeSlug', $tenant->getThemeSlug());
+        view()->share('theme', $tenant->theme);
         view()->share('themeConfig', $tenant->theme?->config ?? []);
 
         return $next($request);

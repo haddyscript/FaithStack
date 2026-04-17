@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Theme extends Model
 {
-    protected $fillable = ['name', 'slug', 'category', 'preview_image', 'config'];
+    protected $fillable = ['name', 'slug', 'category', 'preview_image', 'config', 'view_path'];
 
     protected $casts = [
         'config' => 'array',
