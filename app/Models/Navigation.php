@@ -12,6 +12,7 @@ class Navigation extends Model
 
     protected $fillable = [
         'tenant_id',
+        'parent_id',
         'name',
         'url',
         'order',
