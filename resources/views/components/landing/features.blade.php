@@ -5,31 +5,34 @@
 
         {{-- Header --}}
         <div class="text-center mb-20">
-            <p class="text-sm font-semibold text-indigo-600 uppercase tracking-widest mb-4">Platform Features</p>
-            <h2 class="text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight mb-5">
+            <p class="reveal text-sm font-semibold text-indigo-600 uppercase tracking-widest mb-4">Platform Features</p>
+            <h2 class="reveal text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight mb-5" data-delay="1">
                 Everything you need to<br>build and grow
             </h2>
-            <p class="text-lg text-slate-500 max-w-xl mx-auto">
+            <p class="reveal text-lg text-slate-500 max-w-xl mx-auto" data-delay="2">
                 A complete platform built specifically for churches, nonprofits, and community organizations — with tools you'll actually use.
             </p>
         </div>
 
         {{-- Feature grid --}}
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($features as $feature)
+            @foreach($features as $i => $feature)
             @php
                 $colors = [
-                    'indigo'  => ['bg' => 'bg-indigo-50',  'icon' => 'text-indigo-600',  'border' => 'group-hover:border-indigo-200'],
-                    'purple'  => ['bg' => 'bg-purple-50',  'icon' => 'text-purple-600',  'border' => 'group-hover:border-purple-200'],
-                    'blue'    => ['bg' => 'bg-blue-50',    'icon' => 'text-blue-600',    'border' => 'group-hover:border-blue-200'],
-                    'emerald' => ['bg' => 'bg-emerald-50', 'icon' => 'text-emerald-600', 'border' => 'group-hover:border-emerald-200'],
-                    'rose'    => ['bg' => 'bg-rose-50',    'icon' => 'text-rose-600',    'border' => 'group-hover:border-rose-200'],
-                    'amber'   => ['bg' => 'bg-amber-50',   'icon' => 'text-amber-600',   'border' => 'group-hover:border-amber-200'],
+                    'indigo'  => ['bg' => 'bg-indigo-50',  'icon' => 'text-indigo-600',  'glow' => 'hover:shadow-indigo-500/10'],
+                    'purple'  => ['bg' => 'bg-purple-50',  'icon' => 'text-purple-600',  'glow' => 'hover:shadow-purple-500/10'],
+                    'blue'    => ['bg' => 'bg-blue-50',    'icon' => 'text-blue-600',    'glow' => 'hover:shadow-blue-500/10'],
+                    'emerald' => ['bg' => 'bg-emerald-50', 'icon' => 'text-emerald-600', 'glow' => 'hover:shadow-emerald-500/10'],
+                    'rose'    => ['bg' => 'bg-rose-50',    'icon' => 'text-rose-600',    'glow' => 'hover:shadow-rose-500/10'],
+                    'amber'   => ['bg' => 'bg-amber-50',   'icon' => 'text-amber-600',   'glow' => 'hover:shadow-amber-500/10'],
                 ];
                 $c = $colors[$feature['color']] ?? $colors['indigo'];
             @endphp
-            <div class="group relative bg-white rounded-2xl border border-slate-100 p-8 hover:shadow-lg {{ $c['border'] }} transition-all duration-300">
-                <div class="w-12 h-12 rounded-xl {{ $c['bg'] }} flex items-center justify-center mb-5">
+            <div class="reveal feature-card group bg-white rounded-2xl border border-slate-100 p-8 cursor-default hover:shadow-2xl {{ $c['glow'] }}"
+                 data-delay="{{ $i + 1 }}">
+
+                {{-- Icon --}}
+                <div class="feature-icon w-12 h-12 rounded-xl {{ $c['bg'] }} flex items-center justify-center mb-5">
                     @if($feature['icon'] === 'cube')
                     <svg class="w-6 h-6 {{ $c['icon'] }}" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
                     @elseif($feature['icon'] === 'swatch')
@@ -44,7 +47,8 @@
                     <svg class="w-6 h-6 {{ $c['icon'] }}" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3m-3 3.75h3m-6-7.5h.008v.008H7.5V6zm0 3.75h.008v.008H7.5V9.75z"/></svg>
                     @endif
                 </div>
-                <h3 class="text-lg font-semibold text-slate-900 mb-2">{{ $feature['title'] }}</h3>
+
+                <h3 class="text-lg font-semibold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors duration-200">{{ $feature['title'] }}</h3>
                 <p class="text-slate-500 text-sm leading-relaxed">{{ $feature['description'] }}</p>
             </div>
             @endforeach
