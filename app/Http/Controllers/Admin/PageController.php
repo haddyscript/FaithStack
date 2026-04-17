@@ -50,10 +50,15 @@ class PageController extends Controller
         $tenant    = app('tenant');
         $validated = $this->validatePage($request, $tenant->id, $page->id);
 
-        $page->update([
-            ...$validated,
-            'content' => $this->buildContent($request),
-        ]);
+        $updateData = $validated;
+
+        // Only overwrite content when the form actually submits sections.
+        // Status-only toggles (is_published) must not touch stored content.
+        if ($request->has('sections') || $request->has('footer_enabled')) {
+            $updateData['content'] = $this->buildContent($request);
+        }
+
+        $page->update($updateData);
 
         return redirect()->route('admin.pages.index')->with('success', 'Page updated.');
     }
