@@ -1,0 +1,152 @@
+You are a senior Laravel 13 + frontend UX engineer.
+
+Enhance the **Theme Library section** at:
+http://faithstack.test/#themes
+
+---
+
+## 🎯 Objective
+
+Make the **“Browse All Themes”** button open a **full-screen modal theme explorer** with a premium, immersive experience.
+
+---
+
+## ⚙️ Functional Behavior
+
+### 1. Modal System
+
+* Clicking “Browse All Themes” opens a **full-screen modal (not small dialog)**
+* Covers entire viewport
+* Background blurred/dimmed
+* Prevent body scroll
+
+---
+
+### 2. Modal Content
+
+Inside modal:
+
+#### Top Bar
+
+* Title: “Explore Themes”
+* Search input (real-time filter)
+* Category filter (tabs or dropdown)
+* Close button (top-right)
+
+---
+
+#### Theme Grid
+
+* Responsive grid (3–5 columns desktop)
+* Each card:
+
+  * Image
+  * Name
+  * Category
+
+---
+
+### 3. Theme Card Interactions
+
+* Hover:
+
+  * image zoom
+  * 3D tilt (subtle)
+  * overlay with:
+
+    * “Preview”
+    * “Use Theme”
+* Smooth transitions (300–400ms)
+
+---
+
+### 4. Preview Interaction
+
+* Click “Preview” → open **nested modal or side panel**
+* Show:
+
+  * Large preview image
+  * Scrollable mock layout
+  * CTA: “Start with this theme”
+
+---
+
+## ✨ WOW Factor Animations
+
+### 5. Modal Entrance
+
+* Animate modal with:
+
+  * scale-up + fade
+  * OR expand from button origin
+* Add slight backdrop blur animation
+
+---
+
+### 6. Staggered Grid Reveal
+
+* Theme cards appear with stagger:
+
+  * fade + slide-up
+* Delay per card (50–80ms)
+
+---
+
+### 7. Micro-Interactions
+
+* Buttons:
+
+  * magnetic hover
+  * glow effect
+* Search:
+
+  * smooth filtering (fade in/out)
+* Close:
+
+  * reverse animation (smooth exit)
+
+---
+
+### 8. Cursor Effects (Optional)
+
+* Subtle glow following cursor inside modal
+* Disable on mobile
+
+---
+
+## ⚡ Performance
+
+* Lazy load images
+* Use `transform` + `opacity` only
+* Disable heavy effects on mobile
+
+---
+
+## 🧠 UX Rules
+
+* Fast and smooth (no lag)
+* Feels like a **premium theme marketplace**
+* Easy to scan and explore
+
+---
+
+## 🏗 Implementation
+
+* Use Alpine.js for modal + filtering
+* Create reusable component:
+
+  * `<x-theme-modal />`
+* Keep logic clean and modular
+
+---
+
+## ✅ Output
+
+Provide:
+
+* Blade modal component
+* Updated landing integration
+* Alpine/JS logic
+* Animation classes
+
+Goal: Users click “Browse All Themes” and feel like they entered a **high-end product gallery**.
