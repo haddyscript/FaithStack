@@ -1,3 +1,4 @@
+@php $br = $tenant->getBranding(); $ctaText = $br['nav_cta_text']; $ctaUrl = $br['nav_cta_url']; @endphp
 <header class="sticky top-0 z-50 border-b border-black/10" style="background-color: var(--primary);">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <a href="{{ route('home') }}" class="flex items-center gap-2">
@@ -11,9 +12,9 @@
             @foreach($navItems as $item)
                 <a href="{{ $item->url }}" class="nav-link hover:text-white transition-colors">{{ $item->name }}</a>
             @endforeach
-            <a href="{{ route('donate') }}"
+            <a href="{{ $ctaUrl }}"
                class="btn-primary px-5 py-2 {{ $config['button_radius'] ?? 'rounded-lg' }} text-sm font-semibold shadow transition-all">
-                Get Started
+                {{ $ctaText }}
             </a>
         </nav>
         <button @click="mobileOpen = !mobileOpen" class="md:hidden p-2 text-white/70 hover:text-white">
@@ -25,6 +26,6 @@
         @foreach($navItems as $item)
             <a href="{{ $item->url }}" class="block text-sm font-medium text-white/80 hover:text-white">{{ $item->name }}</a>
         @endforeach
-        <a href="{{ route('donate') }}" class="block text-center btn-primary px-5 py-2.5 {{ $config['button_radius'] ?? 'rounded-lg' }} text-sm font-semibold">Get Started</a>
+        <a href="{{ $ctaUrl }}" class="block text-center btn-primary px-5 py-2.5 {{ $config['button_radius'] ?? 'rounded-lg' }} text-sm font-semibold">{{ $ctaText }}</a>
     </div>
 </header>

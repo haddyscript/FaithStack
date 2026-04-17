@@ -31,6 +31,8 @@ class Tenant extends Model
         'sidebar_text' => '#94a3b8',
         'primary'      => '#6366f1',
         'accent'       => '#a78bfa',
+        'nav_cta_text' => 'Get Started',
+        'nav_cta_url'  => '/donate',
     ];
 
     public function getBranding(): array

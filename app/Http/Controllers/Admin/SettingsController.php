@@ -37,12 +37,14 @@ class SettingsController extends Controller
             $data['logo'] = $request->file('logo')->store('logos', 'public');
         }
 
-        // Branding colors
+        // Branding colors + nav CTA
         $data['branding'] = [
             'sidebar_bg'   => $request->input('branding_sidebar_bg',   '#0f172a'),
             'sidebar_text' => $request->input('branding_sidebar_text',  '#94a3b8'),
             'primary'      => $request->input('branding_primary',       '#6366f1'),
             'accent'       => $request->input('branding_accent',        '#a78bfa'),
+            'nav_cta_text' => trim($request->input('branding_nav_cta_text', 'Get Started')) ?: 'Get Started',
+            'nav_cta_url'  => trim($request->input('branding_nav_cta_url',  '/donate'))    ?: '/donate',
         ];
 
         $tenant->update($data);

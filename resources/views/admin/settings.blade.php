@@ -22,12 +22,16 @@
               sidebar_text: '{{ $br['sidebar_text'] }}',
               primary:      '{{ $br['primary'] }}',
               accent:       '{{ $br['accent'] }}',
+              nav_cta_text: '{{ addslashes($br['nav_cta_text']) }}',
+              nav_cta_url:  '{{ addslashes($br['nav_cta_url']) }}',
           },
           defaults: {
               sidebar_bg:   '{{ \App\Models\Tenant::$brandingDefaults['sidebar_bg'] }}',
               sidebar_text: '{{ \App\Models\Tenant::$brandingDefaults['sidebar_text'] }}',
               primary:      '{{ \App\Models\Tenant::$brandingDefaults['primary'] }}',
               accent:       '{{ \App\Models\Tenant::$brandingDefaults['accent'] }}',
+              nav_cta_text: '{{ \App\Models\Tenant::$brandingDefaults['nav_cta_text'] }}',
+              nav_cta_url:  '{{ \App\Models\Tenant::$brandingDefaults['nav_cta_url'] }}',
           },
           get contrastWarning() {
               function lum(hex) {
@@ -379,6 +383,44 @@
                         <p class="text-[11px] text-slate-400">{{ $pk['hint'] }}</p>
                     </div>
                     @endforeach
+                </div>
+
+                {{-- Nav CTA button --}}
+                <div class="border-t border-slate-100 pt-5">
+                    <p class="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-3">Navigation CTA Button</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Button Label</label>
+                            <input type="text" name="branding_nav_cta_text"
+                                   x-model="branding.nav_cta_text"
+                                   placeholder="Get Started"
+                                   maxlength="40"
+                                   class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent hover:border-slate-300 transition-all">
+                            <p class="text-[11px] text-slate-400 mt-1.5">Text shown on the nav button.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Button URL</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+                                </span>
+                                <input type="text" name="branding_nav_cta_url"
+                                       x-model="branding.nav_cta_url"
+                                       placeholder="/donate"
+                                       class="w-full border border-slate-200 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent hover:border-slate-300 transition-all">
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1.5">Use <code class="bg-slate-100 px-1 rounded">/donate</code>, <code class="bg-slate-100 px-1 rounded">/contact</code>, or a full URL.</p>
+                        </div>
+                    </div>
+
+                    {{-- Live CTA preview --}}
+                    <div class="mt-3 flex items-center gap-3">
+                        <span class="text-xs text-slate-400">Preview:</span>
+                        <a href="#" onclick="return false"
+                           class="inline-flex items-center px-4 py-1.5 rounded-lg text-sm font-semibold text-white transition-all pointer-events-none select-none"
+                           :style="'background: linear-gradient(135deg,' + branding.primary + ',' + branding.accent + ')'"
+                           x-text="branding.nav_cta_text || 'Get Started'"></a>
+                    </div>
                 </div>
             </div>
 
