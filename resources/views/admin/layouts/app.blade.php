@@ -11,12 +11,41 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    @php $br = $tenant->getBranding(); @endphp
     <style>
+        :root {
+            --sb-bg:    {{ $br['sidebar_bg'] }};
+            --sb-text:  {{ $br['sidebar_text'] }};
+            --adm-pri:  {{ $br['primary'] }};
+            --adm-acc:  {{ $br['accent'] }};
+        }
         body { font-family: 'Inter', sans-serif; }
         [x-cloak] { display: none !important; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--sb-bg); border-radius: 4px; }
+
+        /* Sidebar theming */
+        .adm-sidebar              { background-color: var(--sb-bg) !important; }
+        .adm-sidebar .nav-text    { color: var(--sb-text) !important; }
+        .adm-nav-item:hover       { background-color: rgba(255,255,255,0.07) !important; }
+        .adm-nav-item.active      { background-color: var(--adm-pri) !important; color: #fff !important; }
+        .adm-nav-item.active svg  { color: #fff !important; }
+        .adm-nav-item.active span { color: #fff !important; }
+
+        /* Primary action buttons */
+        .adm-btn-primary {
+            background-color: var(--adm-pri) !important;
+            color: #fff !important;
+        }
+        .adm-btn-primary:hover { filter: brightness(1.1); }
+
+        /* Accent badges / toggles */
+        .adm-accent-bg { background-color: var(--adm-acc) !important; }
+        .adm-accent-text { color: var(--adm-pri) !important; }
+
+        /* Focus rings */
+        *:focus-visible { outline-color: var(--adm-pri) !important; }
     </style>
 </head>
 
@@ -50,7 +79,7 @@
     {{-- ── Sidebar ──────────────────────────────────────────────────────── --}}
     <aside
         :class="sidebarOpen ? 'w-64' : 'w-[68px]'"
-        class="flex-col bg-slate-900 transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 z-30
+        class="adm-sidebar flex-col transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 z-30
                hidden lg:flex"
     >
         {{-- Brand --}}

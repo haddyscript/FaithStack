@@ -37,6 +37,14 @@ class SettingsController extends Controller
             $data['logo'] = $request->file('logo')->store('logos', 'public');
         }
 
+        // Branding colors
+        $data['branding'] = [
+            'sidebar_bg'   => $request->input('branding_sidebar_bg',   '#0f172a'),
+            'sidebar_text' => $request->input('branding_sidebar_text',  '#94a3b8'),
+            'primary'      => $request->input('branding_primary',       '#6366f1'),
+            'accent'       => $request->input('branding_accent',        '#a78bfa'),
+        ];
+
         $tenant->update($data);
 
         return redirect()->route('admin.settings')->with('success', 'Settings saved.');

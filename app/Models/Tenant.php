@@ -16,13 +16,27 @@ class Tenant extends Model
         'phone',
         'address',
         'theme_id',
+        'branding',
         'subscription_status',
         'subscription_ends_at',
     ];
 
     protected $casts = [
         'subscription_ends_at' => 'datetime',
+        'branding'             => 'array',
     ];
+
+    public static array $brandingDefaults = [
+        'sidebar_bg'   => '#0f172a',
+        'sidebar_text' => '#94a3b8',
+        'primary'      => '#6366f1',
+        'accent'       => '#a78bfa',
+    ];
+
+    public function getBranding(): array
+    {
+        return array_merge(self::$brandingDefaults, $this->branding ?? []);
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 

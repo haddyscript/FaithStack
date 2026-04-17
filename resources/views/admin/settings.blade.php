@@ -4,11 +4,66 @@
 @section('heading', 'Site Settings')
 
 @section('content')
+@php
+    $br = $tenant->getBranding();
+    $presets = [
+        ['label' => 'Indigo Pro',    'sidebar_bg' => '#1e1b4b', 'sidebar_text' => '#a5b4fc', 'primary' => '#6366f1', 'accent' => '#a78bfa'],
+        ['label' => 'Dark Mode',     'sidebar_bg' => '#09090b', 'sidebar_text' => '#71717a', 'primary' => '#3b82f6', 'accent' => '#06b6d4'],
+        ['label' => 'Forest Green',  'sidebar_bg' => '#052e16', 'sidebar_text' => '#86efac', 'primary' => '#16a34a', 'accent' => '#4ade80'],
+    ];
+@endphp
 <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data"
       x-data="{
           logoPreview: '{{ $tenant->logo ? Storage::url($tenant->logo) : '' }}',
           isDragging: false,
           selectedTheme: '{{ old('theme_id', $tenant->theme_id) }}',
+          branding: {
+              sidebar_bg:   '{{ $br['sidebar_bg'] }}',
+              sidebar_text: '{{ $br['sidebar_text'] }}',
+              primary:      '{{ $br['primary'] }}',
+              accent:       '{{ $br['accent'] }}',
+          },
+          defaults: {
+              sidebar_bg:   '{{ \App\Models\Tenant::$brandingDefaults['sidebar_bg'] }}',
+              sidebar_text: '{{ \App\Models\Tenant::$brandingDefaults['sidebar_text'] }}',
+              primary:      '{{ \App\Models\Tenant::$brandingDefaults['primary'] }}',
+              accent:       '{{ \App\Models\Tenant::$brandingDefaults['accent'] }}',
+          },
+          get contrastWarning() {
+              function lum(hex) {
+                  hex = hex.replace('#','');
+                  var r = parseInt(hex.substr(0,2),16)/255,
+                      g = parseInt(hex.substr(2,2),16)/255,
+                      b = parseInt(hex.substr(4,2),16)/255;
+                  return 0.2126*r + 0.7152*g + 0.0722*b;
+              }
+              var bgL = lum(this.branding.sidebar_bg);
+              var txL = lum(this.branding.sidebar_text);
+              var ratio = (Math.max(bgL,txL)+0.05)/(Math.min(bgL,txL)+0.05);
+              return ratio < 3;
+          },
+          applyPreset(p) {
+              this.branding.sidebar_bg   = p.sidebar_bg;
+              this.branding.sidebar_text = p.sidebar_text;
+              this.branding.primary      = p.primary;
+              this.branding.accent       = p.accent;
+              this.applyLive();
+          },
+          resetBranding() { this.branding = Object.assign({}, this.defaults); this.applyLive(); },
+          applyLive() {
+              var r = document.documentElement.style;
+              r.setProperty('--sb-bg',   this.branding.sidebar_bg);
+              r.setProperty('--sb-text', this.branding.sidebar_text);
+              r.setProperty('--adm-pri', this.branding.primary);
+              r.setProperty('--adm-acc', this.branding.accent);
+              var prev = document.getElementById('branding-preview');
+              if (prev) {
+                  prev.querySelector('.prev-sidebar').style.background = this.branding.sidebar_bg;
+                  prev.querySelector('.prev-sidebar-text').style.color  = this.branding.sidebar_text;
+                  prev.querySelector('.prev-btn').style.background      = this.branding.primary;
+                  prev.querySelector('.prev-accent').style.background   = this.branding.accent;
+              }
+          },
           handleFile(file) {
               if (!file || !file.type.startsWith('image/')) return;
               this.logoPreview = URL.createObjectURL(file);
@@ -16,7 +71,7 @@
                   const dt = new DataTransfer(); dt.items.add(f); return dt.files;
               })(file);
           }
-      }">
+      }" @change.debounce.50ms="applyLive()">
     @csrf @method('PUT')
 
     {{-- Success banner --}}
@@ -241,6 +296,134 @@
                         No themes match your search.
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Branding & Colors ─────────────────────────────────────────── --}}
+    <div class="mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800">Branding & Colors</h3>
+                    <p class="text-xs text-slate-400">Customize your admin dashboard appearance</p>
+                </div>
+            </div>
+            <button type="button" @click="resetBranding()"
+                    class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                Reset to Defaults
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+
+            {{-- Color pickers --}}
+            <div class="lg:col-span-2 px-6 py-5 space-y-6">
+
+                {{-- Preset palettes --}}
+                <div>
+                    <p class="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-3">Quick Presets</p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($presets as $preset)
+                        <button type="button"
+                                @click="applyPreset({{ json_encode($preset) }})"
+                                class="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm bg-white transition-all text-xs font-medium text-slate-700">
+                            <span class="flex gap-1">
+                                <span class="w-3 h-3 rounded-full ring-1 ring-white shadow" style="background: {{ $preset['sidebar_bg'] }};"></span>
+                                <span class="w-3 h-3 rounded-full ring-1 ring-white shadow" style="background: {{ $preset['primary'] }};"></span>
+                                <span class="w-3 h-3 rounded-full ring-1 ring-white shadow" style="background: {{ $preset['accent'] }};"></span>
+                            </span>
+                            {{ $preset['label'] }}
+                        </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Contrast warning --}}
+                <div x-show="contrastWarning" x-cloak
+                     class="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700">
+                    <svg class="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                    <span><strong>Low contrast warning:</strong> The sidebar text may be hard to read on this background. WCAG requires a 3:1 ratio minimum.</span>
+                </div>
+
+                {{-- Color picker grid --}}
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    @php
+                        $pickers = [
+                            ['key' => 'sidebar_bg',   'label' => 'Sidebar Background', 'hint' => 'Main nav rail color'],
+                            ['key' => 'sidebar_text', 'label' => 'Sidebar Text',       'hint' => 'Nav links & icons'],
+                            ['key' => 'primary',      'label' => 'Primary Action',     'hint' => 'Buttons & active states'],
+                            ['key' => 'accent',       'label' => 'Accent',             'hint' => 'Badges & highlights'],
+                        ];
+                    @endphp
+                    @foreach($pickers as $pk)
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide">{{ $pk['label'] }}</label>
+                        <div class="relative group cursor-pointer">
+                            <div class="w-full h-14 rounded-xl border-2 border-slate-200 group-hover:border-slate-300 overflow-hidden transition-all shadow-sm"
+                                 :style="'background:' + branding['{{ $pk['key'] }}']">
+                                <input type="color" name="branding_{{ $pk['key'] }}"
+                                       x-model="branding['{{ $pk['key'] }}']"
+                                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            </div>
+                            <div class="mt-1.5 flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full border border-slate-200 shadow-sm flex-shrink-0"
+                                      :style="'background:' + branding['{{ $pk['key'] }}']"></span>
+                                <span class="text-xs text-slate-500 font-mono" x-text="branding['{{ $pk['key'] }}']"></span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-400">{{ $pk['hint'] }}</p>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Live Preview --}}
+            <div class="px-6 py-5">
+                <p class="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-3">Live Preview</p>
+                <div id="branding-preview" class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm select-none">
+                    {{-- Mini sidebar + content --}}
+                    <div class="flex h-40">
+                        {{-- Sidebar --}}
+                        <div class="prev-sidebar w-14 flex flex-col items-center pt-3 gap-3 flex-shrink-0 transition-colors duration-200"
+                             :style="'background:' + branding.sidebar_bg">
+                            <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                                <div class="w-3 h-3 rounded-sm" :style="'background:' + branding.primary"></div>
+                            </div>
+                            @foreach([1,2,3,4] as $i)
+                            <div class="prev-sidebar-text w-8 h-1.5 rounded-full opacity-60 transition-colors duration-200"
+                                 :style="'background:' + branding.sidebar_text"></div>
+                            @endforeach
+                        </div>
+                        {{-- Main area --}}
+                        <div class="flex-1 bg-slate-50 p-3 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="h-2 w-20 bg-slate-200 rounded-full"></div>
+                                <div class="prev-btn h-5 w-14 rounded-lg flex items-center justify-center transition-colors duration-200"
+                                     :style="'background:' + branding.primary">
+                                    <div class="h-1 w-8 rounded-full bg-white/70"></div>
+                                </div>
+                            </div>
+                            <div class="h-1.5 w-24 bg-slate-200 rounded-full"></div>
+                            <div class="h-1.5 w-16 bg-slate-200 rounded-full"></div>
+                            <div class="flex gap-1.5 mt-3">
+                                <div class="prev-accent h-4 w-10 rounded-full transition-colors duration-200"
+                                     :style="'background:' + branding.accent"></div>
+                                <div class="h-4 w-14 bg-slate-200 rounded-full"></div>
+                            </div>
+                            <div class="h-14 rounded-xl bg-white border border-slate-200 mt-1"></div>
+                        </div>
+                    </div>
+                    <div class="border-t border-slate-100 px-3 py-2 flex items-center gap-1.5 bg-white">
+                        <div class="w-2 h-2 rounded-full" :style="'background:' + branding.primary"></div>
+                        <p class="text-[10px] text-slate-400">Admin dashboard preview</p>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-2 text-center">Updates apply to your live admin panel after saving.</p>
             </div>
         </div>
     </div>
