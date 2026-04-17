@@ -1,44 +1,42 @@
 @php
-    $hero    = collect($content['sections'] ?? [])->firstWhere('type', 'hero')['data'] ?? [];
-    $spacing = match($config['section_spacing'] ?? 'spacious') { 'spacious' => 'py-32', 'compact' => 'py-16', default => 'py-24' };
-    $slides  = $hero['slides'] ?? [['title' => $hero['title'] ?? $page->title, 'subtitle' => $hero['subtitle'] ?? '']];
-    $isLight = str_starts_with($config['primary_color'] ?? '', '#f') || $config['primary_color'] === '#ffffff';
-    $textColor = $isLight ? 'text-gray-900' : 'text-white';
-    $subColor  = $isLight ? 'text-gray-600' : 'text-white/70';
+    $textColor = $sectionConfig['text_color'] ?? 'inverse';
+    $textVal   = $textColor === 'inverse' ? 'var(--text-inv)' : 'var(--text-pri)';
+    $subVal    = $textColor === 'inverse' ? 'rgba(255,255,255,0.75)' : 'var(--text-sec)';
+    $spacing   = match($config['section_spacing'] ?? 'spacious') { 'spacious' => 'py-32', 'compact' => 'py-16', default => 'py-24' };
+    $slides    = !empty($data['slides']) ? $data['slides'] : [['title' => $data['title'] ?? $page->title, 'subtitle' => $data['subtitle'] ?? '']];
 @endphp
-<section class="{{ $spacing }} relative overflow-hidden" style="background-color: var(--primary);"
+<section class="{{ $spacing }} relative overflow-hidden" style="background:var(--primary);"
          x-data="{ slide: 0, slides: {{ count($slides) }} }"
          x-init="setInterval(() => slide = (slide + 1) % slides, 5000)">
-    <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 60% 40%, var(--secondary), transparent 70%);"></div>
-
+    <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 60% 40%,var(--secondary),transparent 70%);"></div>
     <div class="relative max-w-4xl mx-auto px-6 text-center">
         @foreach($slides as $i => $slide)
-            <div x-show="slide === {{ $i }}" x-transition:enter="transition ease-out duration-500"
-                 x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                <h1 class="text-4xl md:text-6xl font-bold {{ $textColor }} leading-tight mb-6">
+            <div x-show="slide === {{ $i }}"
+                 x-transition:enter="transition ease-out duration-500"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
+                <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-6" style="color:{{ $textVal }};">
                     {!! nl2br(e($slide['title'] ?? '')) !!}
                 </h1>
                 @if(!empty($slide['subtitle']))
-                    <p class="text-lg md:text-xl {{ $subColor }} mb-10 max-w-2xl mx-auto leading-relaxed">{{ $slide['subtitle'] }}</p>
+                    <p class="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed" style="color:{{ $subVal }};">{{ $slide['subtitle'] }}</p>
                 @endif
             </div>
         @endforeach
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mt-4">
-            @if(!empty($hero['button_text']))
-                <a href="{{ $hero['button_url'] ?? '#' }}"
-                   class="btn-primary px-8 py-3.5 {{ $config['button_radius'] ?? 'rounded-lg' }} text-base font-semibold shadow-xl transition-all">
-                    {{ $hero['button_text'] }}
-                </a>
-            @endif
-        </div>
+        @if(!empty($data['button_text']))
+            <a href="{{ $data['button_url'] ?? '#' }}"
+               class="btn-primary inline-block px-8 py-3.5 {{ $config['button_radius'] ?? 'rounded-lg' }} text-base font-semibold shadow-xl transition-all mt-4">
+                {{ $data['button_text'] }}
+            </a>
+        @endif
 
-        {{-- Dots --}}
         <div class="flex justify-center gap-2 mt-8">
             @foreach($slides as $i => $slide)
                 <button @click="slide = {{ $i }}"
-                        class="w-2 h-2 rounded-full transition-all"
-                        :class="slide === {{ $i }} ? 'bg-white w-6' : 'bg-white/40'"></button>
+                        class="h-2 rounded-full transition-all duration-300"
+                        :class="slide === {{ $i }} ? 'w-6' : 'w-2'"
+                        style="background:var(--text-inv); opacity: slide === {{ $i }} ? 1 : 0.4;"></button>
             @endforeach
         </div>
     </div>

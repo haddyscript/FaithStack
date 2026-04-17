@@ -1179,6 +1179,64 @@ class ThemeSeeder extends Seeder
 
         ];
 
+        // Automatically compute text colors (via luminance) and section configs
+        foreach ($themes as &$theme) {
+            $hex = ltrim($theme['config']['primary_color'] ?? '#0f0f23', '#');
+            $r   = hexdec(substr($hex, 0, 2));
+            $g   = hexdec(substr($hex, 2, 2));
+            $b   = hexdec(substr($hex, 4, 2));
+            $isLight = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255 > 0.5;
+
+            $heroVariant = $theme['config']['hero_variant'] ?? 'centered';
+            $heroBg = match (true) {
+                str_contains($heroVariant, 'video') => 'video',
+                str_contains($heroVariant, 'image') => 'image',
+                default                              => 'gradient',
+            };
+
+            $theme['config'] = array_merge($theme['config'], [
+                'text_primary'         => '#111827',
+                'text_secondary'       => '#6b7280',
+                'text_inverse'         => '#ffffff',
+                'background_primary'   => '#ffffff',
+                'background_secondary' => '#f9fafb',
+                'sections' => [
+                    'hero' => [
+                        'background' => $heroBg,
+                        'text_color' => $isLight ? 'primary' : 'inverse',
+                        'alignment'  => $heroVariant === 'centered' ? 'center' : 'left',
+                    ],
+                    'text' => [
+                        'background' => 'primary',
+                        'text_color' => 'primary',
+                        'alignment'  => 'left',
+                    ],
+                    'image_text' => [
+                        'background' => 'secondary',
+                        'text_color' => 'primary',
+                        'image_side' => 'right',
+                    ],
+                    'gallery' => [
+                        'columns'    => 3,
+                        'background' => 'primary',
+                        'text_color' => 'primary',
+                    ],
+                    'cta' => [
+                        'style'      => ($theme['config']['section_spacing'] ?? '') === 'spacious' ? 'full' : 'boxed',
+                        'background' => 'brand',
+                        'text_color' => 'inverse',
+                    ],
+                    'footer' => [
+                        'enabled'    => true,
+                        'style'      => $theme['config']['footer_style'] ?? 'multi-column',
+                        'text_color' => 'inverse',
+                        'background' => 'brand',
+                    ],
+                ],
+            ]);
+        }
+        unset($theme); // clear reference
+
         foreach ($themes as $theme) {
             Theme::updateOrCreate(
                 ['slug' => $theme['slug']],
