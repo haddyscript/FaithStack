@@ -22,23 +22,74 @@
             }
         }
     </script>
+
+    {{-- Register Alpine components BEFORE Alpine boots --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+
+            // Typewriter effect
+            Alpine.data('typewriter', () => ({
+                words:      ['churches', 'nonprofits', 'ministries', 'communities'],
+                displayed:  'churches',
+                current:    0,
+                deleting:   false,
+                init() { setTimeout(() => this.tick(), 2000); },
+                tick() {
+                    const word  = this.words[this.current];
+                    const speed = this.deleting ? 55 : 110;
+
+                    if (!this.deleting && this.displayed === word) {
+                        setTimeout(() => { this.deleting = true; this.tick(); }, 2200);
+                        return;
+                    }
+                    if (this.deleting && this.displayed === '') {
+                        this.deleting = false;
+                        this.current = (this.current + 1) % this.words.length;
+                        setTimeout(() => this.tick(), 380);
+                        return;
+                    }
+                    this.displayed = this.deleting
+                        ? word.slice(0, this.displayed.length - 1)
+                        : word.slice(0, this.displayed.length + 1);
+                    setTimeout(() => this.tick(), speed);
+                }
+            }));
+
+            // Theme preview modal
+            Alpine.data('themeGallery', () => ({
+                active: null,
+                open(theme) { this.active = theme; document.body.style.overflow = 'hidden'; },
+                close()     { this.active = null;  document.body.style.overflow = ''; },
+            }));
+
+        });
+    </script>
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         /* ── Base ── */
         html { scroll-padding-top: 72px; }
-        * { -webkit-font-smoothing: antialiased; }
+        *, *::before, *::after { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
 
-        /* ── Scroll-reveal system ── */
+        /* ── Noise overlay (premium texture) ── */
+        body::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 9999;
+            pointer-events: none; user-select: none;
+            opacity: 0.032;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 180px 180px;
+        }
+
+        /* ── Scroll-reveal ── */
         .reveal {
-            opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1),
-                        transform 0.65s cubic-bezier(0.16,1,0.3,1);
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                        transform 0.7s cubic-bezier(0.16,1,0.3,1);
+            will-change: transform, opacity;
         }
         .reveal.in { opacity: 1; transform: translateY(0); }
-
-        /* stagger delays */
         .reveal[data-delay="1"] { transition-delay: 80ms; }
         .reveal[data-delay="2"] { transition-delay: 160ms; }
         .reveal[data-delay="3"] { transition-delay: 240ms; }
@@ -46,88 +97,144 @@
         .reveal[data-delay="5"] { transition-delay: 400ms; }
         .reveal[data-delay="6"] { transition-delay: 480ms; }
 
+        /* ── Direction-aware (scroll-up variant) ── */
+        .reveal.from-below  { transform: translateY(-20px); }
+
         /* ── Hero word-reveal ── */
         @keyframes wordIn {
-            from { opacity: 0; transform: translateY(36px) skewY(3deg); }
+            from { opacity: 0; transform: translateY(40px) skewY(4deg); }
             to   { opacity: 1; transform: translateY(0)   skewY(0deg); }
         }
-        .word-reveal { display: inline-block; opacity: 0; animation: wordIn 0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .word-reveal {
+            display: inline-block; opacity: 0;
+            animation: wordIn 0.75s cubic-bezier(0.16,1,0.3,1) forwards;
+            will-change: transform, opacity;
+        }
 
-        /* ── Floating blob animation ── */
+        /* ── Cursor glow in hero ── */
+        [data-cursor-glow] { --cx: 50%; --cy: 50%; }
+        [data-cursor-glow]::before {
+            content: '';
+            position: absolute; inset: 0; z-index: 2; pointer-events: none;
+            background: radial-gradient(700px circle at var(--cx) var(--cy),
+                rgba(99,102,241,0.13) 0%, transparent 55%);
+            transition: background 0.1s ease;
+        }
+
+        /* ── Animated blobs ── */
         @keyframes blobFloat {
             0%,100% { transform: translate(0,0) scale(1); }
-            33%      { transform: translate(30px,-20px) scale(1.05); }
-            66%      { transform: translate(-20px,25px) scale(0.97); }
+            33%      { transform: translate(35px,-25px) scale(1.06); }
+            66%      { transform: translate(-25px,30px) scale(0.96); }
         }
-        .blob { animation: blobFloat var(--duration,18s) ease-in-out infinite; }
-
-        /* ── Browser mockup bob ── */
-        @keyframes float {
-            0%,100% { transform: translateY(0px) rotate(-1deg); }
-            50%      { transform: translateY(-10px) rotate(-1deg); }
+        .blob {
+            animation: blobFloat var(--dur,20s) ease-in-out infinite;
+            will-change: transform;
         }
-        .mockup-float { animation: float 5s ease-in-out infinite; }
 
-        /* ── Gradient shift (CTA section) ── */
-        @keyframes gradientShift {
+        /* ── Browser mockup float ── */
+        @keyframes floatY {
+            0%,100% { transform: rotate(-1deg) translateY(0); }
+            50%      { transform: rotate(-1deg) translateY(-12px); }
+        }
+        .mockup-float { animation: floatY 5.5s ease-in-out infinite; will-change: transform; }
+
+        /* ── Gradient shift (slow, premium) ── */
+        @keyframes gradShift {
             0%   { background-position: 0% 50%; }
             50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        .gradient-animate {
-            background-size: 300% 300%;
-            animation: gradientShift 8s ease infinite;
+        .grad-animate { background-size: 400% 400%; animation: gradShift 14s ease infinite; }
+
+        /* ── Feature card tilt & hover ── */
+        .feature-card {
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+            will-change: transform;
+            transform-style: preserve-3d;
+        }
+        .feature-card:hover { box-shadow: 0 24px 60px -8px rgba(99,102,241,0.15); border-color: rgba(199,210,254,0.6); }
+        .feature-card:hover .feature-icon { transform: scale(1.18) rotate(7deg); }
+        .feature-icon { transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+
+        /* ── Theme card tilt & hover ── */
+        .theme-card { will-change: transform; transform-style: preserve-3d; }
+        .theme-preview-img { transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+        .theme-card:hover .theme-preview-img { transform: scale(1.05); }
+        .theme-overlay { transition: opacity 0.35s ease; opacity: 0; }
+        .theme-card:hover .theme-overlay { opacity: 1; }
+
+        /* ── Pricing card hover glow ── */
+        .pricing-card { will-change: transform; }
+        .pricing-card:not(.pricing-featured):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(99,102,241,0.13);
+            border-color: rgba(165,180,252,0.5);
         }
 
-        /* ── Pulse glow (Pro CTA button) ── */
+        /* ── Pulse glow (Pro CTA) ── */
         @keyframes pulseGlow {
-            0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+            0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.35); }
             50%      { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
         }
-        .pulse-glow { animation: pulseGlow 2.5s ease-in-out infinite; }
+        .pulse-glow { animation: pulseGlow 2.8s ease-in-out infinite; }
 
-        /* ── Ripple on buttons ── */
+        /* ── Magnetic button ── */
+        .magnetic { will-change: transform; display: inline-flex; }
+
+        /* ── Ripple ── */
         .ripple-btn { position: relative; overflow: hidden; }
-        .ripple-btn .ripple {
+        .ripple-btn .ripple-wave {
             position: absolute; border-radius: 50%;
-            transform: scale(0); animation: rippleAnim 0.55s linear;
-            background: rgba(255,255,255,0.25); pointer-events: none;
+            transform: scale(0); animation: rippleAnim 0.6s linear;
+            background: rgba(255,255,255,0.22); pointer-events: none;
         }
         @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
 
-        /* ── Feature card hover ── */
-        .feature-card { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease; }
-        .feature-card:hover { transform: translateY(-6px); }
-        .feature-card:hover .feature-icon { transform: scale(1.15) rotate(6deg); }
-        .feature-icon { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+        /* ── Button press ── */
+        .ripple-btn:active { transform: scale(0.97) !important; }
 
-        /* ── Theme card hover ── */
-        .theme-card { transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease; }
-        .theme-card:hover { transform: translateY(-8px); box-shadow: 0 24px 60px rgba(0,0,0,0.12); }
-        .theme-preview-img { transition: transform 0.5s cubic-bezier(0.16,1,0.3,1); }
-        .theme-card:hover .theme-preview-img { transform: scale(1.04); }
-        .theme-overlay { transition: opacity 0.3s ease; opacity: 0; }
-        .theme-card:hover .theme-overlay { opacity: 1; }
-
-        /* ── Pricing card hover ── */
-        .pricing-card { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease; }
-        .pricing-card:not(.pricing-featured):hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 50px rgba(99,102,241,0.12);
-            border-color: rgb(199,210,254);
+        /* ── Typewriter cursor ── */
+        .tw-cursor {
+            display: inline-block; width: 2px; height: 0.85em;
+            background: currentColor; margin-left: 2px; vertical-align: -1px;
+            animation: blink 1s step-end infinite;
         }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
         /* ── Link underline slide ── */
         .link-slide { position: relative; }
         .link-slide::after {
-            content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px;
-            background: currentColor; transition: width 0.25s ease;
+            content: ''; position: absolute; bottom: -2px; left: 0;
+            width: 0; height: 1px; background: currentColor;
+            transition: width 0.25s cubic-bezier(0.16,1,0.3,1);
         }
         .link-slide:hover::after { width: 100%; }
 
-        /* ── Smooth scroll nav ── */
+        /* ── Testimonial card hover ── */
+        .testimonial-card { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease; }
+        .testimonial-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(99,102,241,0.08); border-color: rgba(199,210,254,0.5); }
+
+        /* ── Section separators ── */
+        .section-sep {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(148,163,184,0.15), transparent);
+        }
+
+        /* ── Modal ── */
+        [x-cloak] { display: none !important; }
+
+        /* ── Reduce motion ── */
         @media (prefers-reduced-motion: reduce) {
-            .reveal, .word-reveal, .blob, .mockup-float, .gradient-animate, .pulse-glow { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+            .reveal, .word-reveal, .blob, .mockup-float, .grad-animate, .pulse-glow, .magnetic {
+                animation: none !important; transition: none !important;
+                opacity: 1 !important; transform: none !important;
+            }
+        }
+        /* ── Disable heavy effects on touch ── */
+        @media (pointer: coarse) {
+            .mockup-float { animation-duration: 8s; }
+            .blob { animation-duration: 30s; }
         }
     </style>
 </head>
@@ -135,45 +242,173 @@
 
     <x-landing.nav />
     <x-landing.hero />
+    <div class="section-sep"></div>
     <x-landing.features :features="$features" />
+    <div class="section-sep"></div>
     <x-landing.themes :themes="$themes" />
+    <div class="section-sep"></div>
     <x-landing.how-it-works :steps="$steps" />
+    <div class="section-sep"></div>
     <x-landing.pricing :plans="$plans" />
+    <div class="section-sep"></div>
     <x-landing.testimonials :testimonials="$testimonials" />
     <x-landing.final-cta />
     <x-landing.footer />
 
     <script>
     (() => {
-        // ── Scroll reveal ──────────────────────────────────────────────
+        const isMobile = window.matchMedia('(pointer: coarse)').matches;
+
+        // ── Scroll state ───────────────────────────────────────────────────
+        let raf = false, lastScrollY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            if (!raf) {
+                requestAnimationFrame(() => {
+                    document.documentElement.style.setProperty('--scroll-y', window.scrollY + 'px');
+                    lastScrollY = window.scrollY;
+                    raf = false;
+                });
+                raf = true;
+            }
+        }, { passive: true });
+
+        // ── Direction-aware reveal ─────────────────────────────────────────
+        let prevY = 0;
         const revealObs = new IntersectionObserver((entries) => {
+            const goingDown = window.scrollY >= prevY;
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
+                    if (!goingDown) entry.target.classList.add('from-below');
                     entry.target.classList.add('in');
                     revealObs.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+            prevY = window.scrollY;
+        }, { threshold: 0.07, rootMargin: '0px 0px -36px 0px' });
 
         document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
-        // ── Ripple effect ──────────────────────────────────────────────
+        // ── Hero word reveal ───────────────────────────────────────────────
+        document.querySelectorAll('.word-reveal').forEach((el, i) => {
+            el.style.animationDelay = `${0.1 + i * 0.09}s`;
+        });
+
+        // ── Cursor glow (hero only, skip mobile) ──────────────────────────
+        if (!isMobile) {
+            const glowEl = document.querySelector('[data-cursor-glow]');
+            if (glowEl) {
+                let cx = 0, cy = 0, tx = 0, ty = 0, glowRaf = null;
+                glowEl.addEventListener('mousemove', (e) => {
+                    const r = glowEl.getBoundingClientRect();
+                    tx = e.clientX - r.left; ty = e.clientY - r.top;
+                }, { passive: true });
+                glowEl.addEventListener('mouseenter', () => {
+                    function lerp(a, b, t) { return a + (b - a) * t; }
+                    function animate() {
+                        cx = lerp(cx, tx, 0.08); cy = lerp(cy, ty, 0.08);
+                        glowEl.style.setProperty('--cx', cx + 'px');
+                        glowEl.style.setProperty('--cy', cy + 'px');
+                        glowRaf = requestAnimationFrame(animate);
+                    }
+                    glowRaf = requestAnimationFrame(animate);
+                });
+                glowEl.addEventListener('mouseleave', () => {
+                    if (glowRaf) cancelAnimationFrame(glowRaf);
+                });
+            }
+        }
+
+        // ── Magnetic buttons (desktop only) ──────────────────────────────
+        if (!isMobile) {
+            document.querySelectorAll('[data-magnetic]').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const r  = btn.getBoundingClientRect();
+                    const dx = (e.clientX - (r.left + r.width / 2))  * 0.32;
+                    const dy = (e.clientY - (r.top  + r.height / 2)) * 0.32;
+                    btn.style.transform    = `translate(${dx}px, ${dy}px)`;
+                    btn.style.transition   = 'transform 0.15s ease';
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform  = '';
+                    btn.style.transition = 'transform 0.6s cubic-bezier(0.23,1,0.32,1)';
+                });
+            });
+        }
+
+        // ── Card 3D tilt (desktop only) ──────────────────────────────────
+        if (!isMobile) {
+            document.querySelectorAll('[data-tilt]').forEach(card => {
+                const intensity = parseFloat(card.dataset.tilt) || 8;
+                let tiltRaf = null, tx = 0, ty = 0, cx = 0, cy = 0;
+
+                card.addEventListener('mousemove', (e) => {
+                    const r = card.getBoundingClientRect();
+                    tx = ((e.clientX - r.left) / r.width  - 0.5) * intensity;
+                    ty = ((e.clientY - r.top)  / r.height - 0.5) * intensity;
+                });
+
+                card.addEventListener('mouseenter', () => {
+                    function animate() {
+                        cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
+                        card.style.transform = `perspective(900px) rotateX(${-cy}deg) rotateY(${cx}deg) translateZ(8px)`;
+                        tiltRaf = requestAnimationFrame(animate);
+                    }
+                    tiltRaf = requestAnimationFrame(animate);
+                });
+                card.addEventListener('mouseleave', () => {
+                    if (tiltRaf) cancelAnimationFrame(tiltRaf);
+                    tx = 0; ty = 0; cx = 0; cy = 0;
+                    card.style.transform  = '';
+                    card.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1)';
+                    setTimeout(() => card.style.transition = '', 500);
+                });
+            });
+        }
+
+        // ── Animated counters ─────────────────────────────────────────────
+        const cntObs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    runCounter(entry.target);
+                    cntObs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('[data-counter]').forEach(el => cntObs.observe(el));
+
+        function runCounter(el) {
+            const raw    = el.dataset.counter;
+            const suffix = el.dataset.suffix  || '';
+            const prefix = el.dataset.prefix  || '';
+            const dec    = el.dataset.decimals || 0;
+            const target = parseFloat(raw);
+            const dur    = 2200;
+            const t0     = performance.now();
+
+            (function step(now) {
+                const p   = Math.min((now - t0) / dur, 1);
+                const ease = 1 - Math.pow(1 - p, 3);
+                const val  = (target * ease).toFixed(dec);
+                el.textContent = prefix + Number(val).toLocaleString() + suffix;
+                if (p < 1) requestAnimationFrame(step);
+            })(t0);
+        }
+
+        // ── Ripple on click ───────────────────────────────────────────────
         document.querySelectorAll('.ripple-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const r = document.createElement('span');
-                const rect = btn.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
-                r.className = 'ripple';
-                btn.appendChild(r);
-                r.addEventListener('animationend', () => r.remove());
+            btn.addEventListener('click', (e) => {
+                const r    = btn.getBoundingClientRect();
+                const size = Math.max(r.width, r.height);
+                const rip  = document.createElement('span');
+                rip.className = 'ripple-wave';
+                rip.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
+                btn.appendChild(rip);
+                rip.addEventListener('animationend', () => rip.remove());
             });
         });
 
-        // ── Hero word reveal trigger ───────────────────────────────────
-        document.querySelectorAll('.word-reveal').forEach((el, i) => {
-            el.style.animationDelay = `${0.15 + i * 0.08}s`;
-        });
     })();
     </script>
 </body>
