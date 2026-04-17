@@ -1,10 +1,20 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Landing page — root domain only, no tenant context
+|--------------------------------------------------------------------------
+*/
+Route::domain(config('app.base_domain', 'faithstack.test'))->group(function () {
+    Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+});
 
 /*
 |--------------------------------------------------------------------------
