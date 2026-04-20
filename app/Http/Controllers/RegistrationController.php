@@ -6,6 +6,7 @@ use App\Mail\WelcomeTenant;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\StripeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,10 @@ class RegistrationController extends Controller
         'status', 'staging', 'dev', 'test', 'demo', 'billing',
     ];
 
+    public function __construct(private readonly StripeService $stripe) {}
+
+    // ─── Subdomain availability check ────────────────────────────────────────
+
     public function checkSubdomain(Request $request): JsonResponse
     {
         $subdomain = strtolower(trim($request->query('subdomain', '')));
@@ -41,13 +46,15 @@ class RegistrationController extends Controller
             return response()->json(['available' => false, 'message' => 'Invalid format']);
         }
 
-        $taken = \App\Models\Tenant::where('subdomain', $subdomain)->exists();
+        $taken = Tenant::where('subdomain', $subdomain)->exists();
 
         return response()->json([
             'available' => !$taken,
             'message'   => $taken ? 'Already taken' : 'Available',
         ]);
     }
+
+    // ─── Registration form ────────────────────────────────────────────────────
 
     public function show(Request $request): View
     {
@@ -58,12 +65,35 @@ class RegistrationController extends Controller
 
         $allPlans = Plan::public()->get();
 
-        return view('register', compact('plan', 'allPlans'));
+        $stripeKey = config('services.stripe.key');
+
+        return view('register', compact('plan', 'allPlans', 'stripeKey'));
     }
+
+    // ─── Stripe SetupIntent (AJAX) ────────────────────────────────────────────
+
+    /**
+     * GET /register/setup-intent
+     * Returns a Stripe SetupIntent client_secret for the frontend to confirm card details.
+     * No auth required — the SetupIntent has no customer attached yet.
+     */
+    public function setupIntent(): JsonResponse
+    {
+        try {
+            $intent = $this->stripe->createSetupIntent();
+            return response()->json(['client_secret' => $intent->client_secret]);
+        } catch (\Throwable $e) {
+            Log::error('Could not create SetupIntent during registration', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Could not initialise payment form. Please try again.'], 500);
+        }
+    }
+
+    // ─── Registration submit ──────────────────────────────────────────────────
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            // Step 1 — Account info
             'plan_slug' => [
                 'required',
                 'string',
@@ -86,17 +116,73 @@ class RegistrationController extends Controller
                 Rule::unique('tenants', 'email'),
             ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+
+            // Step 2 — Billing address
+            'cardholder_name' => ['required', 'string', 'max:100'],
+            'billing_line1'   => ['required', 'string', 'max:191'],
+            'billing_line2'   => ['nullable', 'string', 'max:191'],
+            'billing_city'    => ['required', 'string', 'max:100'],
+            'billing_state'   => ['nullable', 'string', 'max:100'],
+            'billing_zip'     => ['required', 'string', 'max:20'],
+            'billing_country' => ['required', 'string', 'size:2'],
+
+            // Step 3 — Card (Stripe payment method ID confirmed by Stripe.js)
+            'payment_method_id' => ['required', 'string', 'starts_with:pm_'],
         ], [
-            'subdomain.regex'    => 'Subdomain may only contain lowercase letters, numbers, and hyphens, and must not start or end with a hyphen.',
-            'subdomain.not_in'   => 'That subdomain is reserved. Please choose another.',
-            'subdomain.unique'   => 'That subdomain is already taken.',
-            'email.unique'       => 'An account with that email already exists.',
+            'subdomain.regex'          => 'Subdomain may only contain lowercase letters, numbers, and hyphens.',
+            'subdomain.not_in'         => 'That subdomain is reserved. Please choose another.',
+            'subdomain.unique'         => 'That subdomain is already taken.',
+            'email.unique'             => 'An account with that email already exists.',
+            'payment_method_id.required' => 'Please complete the card details.',
+            'payment_method_id.starts_with' => 'Invalid payment method. Please re-enter your card.',
         ]);
 
         $plan = Plan::where('slug', $validated['plan_slug'])->firstOrFail();
 
-        $tenant = DB::transaction(function () use ($validated, $plan): Tenant {
-            $trialDays = $plan->effectiveTrialDays();
+        // ── 1. Stripe: create customer + attach payment method + optional subscription ──
+
+        try {
+            $customer = $this->stripe->createCustomer(
+                email: $validated['email'],
+                name:  $validated['cardholder_name'],
+                address: [
+                    'line1'       => $validated['billing_line1'],
+                    'line2'       => $validated['billing_line2'] ?? null,
+                    'city'        => $validated['billing_city'],
+                    'state'       => $validated['billing_state'] ?? null,
+                    'postal_code' => $validated['billing_zip'],
+                    'country'     => $validated['billing_country'],
+                ],
+            );
+
+            $this->stripe->attachPaymentMethod($customer->id, $validated['payment_method_id']);
+
+            // Create a subscription if the plan has a Stripe price.
+            // Trial plans: card is saved now, charged only when trial ends.
+            if ($plan->stripe_price_id) {
+                $this->stripe->createSubscription(
+                    customerId:      $customer->id,
+                    priceId:         $plan->stripe_price_id,
+                    trialDays:       $plan->effectiveTrialDays(),
+                    paymentMethodId: $validated['payment_method_id'],
+                );
+            }
+
+        } catch (\Throwable $e) {
+            Log::error('Stripe setup failed during registration', [
+                'email' => $validated['email'],
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['payment_method_id' => 'Card setup failed: ' . $e->getMessage()]);
+        }
+
+        // ── 2. Database: create Tenant + admin User ───────────────────────────
+
+        $tenant = DB::transaction(function () use ($validated, $plan, $customer): Tenant {
+            $trialDays   = $plan->effectiveTrialDays();
             $trialEndsAt = $trialDays > 0 ? now()->addDays($trialDays) : null;
 
             $tenant = Tenant::create([
@@ -104,6 +190,7 @@ class RegistrationController extends Controller
                 'subdomain'           => $validated['subdomain'],
                 'email'               => $validated['email'],
                 'plan_id'             => $plan->id,
+                'stripe_customer_id'  => $customer->id,
                 'subscription_status' => 'trial',
                 'subscription_ends_at'=> $trialEndsAt,
             ]);
@@ -119,6 +206,8 @@ class RegistrationController extends Controller
             return $tenant;
         });
 
+        // ── 3. Welcome email ──────────────────────────────────────────────────
+
         try {
             Mail::to($tenant->email)->send(new WelcomeTenant($tenant, $plan));
         } catch (\Throwable $e) {
@@ -127,6 +216,8 @@ class RegistrationController extends Controller
                 'error'     => $e->getMessage(),
             ]);
         }
+
+        // ── 4. Redirect to tenant admin login ─────────────────────────────────
 
         $baseDomain = config('app.base_domain', 'faithstack.test');
         $scheme     = $request->isSecure() ? 'https' : 'http';

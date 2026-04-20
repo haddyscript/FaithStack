@@ -12,6 +12,7 @@ class Tenant extends Model
         'name',
         'subdomain',
         'email',
+        'stripe_customer_id',
         'logo',
         'phone',
         'address',

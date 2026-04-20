@@ -5,9 +5,13 @@ namespace App\Services;
 use App\Models\Plan;
 use App\Models\Tenant;
 use Stripe\Checkout\Session;
+use Stripe\Customer;
 use Stripe\Event;
 use Stripe\PaymentIntent;
+use Stripe\PaymentMethod;
+use Stripe\SetupIntent;
 use Stripe\Stripe;
+use Stripe\Subscription;
 use Stripe\Webhook;
 
 class StripeService
@@ -77,5 +81,71 @@ class StripeService
             $signature,
             config('services.stripe.webhook_secret')
         );
+    }
+
+    // ─── Registration payment flow ────────────────────────────────────────────
+
+    /**
+     * Create a Stripe Customer for a new registrant.
+     */
+    public function createCustomer(string $email, string $name, array $address = []): Customer
+    {
+        $data = ['email' => $email, 'name' => $name];
+
+        if (! empty($address)) {
+            $data['address'] = array_filter($address); // strip nulls
+        }
+
+        return Customer::create($data);
+    }
+
+    /**
+     * Create an off-session SetupIntent so the frontend can securely collect card details.
+     */
+    public function createSetupIntent(?string $customerId = null): SetupIntent
+    {
+        $params = ['usage' => 'off_session'];
+
+        if ($customerId) {
+            $params['customer'] = $customerId;
+        }
+
+        return SetupIntent::create($params);
+    }
+
+    /**
+     * Attach a PaymentMethod to a Customer and set it as their default.
+     */
+    public function attachPaymentMethod(string $customerId, string $paymentMethodId): void
+    {
+        $pm = PaymentMethod::retrieve($paymentMethodId);
+        $pm->attach(['customer' => $customerId]);
+
+        Customer::update($customerId, [
+            'invoice_settings' => ['default_payment_method' => $paymentMethodId],
+        ]);
+    }
+
+    /**
+     * Create a Stripe Subscription for the Customer, with an optional trial period.
+     * If trialDays > 0 the card is saved but not charged until the trial ends.
+     */
+    public function createSubscription(
+        string $customerId,
+        string $priceId,
+        int    $trialDays,
+        string $paymentMethodId,
+    ): Subscription {
+        $params = [
+            'customer'               => $customerId,
+            'items'                  => [['price' => $priceId]],
+            'default_payment_method' => $paymentMethodId,
+        ];
+
+        if ($trialDays > 0) {
+            $params['trial_period_days'] = $trialDays;
+        }
+
+        return Subscription::create($params);
     }
 }

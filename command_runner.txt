@@ -11,7 +11,7 @@
 - paste this ;
 127.0.0.1  faithstack.app
 127.0.0.1  church1.faithstack.test
-127.0.0.1  faithstack.app
+127.0.0.1  faithstack.app 
 127.0.0.1  church1.faithstack.test
 127.0.0.1  faithstack.test
 127.0.0.1  church1.faithstack.test
