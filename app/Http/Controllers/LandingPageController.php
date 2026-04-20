@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Plan;
 use Illuminate\View\View;
 
 class LandingPageController extends Controller
@@ -119,69 +120,12 @@ class LandingPageController extends Controller
             ],
         ];
 
-        $plans = [
-            [
-                'name'        => 'Starter',
-                'price'       => 0,
-                'period'      => 'forever',
-                'description' => 'Perfect for getting started.',
-                'featured'    => false,
-                'cta'         => 'Get Started Free',
-                'features'    => [
-                    '1 website',
-                    'Up to 5 pages',
-                    '10 basic themes',
-                    'FaithStack subdomain',
-                    'Donation forms',
-                    'Email support',
-                ],
-                'missing' => [
-                    'Custom domain',
-                    'Priority support',
-                    'White-label',
-                ],
-            ],
-            [
-                'name'        => 'Pro',
-                'price'       => 29,
-                'period'      => 'per month',
-                'description' => 'Everything you need to grow.',
-                'featured'    => true,
-                'cta'         => 'Start Free Trial',
-                'features'    => [
-                    '1 website',
-                    'Unlimited pages',
-                    'All 80+ themes',
-                    'Custom domain',
-                    'Advanced branding',
-                    'Donation analytics',
-                    'Priority support',
-                ],
-                'missing' => [
-                    'Multiple sites',
-                    'White-label',
-                ],
-            ],
-            [
-                'name'        => 'Business',
-                'price'       => 79,
-                'period'      => 'per month',
-                'description' => 'For organizations at scale.',
-                'featured'    => false,
-                'cta'         => 'Contact Sales',
-                'features'    => [
-                    'Up to 10 websites',
-                    'Unlimited pages',
-                    'All 80+ themes',
-                    'Custom domains',
-                    'White-label platform',
-                    'Advanced analytics',
-                    'Dedicated support',
-                    'SLA guarantee',
-                ],
-                'missing' => [],
-            ],
-        ];
+        // Load plans from DB; fall back to empty array if migration hasn't run yet
+        try {
+            $plans = Plan::public()->get()->map->toLandingArray()->values()->toArray();
+        } catch (\Throwable) {
+            $plans = [];
+        }
 
         $testimonials = [
             [

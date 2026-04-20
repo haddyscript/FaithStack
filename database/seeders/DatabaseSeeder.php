@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(ThemeSeeder::class);
+        $this->call([
+            PlanSeeder::class,
+            ThemeSeeder::class,
+        ]);
     }
 }

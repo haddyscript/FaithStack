@@ -24,9 +24,9 @@
                      'bg-gradient-to-b from-indigo-600 to-purple-700 shadow-2xl shadow-indigo-500/30 scale-105 z-10 ring-1 ring-indigo-400/30' => $plan['featured'],
                  ])>
 
-                @if($plan['featured'])
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg tracking-wide">
-                    MOST POPULAR
+                @if(!empty($plan['badge']))
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg tracking-wide uppercase">
+                    {{ $plan['badge'] }}
                 </div>
                 @endif
 
@@ -37,11 +37,11 @@
                     </p>
 
                     <div class="flex items-baseline gap-1 mb-2">
-                        @if($plan['price'] === 0)
+                        @if($plan['price'] == 0)
                         <span @class(['text-5xl font-bold', 'text-slate-900' => !$plan['featured'], 'text-white' => $plan['featured']])>Free</span>
                         @else
                         <span @class(['text-2xl font-semibold', 'text-slate-400' => !$plan['featured'], 'text-indigo-200' => $plan['featured']])>$</span>
-                        <span @class(['text-5xl font-bold', 'text-slate-900' => !$plan['featured'], 'text-white' => $plan['featured']])>{{ $plan['price'] }}</span>
+                        <span @class(['text-5xl font-bold', 'text-slate-900' => !$plan['featured'], 'text-white' => $plan['featured']])>{{ number_format((float)$plan['price'], 0) }}</span>
                         <span @class(['text-sm', 'text-slate-400' => !$plan['featured'], 'text-indigo-200' => $plan['featured']])}>/mo</span>
                         @endif
                     </div>
@@ -49,10 +49,16 @@
                     <p @class(['text-sm', 'text-slate-500' => !$plan['featured'], 'text-indigo-200' => $plan['featured']])>
                         {{ $plan['description'] }}
                     </p>
+
+                    @if(!empty($plan['trial_days']) && $plan['price'] == 0)
+                    <p class="mt-2 text-xs font-medium {{ $plan['featured'] ? 'text-indigo-200' : 'text-emerald-600' }}">
+                        ✓ No credit card required
+                    </p>
+                    @endif
                 </div>
 
                 {{-- CTA --}}
-                <a href="/superadmin/login" @class([
+                <a href="{{ url('/register') }}?plan={{ $plan['slug'] ?? 'free-trial' }}" @class([
                     'ripple-btn block text-center py-3 px-6 rounded-xl font-semibold text-sm mb-8 transition-all duration-300 hover:-translate-y-0.5',
                     'bg-slate-900 hover:bg-slate-800 text-white shadow-md hover:shadow-xl hover:shadow-slate-900/20' => !$plan['featured'],
                     'bg-white text-indigo-700 hover:bg-indigo-50 shadow-xl pulse-glow' => $plan['featured'],

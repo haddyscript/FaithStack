@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\PageController;
@@ -14,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 Route::domain(config('app.base_domain', 'faithstack.test'))->group(function () {
     Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+
+    // Public self-serve registration
+    Route::get('/register',  [RegistrationController::class, 'show'])->name('register');
+    Route::post('/register', [RegistrationController::class, 'store'])->name('register.store');
 });
 
 /*

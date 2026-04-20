@@ -54,8 +54,8 @@
             <div>
                 <h4 class="text-white text-sm font-semibold mb-5">Account</h4>
                 <ul class="space-y-3">
-                    <li><a href="/superadmin/login" class="text-sm text-white/35 hover:text-white/70 transition-colors">Log in</a></li>
-                    <li><a href="/superadmin/login" class="text-sm text-white/35 hover:text-white/70 transition-colors">Sign up free</a></li>
+                    <li><a href="{{ route('superadmin.login') }}" class="text-sm text-white/35 hover:text-white/70 transition-colors">Log in</a></li>
+                    <li><a href="{{ url('/register') }}?plan=free-trial" class="text-sm text-white/35 hover:text-white/70 transition-colors">Sign up free</a></li>
                     <li><a href="#" class="text-sm text-white/35 hover:text-white/70 transition-colors">Documentation</a></li>
                     <li><a href="#" class="text-sm text-white/35 hover:text-white/70 transition-colors">Support</a></li>
                 </ul>

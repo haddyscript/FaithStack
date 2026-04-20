@@ -432,7 +432,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-end="opacity-0 translate-y-3 scale-95"
          class="hidden md:block fixed bottom-6 right-6 z-40">
-        <a href="/superadmin/login"
+        <a href="{{ url('/register') }}?plan=free-trial"
            class="ripple-btn btn-spring flex items-center gap-3 pl-5 pr-4 py-3.5 rounded-2xl bg-[#09090b] text-white shadow-2xl shadow-black/50 border border-white/[0.08] no-underline">
             <span class="relative flex h-2 w-2 flex-shrink-0">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

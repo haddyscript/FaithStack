@@ -34,10 +34,10 @@
 
         {{-- Desktop CTAs --}}
         <div class="hidden md:flex items-center gap-3">
-            <a href="/superadmin/login" class="text-sm text-white/50 hover:text-white transition-colors duration-200 px-3 py-1.5">
+            <a href="{{ route('superadmin.login') }}" class="text-sm text-white/50 hover:text-white transition-colors duration-200 px-3 py-1.5">
                 Log in
             </a>
-            <a href="/superadmin/login"
+            <a href="{{ url('/register') }}?plan=free-trial"
                :class="compact ? 'px-4 py-2 text-xs' : 'px-5 py-2.5 text-sm'"
                class="ripple-btn font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all duration-300 shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/45 hover:-translate-y-0.5">
                 Get started
@@ -64,8 +64,8 @@
         <a href="#{{ $anchor }}" @click="open=false" class="block py-2.5 text-sm text-white/50 hover:text-white transition-colors">{{ $label }}</a>
         @endforeach
         <div class="pt-4 flex flex-col gap-3">
-            <a href="/superadmin/login" class="block text-center py-2.5 text-sm text-white/60 border border-white/10 rounded-lg hover:border-white/25 hover:text-white transition-all">Log in</a>
-            <a href="/superadmin/login" class="ripple-btn block text-center py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-all">Get started free</a>
+            <a href="{{ route('superadmin.login') }}" class="block text-center py-2.5 text-sm text-white/60 border border-white/10 rounded-lg hover:border-white/25 hover:text-white transition-all">Log in</a>
+            <a href="{{ url('/register') }}?plan=free-trial" class="ripple-btn block text-center py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-all">Get started free</a>
         </div>
     </div>
 </nav>

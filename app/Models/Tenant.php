@@ -15,6 +15,7 @@ class Tenant extends Model
         'logo',
         'phone',
         'address',
+        'plan_id',
         'theme_id',
         'branding',
         'subscription_status',
@@ -41,6 +42,11 @@ class Tenant extends Model
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
 
     public function theme(): BelongsTo
     {
@@ -84,6 +90,17 @@ class Tenant extends Model
     public function hasAccess(): bool
     {
         return $this->isSubscriptionActive() || $this->isOnTrial();
+    }
+
+    /** Check if this tenant's plan allows more pages to be created. */
+    public function canAddPage(): bool
+    {
+        $max = $this->plan?->limits['max_pages'] ?? null;
+        if ($max === null) {
+            return true;
+        }
+
+        return $this->pages()->count() < $max;
     }
 
     public function getThemeSlug(): string
