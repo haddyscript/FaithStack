@@ -42,3 +42,11 @@ format : http://{tenants->subdomain}.faithstack.test/admin/login
 
 ### Clear config cache after adding Stripe keys to .env ###
 - docker compose exec app php artisan config:clear
+
+
+
+
+
+
+# Add to your server's crontab (once only):
+* * * * * cd /path/to/faithstack && php artisan schedule:run >> /dev/null 2>&1

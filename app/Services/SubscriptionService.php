@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\SubscriptionCancelled;
 use App\Mail\SubscriptionConfirmed;
 use App\Models\Plan;
 use App\Models\Tenant;
@@ -49,5 +50,26 @@ class SubscriptionService
         ]);
 
         Log::info('Subscription renewed', ['tenant_id' => $tenant->id]);
+    }
+
+    /**
+     * Cancel a tenant's subscription and notify them by email.
+     */
+    public function cancel(Tenant $tenant): void
+    {
+        $tenant->update([
+            'subscription_status' => 'cancelled',
+        ]);
+
+        Log::info('Subscription cancelled', ['tenant_id' => $tenant->id]);
+
+        try {
+            Mail::to($tenant->email)->send(new SubscriptionCancelled($tenant));
+        } catch (\Throwable $e) {
+            Log::warning('SubscriptionCancelled email failed', [
+                'tenant_id' => $tenant->id,
+                'error'     => $e->getMessage(),
+            ]);
+        }
     }
 }

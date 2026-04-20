@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeTenant;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
@@ -10,6 +11,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -115,6 +118,15 @@ class RegistrationController extends Controller
 
             return $tenant;
         });
+
+        try {
+            Mail::to($tenant->email)->send(new WelcomeTenant($tenant, $plan));
+        } catch (\Throwable $e) {
+            Log::warning('Welcome email failed after registration', [
+                'tenant_id' => $tenant->id,
+                'error'     => $e->getMessage(),
+            ]);
+        }
 
         $baseDomain = config('app.base_domain', 'faithstack.test');
         $scheme     = $request->isSecure() ? 'https' : 'http';

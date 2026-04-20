@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\DonationReceipt;
+use App\Mail\NewDonationAlert;
 use App\Models\Donation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class DonationController extends Controller
@@ -29,11 +33,29 @@ class DonationController extends Controller
             'notes'      => ['nullable', 'string', 'max:500'],
         ]);
 
-        Donation::create([
+        $donation = Donation::create([
             ...$validated,
             'tenant_id' => $tenant->id,
             'status'    => 'pending',
         ]);
+
+        try {
+            Mail::to($donation->email)->send(new DonationReceipt($donation, $tenant));
+        } catch (\Throwable $e) {
+            Log::warning('Donation receipt email failed', [
+                'donation_id' => $donation->id,
+                'error'       => $e->getMessage(),
+            ]);
+        }
+
+        try {
+            Mail::to($tenant->email)->send(new NewDonationAlert($donation, $tenant));
+        } catch (\Throwable $e) {
+            Log::warning('New donation admin alert failed', [
+                'donation_id' => $donation->id,
+                'error'       => $e->getMessage(),
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Thank you for your donation!');
     }

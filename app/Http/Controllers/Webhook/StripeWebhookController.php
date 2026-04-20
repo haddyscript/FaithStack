@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Webhook;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentFailed;
+use App\Mail\SubscriptionCancelled;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Services\StripeService;
@@ -10,6 +12,7 @@ use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class StripeWebhookController extends Controller
 {
@@ -32,9 +35,11 @@ class StripeWebhookController extends Controller
         }
 
         match ($event->type) {
-            'checkout.session.completed' => $this->onCheckoutCompleted($event->data->object, $subscription),
-            'invoice.paid'               => $this->onInvoicePaid($event->data->object, $subscription),
-            default                      => null,
+            'checkout.session.completed'   => $this->onCheckoutCompleted($event->data->object, $subscription),
+            'invoice.paid'                 => $this->onInvoicePaid($event->data->object, $subscription),
+            'invoice.payment_failed'       => $this->onInvoicePaymentFailed($event->data->object),
+            'customer.subscription.deleted'=> $this->onSubscriptionDeleted($event->data->object),
+            default                        => null,
         };
 
         return response('OK', 200);
@@ -85,5 +90,61 @@ class StripeWebhookController extends Controller
         }
 
         $subscription->renew($tenant);
+    }
+
+    private function onInvoicePaymentFailed(object $invoice): void
+    {
+        $tenantId = $invoice->subscription_details->metadata->tenant_id
+            ?? $invoice->metadata->tenant_id
+            ?? null;
+
+        if (! $tenantId) {
+            return;
+        }
+
+        $tenant = Tenant::find($tenantId);
+
+        if (! $tenant) {
+            return;
+        }
+
+        Log::warning('Stripe invoice payment failed', ['tenant_id' => $tenant->id]);
+
+        try {
+            Mail::to($tenant->email)->send(new PaymentFailed($tenant));
+        } catch (\Throwable $e) {
+            Log::warning('PaymentFailed email could not be sent', [
+                'tenant_id' => $tenant->id,
+                'error'     => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function onSubscriptionDeleted(object $subscription): void
+    {
+        $tenantId = $subscription->metadata->tenant_id ?? null;
+
+        if (! $tenantId) {
+            return;
+        }
+
+        $tenant = Tenant::find($tenantId);
+
+        if (! $tenant) {
+            return;
+        }
+
+        $tenant->update(['subscription_status' => 'cancelled']);
+
+        Log::info('Stripe subscription deleted — tenant marked cancelled', ['tenant_id' => $tenant->id]);
+
+        try {
+            Mail::to($tenant->email)->send(new SubscriptionCancelled($tenant));
+        } catch (\Throwable $e) {
+            Log::warning('SubscriptionCancelled email could not be sent', [
+                'tenant_id' => $tenant->id,
+                'error'     => $e->getMessage(),
+            ]);
+        }
     }
 }
