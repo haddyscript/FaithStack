@@ -11,7 +11,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    @php $br = $tenant->getBranding(); @endphp
+    @php
+        $br            = $tenant->getBranding();
+        $isOnTrial     = $tenant->subscription_status === 'trial';
+        $isActive      = $tenant->subscription_status === 'active';
+        $planName      = optional($tenant->plan)->name ?? ($isOnTrial ? 'Free Trial' : 'Starter');
+        $trialDaysLeft = null;
+        if ($isOnTrial && $tenant->subscription_ends_at) {
+            $trialDaysLeft = max(0, (int) now()->diffInDays($tenant->subscription_ends_at, false));
+        }
+        $trialUrgent = $isOnTrial && $trialDaysLeft !== null && $trialDaysLeft <= 6;
+    @endphp
     <style>
         :root {
             --sb-bg:    {{ $br['sidebar_bg'] }};
@@ -110,6 +120,50 @@
             </div>
         </div>
 
+        {{-- ── Plan badge ── --}}
+        <div class="px-3 py-2.5 border-b border-white/10 flex-shrink-0">
+            @if($isOnTrial)
+            <a href="{{ route('admin.billing') }}"
+               class="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-amber-400/15 border border-amber-400/25 hover:bg-amber-400/25 transition-all duration-200 group"
+               :class="sidebarOpen ? '' : 'justify-center'">
+                <span class="text-[15px] flex-shrink-0" title="Free Trial">⚡</span>
+                <div class="min-w-0 transition-all duration-200" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'">
+                    <p class="text-[11px] font-bold text-amber-300 leading-tight">Free Trial</p>
+                    @if($trialDaysLeft !== null)
+                    <p class="text-[10px] leading-tight {{ $trialUrgent ? 'text-red-300' : 'text-amber-400/70' }}">
+                        {{ $trialDaysLeft }} day{{ $trialDaysLeft !== 1 ? 's' : '' }} left
+                    </p>
+                    @endif
+                </div>
+                <svg class="w-3 h-3 text-amber-400/50 ml-auto flex-shrink-0 group-hover:translate-x-0.5 transition-transform duration-150"
+                     :class="sidebarOpen ? 'block' : 'hidden'"
+                     fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+            @elseif($isActive)
+            <a href="{{ route('admin.billing') }}"
+               class="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-indigo-500/15 border border-indigo-400/20 hover:bg-indigo-500/25 transition-all duration-200"
+               :class="sidebarOpen ? '' : 'justify-center'">
+                <span class="text-[15px] flex-shrink-0" title="{{ $planName }}">💎</span>
+                <div class="min-w-0 transition-all duration-200" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'">
+                    <p class="text-[11px] font-bold text-indigo-300 leading-tight">{{ $planName }}</p>
+                    <p class="text-[10px] text-indigo-400/60 leading-tight">Active</p>
+                </div>
+            </a>
+            @else
+            <a href="{{ route('admin.billing') }}"
+               class="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-red-500/15 border border-red-400/25 hover:bg-red-500/25 transition-all duration-200"
+               :class="sidebarOpen ? '' : 'justify-center'">
+                <span class="text-[15px] flex-shrink-0">⚠️</span>
+                <div class="min-w-0 transition-all duration-200" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'">
+                    <p class="text-[11px] font-bold text-red-300 leading-tight">Subscription Expired</p>
+                    <p class="text-[10px] text-red-400/60 leading-tight">Renew to restore access</p>
+                </div>
+            </a>
+            @endif
+        </div>
+
         {{-- Navigation --}}
         <nav class="flex-1 px-2 py-3 overflow-y-auto space-y-0.5">
 
@@ -179,6 +233,13 @@
                 icon="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"
             />
 
+            <x-nav-item
+                href="{{ route('admin.billing') }}"
+                label="Plan & Billing"
+                :active="request()->routeIs('admin.billing')"
+                icon="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+            />
+
         </nav>
 
         {{-- View site --}}
@@ -242,6 +303,27 @@
             </div>
         </div>
 
+        {{-- Mobile plan badge --}}
+        <div class="px-3 py-2.5 border-b border-white/10">
+            @if($isOnTrial)
+            <a href="{{ route('admin.billing') }}"
+               class="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-400/15 border border-amber-400/25">
+                <span class="text-sm">⚡</span>
+                <div>
+                    <p class="text-[11px] font-bold text-amber-300 leading-tight">Free Trial</p>
+                    @if($trialDaysLeft !== null)
+                    <p class="text-[10px] {{ $trialUrgent ? 'text-red-300' : 'text-amber-400/70' }} leading-tight">{{ $trialDaysLeft }} day{{ $trialDaysLeft !== 1 ? 's' : '' }} left — Upgrade</p>
+                    @endif
+                </div>
+            </a>
+            @elseif($isActive)
+            <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/15 border border-indigo-400/20">
+                <span class="text-sm">💎</span>
+                <p class="text-[11px] font-bold text-indigo-300">{{ $planName }} — Active</p>
+            </div>
+            @endif
+        </div>
+
         <nav class="flex-1 px-2 py-3 space-y-0.5" x-data="{ sidebarOpen: true }">
             <p class="px-3 pb-1 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Overview</p>
             <x-nav-item href="{{ route('admin.dashboard') }}" label="Dashboard" :active="request()->routeIs('admin.dashboard')" icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -253,6 +335,7 @@
             <x-nav-item href="{{ route('admin.donations.index') }}" label="Donations" :active="request()->routeIs('admin.donations.*')" icon="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
             <p class="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Account</p>
             <x-nav-item href="{{ route('admin.settings') }}" label="Settings" :active="request()->routeIs('admin.settings')" icon="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <x-nav-item href="{{ route('admin.billing') }}" label="Plan & Billing" :active="request()->routeIs('admin.billing')" icon="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
         </nav>
 
         <div class="px-2 py-3 border-t border-white/10" x-data="{ sidebarOpen: true }">
@@ -394,6 +477,13 @@
                             <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             Settings
                         </a>
+                        @if($isOnTrial)
+                        <a href="{{ route('admin.billing') }}" @click="open = false"
+                           class="flex items-center gap-2 px-4 py-2.5 text-sm text-amber-600 hover:bg-amber-50 transition-colors font-semibold">
+                            <span class="text-sm">⚡</span>
+                            Upgrade Plan
+                        </a>
+                        @endif
                         <div class="border-t border-slate-50 my-1"></div>
                         <form method="POST" action="{{ route('admin.logout') }}">
                             @csrf
@@ -407,6 +497,32 @@
 
             </div>
         </header>
+
+        {{-- ── Trial urgency banner ── --}}
+        @if($isOnTrial)
+        <div class="flex-shrink-0 {{ $trialUrgent
+            ? 'bg-gradient-to-r from-orange-500 via-red-500 to-rose-500'
+            : 'bg-gradient-to-r from-amber-500 via-amber-400 to-orange-400' }}">
+            <div class="flex items-center gap-3 px-4 lg:px-5 py-2.5 max-w-7xl">
+                <span class="text-base flex-shrink-0">{{ $trialUrgent ? '🔥' : '⚡' }}</span>
+                <p class="text-white text-sm font-medium flex-1 min-w-0 leading-snug">
+                    @if($trialUrgent)
+                        <span class="font-bold">Your trial ends in {{ $trialDaysLeft }} day{{ $trialDaysLeft !== 1 ? 's' : '' }}.</span>
+                        Upgrade now to keep your website active and features intact.
+                    @else
+                        You're on the Free Trial.
+                        Upgrade to Pro to unlock custom branding, more pages, and priority support.
+                    @endif
+                </p>
+                <a href="{{ route('admin.billing') }}"
+                   class="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02] whitespace-nowrap
+                          {{ $trialUrgent ? 'text-red-600 hover:bg-red-50' : 'text-amber-700 hover:bg-amber-50' }}">
+                    {{ $trialUrgent ? 'Upgrade Now' : 'View Plans' }}
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+        @endif
 
         {{-- Flash --}}
         @if(session('success'))

@@ -103,6 +103,8 @@ Route::middleware(['tenant'])->group(function () {
             Route::get('/settings', [Admin\SettingsController::class, 'index'])->name('settings');
             Route::put('/settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
 
+            Route::get('/billing', [Admin\BillingController::class, 'index'])->name('billing');
+
             // Donations (read-only in admin)
             Route::get('/donations', [Admin\DonationController::class, 'index'])->name('donations.index');
         });
