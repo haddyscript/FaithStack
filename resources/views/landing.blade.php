@@ -62,6 +62,121 @@
                 close()     { this.active = null;  document.body.style.overflow = ''; },
             }));
 
+            // Interactive Build Preview
+            Alpine.data('buildPreview', () => ({
+                theme: 'dark',
+                type:  'church',
+                animating: false,
+                presets: {
+                    church: {
+                        headline: 'Welcome to Grace Community',
+                        sub:      'Growing together in faith and love',
+                        cta:      'Join Us Sunday',
+                        badge:    '⛪ Faith & Community',
+                        nav:      ['Grace Church', 'Sermons', 'Events', 'Give'],
+                        features: [{ icon: '📖', label: 'Sermons' }, { icon: '📅', label: 'Events' }, { icon: '💝', label: 'Online Giving' }],
+                    },
+                    business: {
+                        headline: 'Scale Your Business Today',
+                        sub:      'Enterprise tools that actually work',
+                        cta:      'Get Started Free',
+                        badge:    '🚀 Built for Growth',
+                        nav:      ['AcmeCorp', 'Solutions', 'Pricing', 'Contact'],
+                        features: [{ icon: '📊', label: 'Analytics' }, { icon: '🔗', label: 'Integrations' }, { icon: '🛡️', label: 'Security' }],
+                    },
+                    portfolio: {
+                        headline: 'Creative Work That Speaks',
+                        sub:      'Designs and ideas that leave marks',
+                        cta:      'View My Work',
+                        badge:    '✨ Portfolio & Agency',
+                        nav:      ['Studio', 'Work', 'About', 'Hire Me'],
+                        features: [{ icon: '🎨', label: 'Gallery' }, { icon: '💼', label: 'Case Studies' }, { icon: '📬', label: 'Contact' }],
+                    },
+                },
+                styles: {
+                    dark:    { bg: '#09090b', surface: '#18181b', accent: '#6366f1', text: '#ffffff',  muted: 'rgba(255,255,255,0.45)', border: 'rgba(255,255,255,0.07)' },
+                    light:   { bg: '#f8fafc', surface: '#ffffff',  accent: '#4f46e5', text: '#0f172a', muted: '#64748b',               border: 'rgba(0,0,0,0.07)' },
+                    minimal: { bg: '#ffffff',  surface: '#f1f5f9',  accent: '#111827', text: '#111827', muted: '#9ca3af',               border: 'rgba(0,0,0,0.06)' },
+                },
+                get currentPreset() { return this.presets[this.type]; },
+                get currentStyle()  { return this.styles[this.theme]; },
+                setTheme(t) {
+                    if (this.theme === t) return;
+                    this.animating = true;
+                    setTimeout(() => { this.theme = t; this.animating = false; }, 180);
+                },
+                setType(t) {
+                    if (this.type === t) return;
+                    this.animating = true;
+                    setTimeout(() => { this.type = t; this.animating = false; }, 180);
+                },
+            }));
+
+            // CMS Demo
+            Alpine.data('cmsDemo', () => ({
+                activePage:    'home',
+                activeSection: 'hero',
+                saving:        false,
+                pages: [
+                    { id: 'home',    label: 'Home',    icon: '🏠' },
+                    { id: 'about',   label: 'About',   icon: '👥' },
+                    { id: 'sermons', label: 'Sermons', icon: '📖' },
+                    { id: 'give',    label: 'Give',    icon: '💝' },
+                    { id: 'contact', label: 'Contact', icon: '✉️' },
+                ],
+                sections: {
+                    home:    ['Hero', 'Features', 'Testimonials', 'CTA'],
+                    about:   ['Team', 'Mission', 'History'],
+                    sermons: ['Latest', 'Series', 'Archive'],
+                    give:    ['Online Giving', 'Causes', 'Impact'],
+                    contact: ['Form', 'Map', 'Info'],
+                },
+                get currentSections() { return this.sections[this.activePage] || []; },
+                selectPage(id) {
+                    this.activePage    = id;
+                    this.activeSection = (this.sections[id]?.[0] || 'hero').toLowerCase();
+                    this.triggerSave();
+                },
+                selectSection(s) {
+                    this.activeSection = s.toLowerCase();
+                    this.triggerSave();
+                },
+                triggerSave() {
+                    this.saving = true;
+                    setTimeout(() => { this.saving = false; }, 1300);
+                },
+            }));
+
+            // Sticky Context-Aware CTA
+            Alpine.data('stickyCta', () => ({
+                text:     'Start Free Trial',
+                visible:  false,
+                changing: false,
+                sectionMap: {
+                    'features':     'Explore Features',
+                    'themes':       'Explore Themes',
+                    'build-preview':'Try It Free',
+                    'cms-demo':     'See All Features',
+                    'how-it-works': 'Start Building',
+                    'pricing':      'View Pricing',
+                    'testimonials': 'Join 500+ Organizations',
+                },
+                init() {
+                    const hero = document.querySelector('[data-cursor-glow]');
+                    if (hero) new IntersectionObserver(([e]) => { this.visible = !e.isIntersecting; }, { threshold: 0.15 }).observe(hero);
+                    Object.keys(this.sectionMap).forEach(id => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        new IntersectionObserver(([e]) => { if (e.isIntersecting) this.updateText(this.sectionMap[id]); }, { threshold: 0.35 }).observe(el);
+                    });
+                },
+                updateText(txt) {
+                    if (this.text === txt) return;
+                    this.changing = true;
+                    setTimeout(() => { this.text = txt; this.changing = false; }, 180);
+                },
+            }));
+
         });
     </script>
 
@@ -224,9 +339,55 @@
         /* ── Modal ── */
         [x-cloak] { display: none !important; }
 
+        /* ── Activity ticker ── */
+        @keyframes tickerScroll { to { transform: translateX(-50%); } }
+        .ticker-track { animation: tickerScroll 38s linear infinite; }
+        .ticker-wrap:hover .ticker-track { animation-play-state: paused; }
+
+        /* ── Icon pop (more dramatic than the simple scale/rotate) ── */
+        @keyframes iconPop {
+            0%   { transform: scale(1)    rotate(0deg);  }
+            35%  { transform: scale(1.3)  rotate(15deg); }
+            65%  { transform: scale(0.95) rotate(-5deg); }
+            100% { transform: scale(1.18) rotate(7deg);  }
+        }
+        .feature-card:hover .feature-icon { animation: iconPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+        /* ── Spring button ── */
+        .btn-spring { transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+        .btn-spring:hover  { transform: scale(1.05) translateY(-1px) !important; }
+        .btn-spring:active { transform: scale(0.96) translateY(1px)  !important; transition-duration: 0.08s; }
+
+        /* ── Skeleton shimmer ── */
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position:  200% 0; }
+        }
+        .skeleton      { background: linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%); background-size:200% 100%; animation: shimmer 1.8s ease-in-out infinite; border-radius:6px; }
+        .skeleton-dark { background: linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.09) 50%,rgba(255,255,255,0.04) 75%); background-size:200% 100%; animation: shimmer 1.8s ease-in-out infinite; border-radius:6px; }
+
+        /* ── CMS sidebar item hover nudge ── */
+        .cms-sidebar-item { transition: all 0.18s cubic-bezier(0.16,1,0.3,1); }
+        .cms-sidebar-item:hover { transform: translateX(2px); }
+
+        /* ── Build preview browser transition ── */
+        .bp-content { transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16,1,0.3,1); }
+        .bp-content.animating { opacity: 0.4; transform: scale(0.99); }
+
+        /* ── Parallax layers ── */
+        [data-parallax] { will-change: transform; }
+
+        /* ── Floating accent chips (hero foreground) ── */
+        @keyframes floatChip {
+            0%,100% { transform: translateY(0) rotate(var(--rot,0deg)); }
+            50%     { transform: translateY(-8px) rotate(var(--rot,0deg)); }
+        }
+        .float-chip { animation: floatChip var(--dur,6s) ease-in-out infinite; will-change: transform; }
+
         /* ── Reduce motion ── */
         @media (prefers-reduced-motion: reduce) {
-            .reveal, .word-reveal, .blob, .mockup-float, .grad-animate, .pulse-glow, .magnetic {
+            .reveal, .word-reveal, .blob, .mockup-float, .grad-animate, .pulse-glow, .magnetic,
+            .ticker-track, .float-chip, .btn-spring {
                 animation: none !important; transition: none !important;
                 opacity: 1 !important; transform: none !important;
             }
@@ -235,6 +396,7 @@
         @media (pointer: coarse) {
             .mockup-float { animation-duration: 8s; }
             .blob { animation-duration: 30s; }
+            .ticker-track { animation-duration: 55s; }
         }
     </style>
 </head>
@@ -247,17 +409,63 @@
     <div class="section-sep"></div>
     <x-landing.themes :themes="$themes" />
     <div class="section-sep"></div>
+    <x-landing.build-preview />
+    <div class="section-sep"></div>
+    <x-landing.cms-demo />
+    <div class="section-sep"></div>
     <x-landing.how-it-works :steps="$steps" />
     <div class="section-sep"></div>
     <x-landing.pricing :plans="$plans" />
     <div class="section-sep"></div>
     <x-landing.testimonials :testimonials="$testimonials" />
+    <x-landing.activity-ticker />
     <x-landing.final-cta />
     <x-landing.footer />
+
+    {{-- Sticky context-aware CTA (desktop only) --}}
+    <div x-data="stickyCta"
+         x-show="visible"
+         x-cloak
+         x-transition:enter="transition ease-out duration-400"
+         x-transition:enter-start="opacity-0 translate-y-3 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-end="opacity-0 translate-y-3 scale-95"
+         class="hidden md:block fixed bottom-6 right-6 z-40">
+        <a href="/superadmin/login"
+           class="ripple-btn btn-spring flex items-center gap-3 pl-5 pr-4 py-3.5 rounded-2xl bg-[#09090b] text-white shadow-2xl shadow-black/50 border border-white/[0.08] no-underline">
+            <span class="relative flex h-2 w-2 flex-shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+            <span class="text-sm font-semibold min-w-[120px] text-center"
+                  :class="changing ? 'opacity-0 -translate-y-1' : 'opacity-100 translate-y-0'"
+                  style="transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.16,1,0.3,1)"
+                  x-text="text"></span>
+            <svg class="w-4 h-4 flex-shrink-0 text-white/50" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+    </div>
 
     <script>
     (() => {
         const isMobile = window.matchMedia('(pointer: coarse)').matches;
+
+        // ── Parallax layers ────────────────────────────────────────────────
+        if (!isMobile) {
+            const parallaxEls = document.querySelectorAll('[data-parallax]');
+            if (parallaxEls.length) {
+                window.addEventListener('scroll', () => {
+                    requestAnimationFrame(() => {
+                        const sy = window.scrollY;
+                        parallaxEls.forEach(el => {
+                            const speed  = parseFloat(el.dataset.parallax) || 0.15;
+                            const offset = sy * speed;
+                            el.style.transform = `translateY(${offset}px)`;
+                        });
+                    });
+                }, { passive: true });
+            }
+        }
 
         // ── Scroll state ───────────────────────────────────────────────────
         let raf = false, lastScrollY = window.scrollY;
