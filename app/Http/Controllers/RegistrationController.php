@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,30 @@ class RegistrationController extends Controller
         'static', 'cdn', 'assets', 'media', 'support', 'help', 'docs',
         'status', 'staging', 'dev', 'test', 'demo', 'billing',
     ];
+
+    public function checkSubdomain(Request $request): JsonResponse
+    {
+        $subdomain = strtolower(trim($request->query('subdomain', '')));
+
+        if (strlen($subdomain) < 2) {
+            return response()->json(['available' => false, 'message' => 'Too short']);
+        }
+
+        if (in_array($subdomain, self::RESERVED_SUBDOMAINS)) {
+            return response()->json(['available' => false, 'message' => 'Reserved name']);
+        }
+
+        if (!preg_match('/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/', $subdomain)) {
+            return response()->json(['available' => false, 'message' => 'Invalid format']);
+        }
+
+        $taken = \App\Models\Tenant::where('subdomain', $subdomain)->exists();
+
+        return response()->json([
+            'available' => !$taken,
+            'message'   => $taken ? 'Already taken' : 'Available',
+        ]);
+    }
 
     public function show(Request $request): View
     {

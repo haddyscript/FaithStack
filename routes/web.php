@@ -17,8 +17,9 @@ Route::domain(config('app.base_domain', 'faithstack.test'))->group(function () {
     Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
     // Public self-serve registration
-    Route::get('/register',  [RegistrationController::class, 'show'])->name('register');
-    Route::post('/register', [RegistrationController::class, 'store'])->name('register.store');
+    Route::get('/register',                   [RegistrationController::class, 'show'])->name('register');
+    Route::post('/register',                  [RegistrationController::class, 'store'])->name('register.store');
+    Route::get('/register/check-subdomain',   [RegistrationController::class, 'checkSubdomain'])->name('register.check-subdomain');
 });
 
 /*
