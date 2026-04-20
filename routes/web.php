@@ -6,6 +6,7 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\Webhook;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,10 @@ Route::domain(config('app.base_domain', 'faithstack.test'))->group(function () {
     Route::get('/register',                   [RegistrationController::class, 'show'])->name('register');
     Route::post('/register',                  [RegistrationController::class, 'store'])->name('register.store');
     Route::get('/register/check-subdomain',   [RegistrationController::class, 'checkSubdomain'])->name('register.check-subdomain');
+
+    // Payment webhooks — no CSRF, no auth, no tenant context
+    Route::post('/webhooks/stripe', [Webhook\StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
+    Route::post('/webhooks/paypal', [Webhook\PayPalWebhookController::class, 'handle'])->name('webhooks.paypal');
 });
 
 /*
@@ -104,6 +109,14 @@ Route::middleware(['tenant'])->group(function () {
             Route::put('/settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
 
             Route::get('/billing', [Admin\BillingController::class, 'index'])->name('billing');
+
+            // Checkout
+            Route::post('/billing/upgrade',           [Admin\CheckoutController::class, 'upgrade'])->name('billing.upgrade');
+            Route::get('/billing/stripe/success',     [Admin\CheckoutController::class, 'stripeSuccess'])->name('billing.stripe.success');
+            Route::get('/billing/paypal/capture',     [Admin\CheckoutController::class, 'paypalCapture'])->name('billing.paypal.capture');
+            Route::get('/billing/cancel',             [Admin\CheckoutController::class, 'cancel'])->name('billing.cancel');
+            Route::post('/billing/stripe/intent',     [Admin\CheckoutController::class, 'createIntent'])->name('billing.stripe.intent');
+            Route::post('/billing/stripe/confirm',    [Admin\CheckoutController::class, 'confirmPayment'])->name('billing.stripe.confirm');
 
             // Donations (read-only in admin)
             Route::get('/donations', [Admin\DonationController::class, 'index'])->name('donations.index');

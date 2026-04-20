@@ -12,6 +12,345 @@
     $urgent = $isOnTrial && $trialDaysLeft !== null && $trialDaysLeft <= 6;
 @endphp
 
+{{-- Stripe.js --}}
+<script src="https://js.stripe.com/v3/"></script>
+
+<style>
+@keyframes btn-shimmer { to { background-position: 200% center; } }
+.btn-shimmer { background: linear-gradient(90deg,#4338ca,#6d28d9,#a78bfa,#6d28d9,#4338ca); background-size:250% auto; animation:btn-shimmer 1.8s linear infinite; }
+@keyframes modal-shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-10px)} 30%{transform:translateX(10px)} 45%{transform:translateX(-7px)} 60%{transform:translateX(7px)} 75%{transform:translateX(-4px)} 90%{transform:translateX(4px)} }
+.modal-shake { animation:modal-shake .45s ease-in-out; }
+@keyframes stroke-draw { 100%{stroke-dashoffset:0} }
+@keyframes pop-scale   { 0%,100%{transform:none} 50%{transform:scale3d(1.08,1.08,1)} }
+.cm-circle { stroke-dasharray:166; stroke-dashoffset:166; animation:stroke-draw .55s cubic-bezier(.65,0,.45,1) .1s forwards; }
+.cm-check  { stroke-dasharray:48;  stroke-dashoffset:48;  animation:stroke-draw .3s  cubic-bezier(.65,0,.45,1) .7s  forwards; }
+.cm-svg    { animation:pop-scale .3s ease-in-out 1s both; }
+.stripe-wrap:focus-within { box-shadow:0 0 0 3px rgba(99,102,241,.15); border-color:#818cf8 !important; }
+@keyframes pp-dot { 0%,80%,100%{transform:scale(0);opacity:.3} 40%{transform:scale(1);opacity:1} }
+.pp-dot:nth-child(1){animation:pp-dot 1.3s ease-in-out 0s   infinite}
+.pp-dot:nth-child(2){animation:pp-dot 1.3s ease-in-out .2s  infinite}
+.pp-dot:nth-child(3){animation:pp-dot 1.3s ease-in-out .4s  infinite}
+</style>
+
+{{-- ── Premium checkout modal ── --}}
+<div x-data="checkoutModal()" x-cloak
+     @open-checkout.window="openFor($event.detail.slug, $event.detail.name, $event.detail.price)">
+
+    {{-- Backdrop --}}
+    <div x-show="open"
+         x-transition:enter="transition duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         @click="close()"
+         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
+
+    {{-- Modal panel --}}
+    <div x-show="open"
+         x-transition:enter="transition duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-2" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+         @keydown.escape.window="close()"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl pointer-events-auto overflow-hidden" @click.stop>
+
+            {{-- Header --}}
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-700 p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        {{-- Step breadcrumb --}}
+                        <div class="flex items-center gap-1.5 mb-2" x-show="step === 'card'">
+                            <button @click="step = 'select'" class="text-indigo-200 hover:text-white text-xs flex items-center gap-1 transition-colors">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                                Back
+                            </button>
+                            <span class="text-indigo-300 text-xs">/ Card Details</span>
+                        </div>
+                        <p class="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1" x-show="step !== 'success'">Upgrading to</p>
+                        <h2 class="text-white text-xl font-bold" x-text="step === 'success' ? '🎉 You\'re all set!' : selectedPlanName"></h2>
+                        <p class="text-indigo-200 text-sm mt-1" x-show="step !== 'success'">
+                            $<span x-text="selectedPlanPrice"></span>/month — billed monthly
+                        </p>
+                    </div>
+                    <button @click="close()" class="text-white/60 hover:text-white ml-4 flex-shrink-0 mt-0.5" :disabled="loading">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            {{-- ── Step: select payment method ── --}}
+            <div x-show="step === 'select'" class="p-6">
+                <p class="text-slate-700 font-semibold text-sm mb-4">Choose your payment method</p>
+                <div class="space-y-3">
+                    {{-- Card --}}
+                    <button @click="goToCard()"
+                            class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 transition-all duration-200 group text-left">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-slate-800 font-semibold text-sm">Pay with Card</p>
+                            <p class="text-slate-500 text-xs mt-0.5">Visa, Mastercard, Amex — powered by Stripe</p>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                        </svg>
+                    </button>
+
+                    {{-- PayPal --}}
+                    <form method="POST" action="{{ route('admin.billing.upgrade') }}" @submit="loading = true">
+                        @csrf
+                        <input type="hidden" name="plan_slug" :value="selectedPlanSlug">
+                        <input type="hidden" name="provider" value="paypal">
+                        <button type="submit"
+                                class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 transition-all duration-200 group text-left"
+                                :disabled="loading" :class="loading ? 'opacity-60 cursor-not-allowed' : ''">
+                            <div class="w-10 h-10 rounded-lg bg-[#003087] flex items-center justify-center flex-shrink-0">
+                                <span class="text-white font-bold text-sm tracking-tight">PP</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-slate-800 font-semibold text-sm">Pay with PayPal</p>
+                                <p class="text-slate-500 text-xs mt-0.5">Use your PayPal balance or linked account</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <svg x-show="!loading" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                                </svg>
+                                <svg x-show="loading" class="w-4 h-4 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+                <p class="mt-4 text-center text-xs text-slate-400">🔒 Secure checkout — cancel anytime — no hidden fees</p>
+            </div>
+
+            {{-- ── Step: card details ── --}}
+            <div x-show="step === 'card'" class="p-6" x-ref="cardStep">
+                <div class="space-y-4">
+                    {{-- Cardholder name --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Cardholder Name</label>
+                        <input type="text" x-model="cardName" placeholder="Jane Smith"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm text-slate-800 transition-all"
+                               :class="cardNameError ? 'border-red-400 bg-red-50' : ''">
+                        <p x-show="cardNameError" x-text="cardNameError" class="text-red-600 text-xs mt-1 font-medium"></p>
+                    </div>
+
+                    {{-- Email --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Email</label>
+                        <input type="email" x-model="cardEmail" placeholder="you@example.com"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm text-slate-800 transition-all">
+                    </div>
+
+                    {{-- Stripe card element --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Card Details</label>
+                        <div id="stripe-card-element"
+                             class="px-3.5 py-3 rounded-xl border border-slate-200 bg-white transition-all"
+                             :class="cardElementError ? 'border-red-400 bg-red-50' : 'focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100'">
+                        </div>
+                        <p x-show="cardElementError" x-text="cardElementError" class="text-red-600 text-xs mt-1 font-medium"></p>
+                    </div>
+
+                    {{-- General error --}}
+                    <div x-show="payError" class="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+                        <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <p x-text="payError" class="text-red-700 text-sm"></p>
+                    </div>
+
+                    {{-- Pay button --}}
+                    <button @click="submitCard()"
+                            :disabled="loading"
+                            :class="loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-indigo-500 hover:-translate-y-0.5'"
+                            class="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/25 transition-all duration-200">
+                        <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                        </svg>
+                        <span x-text="loading ? 'Processing...' : 'Pay $' + selectedPlanPrice + '/month'"></span>
+                    </button>
+
+                    <p class="text-center text-xs text-slate-400">
+                        Your card is charged $<span x-text="selectedPlanPrice"></span> today. Cancel anytime.
+                    </p>
+                </div>
+            </div>
+
+            {{-- ── Step: success ── --}}
+            <div x-show="step === 'success'" class="p-8 text-center">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="text-slate-900 font-bold text-lg mb-1" x-text="successMessage"></h3>
+                <p class="text-slate-500 text-sm mb-6">A confirmation email is on its way. Redirecting you now…</p>
+                <div class="w-8 h-1 bg-indigo-600 rounded-full mx-auto animate-pulse"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function checkoutModal() {
+    return {
+        open: false,
+        step: 'select',   // 'select' | 'card' | 'success'
+        loading: false,
+        selectedPlanSlug:  '',
+        selectedPlanName:  '',
+        selectedPlanPrice: '',
+        cardName:       '',
+        cardEmail:      '{{ $tenant->email ?? '' }}',
+        cardNameError:  '',
+        cardElementError: '',
+        payError:       '',
+        successMessage: '',
+        _stripe: null,
+        _cardElement: null,
+
+        openFor(slug, name, price) {
+            this.selectedPlanSlug  = slug;
+            this.selectedPlanName  = name;
+            this.selectedPlanPrice = price;
+            this.step    = 'select';
+            this.loading = false;
+            this.payError = '';
+            this.cardNameError = '';
+            this.cardElementError = '';
+            this.open    = true;
+        },
+
+        close() {
+            if (this.loading) return;
+            this.open = false;
+        },
+
+        goToCard() {
+            this.step = 'card';
+            this.$nextTick(() => this._mountCard());
+        },
+
+        _mountCard() {
+            if (this._stripe) return; // already mounted
+            this._stripe = Stripe('{{ config('services.stripe.key') }}');
+            const elements = this._stripe.elements();
+            this._cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '14px',
+                        color: '#1e293b',
+                        fontFamily: 'Inter, Helvetica Neue, Arial, sans-serif',
+                        '::placeholder': { color: '#94a3b8' },
+                    },
+                    invalid: { color: '#dc2626' },
+                },
+                hidePostalCode: false,
+            });
+            this._cardElement.mount('#stripe-card-element');
+            this._cardElement.on('change', (e) => {
+                this.cardElementError = e.error ? e.error.message : '';
+            });
+        },
+
+        async submitCard() {
+            this.cardNameError   = '';
+            this.cardElementError = '';
+            this.payError        = '';
+
+            if (!this.cardName.trim()) {
+                this.cardNameError = 'Cardholder name is required';
+                return;
+            }
+
+            this.loading = true;
+
+            try {
+                // 1. Get PaymentIntent client_secret from server
+                const intentRes = await fetch('{{ route('admin.billing.stripe.intent') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ plan_slug: this.selectedPlanSlug }),
+                });
+                const intentData = await intentRes.json();
+                if (!intentRes.ok) {
+                    this.payError = intentData.error || 'Could not initiate payment.';
+                    this.loading = false;
+                    return;
+                }
+
+                // 2. Confirm card payment client-side via Stripe.js
+                const { paymentIntent, error } = await this._stripe.confirmCardPayment(
+                    intentData.client_secret,
+                    {
+                        payment_method: {
+                            card: this._cardElement,
+                            billing_details: {
+                                name:  this.cardName,
+                                email: this.cardEmail,
+                            },
+                        },
+                    }
+                );
+
+                if (error) {
+                    this.payError = error.message;
+                    this.loading = false;
+                    return;
+                }
+
+                // 3. Notify server to activate subscription
+                const confirmRes = await fetch('{{ route('admin.billing.stripe.confirm') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        payment_intent_id: paymentIntent.id,
+                        plan_slug:         this.selectedPlanSlug,
+                    }),
+                });
+                const confirmData = await confirmRes.json();
+
+                if (!confirmRes.ok) {
+                    this.payError = confirmData.error || 'Payment succeeded but activation failed. Contact support.';
+                    this.loading = false;
+                    return;
+                }
+
+                // 4. Show success then redirect
+                this.successMessage = confirmData.message;
+                this.step    = 'success';
+                this.loading = false;
+                setTimeout(() => { window.location.href = confirmData.redirect; }, 2500);
+
+            } catch (err) {
+                this.payError = 'An unexpected error occurred. Please try again.';
+                this.loading = false;
+            }
+        },
+    };
+}
+</script>
+
 {{-- ── Trial countdown card (only on trial) ── --}}
 @if($isOnTrial)
 <div class="mb-6 relative overflow-hidden rounded-2xl p-6 {{ $urgent
@@ -124,11 +463,11 @@
 
             @if($isOnTrial)
             <div class="flex-shrink-0">
-                <a href="#upgrade"
-                   class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition-all duration-200 hover:-translate-y-0.5">
+                <button @click="$dispatch('open-checkout', { slug: '{{ optional($plans->firstWhere('is_featured', true) ?? $plans->first())->slug }}', name: '{{ optional($plans->firstWhere('is_featured', true) ?? $plans->first())->name }}', price: '{{ number_format((float)(optional($plans->firstWhere('is_featured', true) ?? $plans->first())->price_monthly), 2) }}' })"
+                        class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition-all duration-200 hover:-translate-y-0.5">
                     <span>⚡</span> Upgrade Now
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                </a>
+                </button>
             </div>
             @endif
         </div>
@@ -229,14 +568,13 @@
                     Contact Support
                 </a>
                 @else
-                {{-- Upgrade CTA — links to public register as placeholder; replace with Stripe checkout --}}
-                <a href="{{ url('/register') }}?plan={{ $plan->slug }}&existing_tenant={{ $tenant->subdomain }}"
-                   class="block text-center py-2.5 px-4 rounded-xl text-sm font-semibold mb-5 transition-all duration-200 hover:-translate-y-0.5
-                          {{ $isFeatured
-                              ? 'bg-white text-indigo-700 hover:bg-indigo-50 shadow-lg'
-                              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20' }}">
+                <button @click="$dispatch('open-checkout', { slug: '{{ $plan->slug }}', name: '{{ addslashes($plan->name) }}', price: '{{ number_format((float)$plan->price_monthly, 2) }}' })"
+                        class="block w-full text-center py-2.5 px-4 rounded-xl text-sm font-semibold mb-5 transition-all duration-200 hover:-translate-y-0.5
+                               {{ $isFeatured
+                                   ? 'bg-white text-indigo-700 hover:bg-indigo-50 shadow-lg'
+                                   : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20' }}">
                     {{ $plan->cta_label ?? 'Upgrade to ' . $plan->name }}
-                </a>
+                </button>
                 @endif
 
                 {{-- Feature list --}}
@@ -278,16 +616,15 @@
 </div>
 @endif
 
-{{-- ── Billing note ── --}}
-<div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
-    <svg class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+{{-- ── Billing support note ── --}}
+<div class="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-3">
+    <svg class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
     </svg>
-    <p class="text-blue-700 text-sm">
-        <strong>Stripe billing coming soon.</strong>
-        Upgrade links currently route to the registration flow.
-        To manually upgrade your plan or for billing questions, email
-        <a href="mailto:hello@faithstack.com" class="font-semibold underline hover:text-blue-900">hello@faithstack.com</a>.
+    <p class="text-slate-500 text-sm">
+        Questions about billing? Email us at
+        <a href="mailto:hello@faithstack.com" class="text-indigo-600 font-semibold hover:underline">hello@faithstack.com</a>
+        — we typically respond within a few hours.
     </p>
 </div>
 

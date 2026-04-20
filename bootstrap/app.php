@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
             'superadmin'   => \App\Http\Middleware\SuperAdminOnly::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/stripe',
+            'webhooks/paypal',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Redirect unauthenticated users to the tenant admin login

@@ -1,3 +1,11 @@
+### Down docker and Build ###
+- docker-compose down -v                             
+- docker-compose up -d --build
+
+### update composer ###
+- docker compose exec app composer install --no-interaction
+
+
 ## -- configure local to create proxy run this
 - sudo nano /etc/hosts
 - paste this ;
@@ -27,3 +35,10 @@ format : http://{tenants->subdomain}.faithstack.test/admin/login
 
 ### Run optimizer and clear cache ###
 - docker compose exec app php artisan optimize:clear
+
+
+### Install Stripe PHP SDK (run once) ###
+- docker compose exec app composer require stripe/stripe-php
+
+### Clear config cache after adding Stripe keys to .env ###
+- docker compose exec app php artisan config:clear
