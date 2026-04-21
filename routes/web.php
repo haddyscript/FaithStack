@@ -22,6 +22,7 @@ Route::domain(config('app.base_domain', 'faithstack.test'))->group(function () {
     Route::post('/register',                  [RegistrationController::class, 'store'])->name('register.store');
     Route::get('/register/check-subdomain',   [RegistrationController::class, 'checkSubdomain'])->name('register.check-subdomain');
     Route::get('/register/setup-intent',      [RegistrationController::class, 'setupIntent'])->name('register.setup-intent');
+    Route::post('/register/validate-account', [RegistrationController::class, 'validateAccount'])->name('register.validate-account');
 
     // Payment webhooks — no CSRF, no auth, no tenant context
     Route::post('/webhooks/stripe', [Webhook\StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
@@ -116,8 +117,9 @@ Route::middleware(['tenant'])->group(function () {
             Route::get('/billing/stripe/success',     [Admin\CheckoutController::class, 'stripeSuccess'])->name('billing.stripe.success');
             Route::get('/billing/paypal/capture',     [Admin\CheckoutController::class, 'paypalCapture'])->name('billing.paypal.capture');
             Route::get('/billing/cancel',             [Admin\CheckoutController::class, 'cancel'])->name('billing.cancel');
-            Route::post('/billing/stripe/intent',     [Admin\CheckoutController::class, 'createIntent'])->name('billing.stripe.intent');
-            Route::post('/billing/stripe/confirm',    [Admin\CheckoutController::class, 'confirmPayment'])->name('billing.stripe.confirm');
+            Route::post('/billing/stripe/intent',        [Admin\CheckoutController::class, 'createIntent'])->name('billing.stripe.intent');
+            Route::post('/billing/stripe/confirm',       [Admin\CheckoutController::class, 'confirmPayment'])->name('billing.stripe.confirm');
+            Route::post('/billing/stripe/upgrade-saved', [Admin\CheckoutController::class, 'upgradeWithSavedCard'])->name('billing.stripe.upgrade-saved');
 
             // Donations (read-only in admin)
             Route::get('/donations', [Admin\DonationController::class, 'index'])->name('donations.index');

@@ -33,8 +33,14 @@ format : http://{tenants->subdomain}.faithstack.test/admin/login
 ### Run seeder with specific ###
 - docker compose exec app php artisan db:seed 
 
+
+
+--------------------------------------------------------------------------------
 ### Run optimizer and clear cache ###
 - docker compose exec app php artisan optimize:clear
+- php artisan route:clear && php artisan config:clear && php artisan view:clear
+--------------------------------------------------------------------------------
+
 
 
 ### Install Stripe PHP SDK (run once) ###

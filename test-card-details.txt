@@ -1,0 +1,14 @@
+✅ Successful Payment
+Card Number: 4242 4242 4242 4242
+Expiry Date: Any future date (e.g., 12/34)
+CVC: Any 3 digits (e.g., 123)
+ZIP: Any (e.g., 1000)
+
+❌ Card Declined
+Card Number: 4000 0000 0000 0002
+🔐 Requires Authentication (3D Secure)
+Card Number: 4000 0025 0000 3155
+💳 Insufficient Funds
+Card Number: 4000 0000 0000 9995
+⚠️ Incorrect CVC
+Card Number: 4000 0000 0000 0127

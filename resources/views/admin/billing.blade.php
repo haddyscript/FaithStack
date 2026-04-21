@@ -33,6 +33,10 @@
 </style>
 
 {{-- ── Premium checkout modal ── --}}
+{{--
+    hasSavedCard: true  → user registered with a card → go straight to 'confirm' step
+    hasSavedCard: false → no saved card → show 'select' step (card or PayPal)
+--}}
 <div x-data="checkoutModal()" x-cloak
      @open-checkout.window="openFor($event.detail.slug, $event.detail.name, $event.detail.price)">
 
@@ -52,25 +56,28 @@
 
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl pointer-events-auto overflow-hidden" @click.stop>
 
-            {{-- Header --}}
+            {{-- ── Header ── --}}
             <div class="bg-gradient-to-r from-indigo-600 to-purple-700 p-6">
                 <div class="flex items-start justify-between">
                     <div>
-                        {{-- Step breadcrumb --}}
+                        {{-- Back breadcrumb (card step only) --}}
                         <div class="flex items-center gap-1.5 mb-2" x-show="step === 'card'">
                             <button @click="step = 'select'" class="text-indigo-200 hover:text-white text-xs flex items-center gap-1 transition-colors">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
                                 Back
                             </button>
-                            <span class="text-indigo-300 text-xs">/ Card Details</span>
+                            <span class="text-indigo-300 text-xs">/ Enter Card</span>
                         </div>
-                        <p class="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1" x-show="step !== 'success'">Upgrading to</p>
-                        <h2 class="text-white text-xl font-bold" x-text="step === 'success' ? '🎉 You\'re all set!' : selectedPlanName"></h2>
+                        <p class="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1"
+                           x-show="step !== 'success'">Upgrading to</p>
+                        <h2 class="text-white text-xl font-bold"
+                            x-text="step === 'success' ? 'You\'re all set!' : selectedPlanName"></h2>
                         <p class="text-indigo-200 text-sm mt-1" x-show="step !== 'success'">
                             $<span x-text="selectedPlanPrice"></span>/month — billed monthly
                         </p>
                     </div>
-                    <button @click="close()" class="text-white/60 hover:text-white ml-4 flex-shrink-0 mt-0.5" :disabled="loading">
+                    <button @click="close()" :disabled="loading"
+                            class="text-white/60 hover:text-white ml-4 flex-shrink-0 mt-0.5 disabled:opacity-40">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -78,10 +85,74 @@
                 </div>
             </div>
 
-            {{-- ── Step: select payment method ── --}}
+            {{-- ════════════════════════════════════════
+                 STEP: confirm (has saved card — primary path)
+            ════════════════════════════════════════ --}}
+            <div x-show="step === 'confirm'" class="p-6">
+
+                {{-- Saved card pill --}}
+                <div class="flex items-center gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl mb-5">
+                    <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4.5 h-4.5 text-white w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-slate-800 font-semibold text-sm">{{ $cardBrand ?? 'Card' }} ending in {{ $cardLast4 ?? '••••' }}</p>
+                        <p class="text-slate-400 text-xs mt-0.5">Saved from registration</p>
+                    </div>
+                    <button @click="step = 'select'"
+                            class="text-xs text-indigo-500 hover:text-indigo-700 font-semibold flex-shrink-0 transition-colors">
+                        Change
+                    </button>
+                </div>
+
+                {{-- What you're paying --}}
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-indigo-900 font-semibold text-sm" x-text="selectedPlanName"></p>
+                            <p class="text-indigo-500 text-xs mt-0.5">Billed monthly · Cancel anytime</p>
+                        </div>
+                        <p class="text-indigo-900 font-bold text-lg">$<span x-text="selectedPlanPrice"></span><span class="text-xs font-normal text-indigo-400">/mo</span></p>
+                    </div>
+                </div>
+
+                {{-- Error --}}
+                <div x-show="payError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+                    <svg class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <p x-text="payError" class="text-red-700 text-sm"></p>
+                </div>
+
+                {{-- Confirm button --}}
+                <button @click="confirmWithSavedCard()"
+                        :disabled="loading"
+                        :class="loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-indigo-500 hover:-translate-y-0.5'"
+                        class="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/25 transition-all duration-200">
+                    <svg x-show="loading" class="w-4 h-4 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    <svg x-show="!loading" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span x-text="loading ? 'Processing…' : 'Confirm Upgrade — $' + selectedPlanPrice + '/mo'"></span>
+                </button>
+
+                <p class="mt-3 text-center text-xs text-slate-400">
+                    You'll be charged $<span x-text="selectedPlanPrice"></span> today. Cancel anytime from this page.
+                </p>
+            </div>
+
+            {{-- ════════════════════════════════════════
+                 STEP: select payment method (no saved card)
+            ════════════════════════════════════════ --}}
             <div x-show="step === 'select'" class="p-6">
                 <p class="text-slate-700 font-semibold text-sm mb-4">Choose your payment method</p>
                 <div class="space-y-3">
+
                     {{-- Card --}}
                     <button @click="goToCard()"
                             class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 transition-all duration-200 group text-left">
@@ -114,25 +185,24 @@
                                 <p class="text-slate-800 font-semibold text-sm">Pay with PayPal</p>
                                 <p class="text-slate-500 text-xs mt-0.5">Use your PayPal balance or linked account</p>
                             </div>
-                            <div class="flex-shrink-0">
-                                <svg x-show="!loading" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-                                </svg>
-                                <svg x-show="loading" class="w-4 h-4 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                            </div>
+                            <svg x-show="!loading" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                            </svg>
+                            <svg x-show="loading" class="w-4 h-4 text-blue-500 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            </svg>
                         </button>
                     </form>
                 </div>
                 <p class="mt-4 text-center text-xs text-slate-400">🔒 Secure checkout — cancel anytime — no hidden fees</p>
             </div>
 
-            {{-- ── Step: card details ── --}}
+            {{-- ════════════════════════════════════════
+                 STEP: card details (new card entry)
+            ════════════════════════════════════════ --}}
             <div x-show="step === 'card'" class="p-6" x-ref="cardStep">
                 <div class="space-y-4">
-                    {{-- Cardholder name --}}
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Cardholder Name</label>
                         <input type="text" x-model="cardName" placeholder="Jane Smith"
@@ -140,33 +210,24 @@
                                :class="cardNameError ? 'border-red-400 bg-red-50' : ''">
                         <p x-show="cardNameError" x-text="cardNameError" class="text-red-600 text-xs mt-1 font-medium"></p>
                     </div>
-
-                    {{-- Email --}}
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Email</label>
                         <input type="email" x-model="cardEmail" placeholder="you@example.com"
                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm text-slate-800 transition-all">
                     </div>
-
-                    {{-- Stripe card element --}}
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Card Details</label>
                         <div id="stripe-card-element"
-                             class="px-3.5 py-3 rounded-xl border border-slate-200 bg-white transition-all"
-                             :class="cardElementError ? 'border-red-400 bg-red-50' : 'focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100'">
-                        </div>
+                             class="px-3.5 py-3 rounded-xl border border-slate-200 bg-white transition-all stripe-wrap"
+                             :class="cardElementError ? 'border-red-400 bg-red-50' : ''"></div>
                         <p x-show="cardElementError" x-text="cardElementError" class="text-red-600 text-xs mt-1 font-medium"></p>
                     </div>
-
-                    {{-- General error --}}
                     <div x-show="payError" class="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
                         <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                         </svg>
                         <p x-text="payError" class="text-red-700 text-sm"></p>
                     </div>
-
-                    {{-- Pay button --}}
                     <button @click="submitCard()"
                             :disabled="loading"
                             :class="loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-indigo-500 hover:-translate-y-0.5'"
@@ -178,16 +239,15 @@
                         <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                         </svg>
-                        <span x-text="loading ? 'Processing...' : 'Pay $' + selectedPlanPrice + '/month'"></span>
+                        <span x-text="loading ? 'Processing…' : 'Pay $' + selectedPlanPrice + '/month'"></span>
                     </button>
-
-                    <p class="text-center text-xs text-slate-400">
-                        Your card is charged $<span x-text="selectedPlanPrice"></span> today. Cancel anytime.
-                    </p>
+                    <p class="text-center text-xs text-slate-400">Charged $<span x-text="selectedPlanPrice"></span> today. Cancel anytime.</p>
                 </div>
             </div>
 
-            {{-- ── Step: success ── --}}
+            {{-- ════════════════════════════════════════
+                 STEP: success
+            ════════════════════════════════════════ --}}
             <div x-show="step === 'success'" class="p-8 text-center">
                 <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
@@ -207,30 +267,40 @@
 function checkoutModal() {
     return {
         open: false,
-        step: 'select',   // 'select' | 'card' | 'success'
+        // 'confirm' = has saved card (fast path)
+        // 'select'  = no saved card (choose stripe or paypal)
+        // 'card'    = enter new card via Stripe Elements
+        // 'success' = done
+        step: 'confirm',
         loading: false,
+
+        hasSavedCard: {{ $hasCard ? 'true' : 'false' }},
+
         selectedPlanSlug:  '',
         selectedPlanName:  '',
         selectedPlanPrice: '',
-        cardName:       '',
-        cardEmail:      '{{ $tenant->email ?? '' }}',
-        cardNameError:  '',
+
+        cardName:         '',
+        cardEmail:        '{{ addslashes($tenant->email ?? '') }}',
+        cardNameError:    '',
         cardElementError: '',
-        payError:       '',
-        successMessage: '',
-        _stripe: null,
+        payError:         '',
+        successMessage:   '',
+
+        _stripe:      null,
         _cardElement: null,
 
         openFor(slug, name, price) {
             this.selectedPlanSlug  = slug;
             this.selectedPlanName  = name;
             this.selectedPlanPrice = price;
-            this.step    = 'select';
+            // Smart routing: saved card → one-click confirm; no card → method select
+            this.step    = this.hasSavedCard ? 'confirm' : 'select';
             this.loading = false;
             this.payError = '';
             this.cardNameError = '';
             this.cardElementError = '';
-            this.open    = true;
+            this.open = true;
         },
 
         close() {
@@ -244,7 +314,7 @@ function checkoutModal() {
         },
 
         _mountCard() {
-            if (this._stripe) return; // already mounted
+            if (this._stripe) return;
             this._stripe = Stripe('{{ config('services.stripe.key') }}');
             const elements = this._stripe.elements();
             this._cardElement = elements.create('card', {
@@ -257,7 +327,7 @@ function checkoutModal() {
                     },
                     invalid: { color: '#dc2626' },
                 },
-                hidePostalCode: false,
+                hidePostalCode: true,
             });
             this._cardElement.mount('#stripe-card-element');
             this._cardElement.on('change', (e) => {
@@ -265,10 +335,45 @@ function checkoutModal() {
             });
         },
 
+        // ── Fast-path: upgrade using saved card (no card entry needed) ──────────
+        async confirmWithSavedCard() {
+            this.payError = '';
+            this.loading  = true;
+
+            try {
+                const res = await fetch('{{ route('admin.billing.stripe.upgrade-saved') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ plan_slug: this.selectedPlanSlug }),
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    this.payError = data.error || 'Upgrade failed. Please try again.';
+                    this.loading  = false;
+                    return;
+                }
+
+                this.successMessage = data.message;
+                this.step    = 'success';
+                this.loading = false;
+                setTimeout(() => { window.location.href = data.redirect; }, 2500);
+
+            } catch (err) {
+                this.payError = 'An unexpected error occurred. Please try again.';
+                this.loading  = false;
+            }
+        },
+
+        // ── Slow-path: new card entry via Stripe Elements ────────────────────────
         async submitCard() {
-            this.cardNameError   = '';
+            this.cardNameError    = '';
             this.cardElementError = '';
-            this.payError        = '';
+            this.payError         = '';
 
             if (!this.cardName.trim()) {
                 this.cardNameError = 'Cardholder name is required';
@@ -278,7 +383,6 @@ function checkoutModal() {
             this.loading = true;
 
             try {
-                // 1. Get PaymentIntent client_secret from server
                 const intentRes = await fetch('{{ route('admin.billing.stripe.intent') }}', {
                     method: 'POST',
                     headers: {
@@ -291,31 +395,26 @@ function checkoutModal() {
                 const intentData = await intentRes.json();
                 if (!intentRes.ok) {
                     this.payError = intentData.error || 'Could not initiate payment.';
-                    this.loading = false;
+                    this.loading  = false;
                     return;
                 }
 
-                // 2. Confirm card payment client-side via Stripe.js
                 const { paymentIntent, error } = await this._stripe.confirmCardPayment(
                     intentData.client_secret,
                     {
                         payment_method: {
-                            card: this._cardElement,
-                            billing_details: {
-                                name:  this.cardName,
-                                email: this.cardEmail,
-                            },
+                            card:            this._cardElement,
+                            billing_details: { name: this.cardName, email: this.cardEmail },
                         },
                     }
                 );
 
                 if (error) {
                     this.payError = error.message;
-                    this.loading = false;
+                    this.loading  = false;
                     return;
                 }
 
-                // 3. Notify server to activate subscription
                 const confirmRes = await fetch('{{ route('admin.billing.stripe.confirm') }}', {
                     method: 'POST',
                     headers: {
@@ -332,11 +431,10 @@ function checkoutModal() {
 
                 if (!confirmRes.ok) {
                     this.payError = confirmData.error || 'Payment succeeded but activation failed. Contact support.';
-                    this.loading = false;
+                    this.loading  = false;
                     return;
                 }
 
-                // 4. Show success then redirect
                 this.successMessage = confirmData.message;
                 this.step    = 'success';
                 this.loading = false;
@@ -344,7 +442,7 @@ function checkoutModal() {
 
             } catch (err) {
                 this.payError = 'An unexpected error occurred. Please try again.';
-                this.loading = false;
+                this.loading  = false;
             }
         },
     };

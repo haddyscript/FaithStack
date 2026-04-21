@@ -43,7 +43,6 @@
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cpath d='M27 0h6v60h-6z' fill='%23ffffff' fill-opacity='0.018'/%3E%3Cpath d='M0 27h60v6H0z' fill='%23ffffff' fill-opacity='0.018'/%3E%3C/g%3E%3C/svg%3E");
         }
 
-        /* ── Base input ── */
         .field-input {
             border-width: 1.5px; border-style: solid; border-color: #e2e8f0;
             background-color: #ffffff; color: #0f172a;
@@ -58,7 +57,6 @@
         .subdomain-wrap:focus-within { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
         .subdomain-wrap.field-error { border-color: #DC2626 !important; background-color: rgba(254,242,242,0.55); }
 
-        /* ── Stripe card element container ── */
         .stripe-field {
             border: 1.5px solid #e2e8f0; background: #ffffff; border-radius: 12px;
             padding: 13px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -75,18 +73,21 @@
         @keyframes statusSlide { from { opacity:0; transform:translateX(-3px); } to { opacity:1; transform:translateX(0); } }
         .status-slide { animation: statusSlide 0.18s ease; }
 
-        @keyframes stepIn { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
-        @keyframes stepOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(-18px); } }
-        .step-enter { animation: stepIn 0.22s ease both; }
+        .strength-seg { transition: background-color 0.3s ease; height: 4px; border-radius: 9999px; flex: 1; }
+        .step-line { height: 1.5px; flex: 1; transition: background-color 0.3s ease; }
 
         .btn-primary { transition: all 0.2s cubic-bezier(0.34,1.4,0.64,1); }
         .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(79,70,229,0.35); }
         .btn-primary:active:not(:disabled) { transform: scale(0.987); }
 
-        .strength-seg { transition: background-color 0.3s ease; height: 4px; border-radius: 9999px; flex: 1; }
-
-        /* Step indicator connector */
-        .step-line { height: 1.5px; flex: 1; transition: background-color 0.3s ease; }
+        .section-label {
+            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: #94a3b8; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-label::after {
+            content: ''; flex: 1; height: 1px; background: #e2e8f0;
+        }
     </style>
 </head>
 <body class="h-full font-sans bg-slate-50">
@@ -94,7 +95,7 @@
 <div class="min-h-screen flex flex-col lg:flex-row">
 
     {{-- ═══════════════════════════════════════════
-         LEFT — Brand panel (unchanged)
+         LEFT — Brand panel
     ═══════════════════════════════════════════ --}}
     <div class="relative lg:w-[42%] bg-[#08080c] faith-pattern flex flex-col overflow-hidden px-8 py-10 lg:px-12 lg:py-14">
 
@@ -195,23 +196,22 @@
     </div>
 
     {{-- ═══════════════════════════════════════════
-         RIGHT — Multi-step registration form
+         RIGHT — 2-step registration form
     ═══════════════════════════════════════════ --}}
     <div class="flex-1 flex flex-col justify-center px-8 py-12 lg:px-14 xl:px-20 bg-slate-50">
-        <div class="w-full max-w-[460px] mx-auto">
+        <div class="w-full max-w-[480px] mx-auto">
 
-            {{-- ── Step indicator ── --}}
             <div x-data="registrationForm" id="reg-root">
 
+            {{-- ── Step indicator (2 steps) ── --}}
             <div class="flex items-center gap-0 mb-8">
+
                 {{-- Step 1 --}}
                 <div class="flex flex-col items-center gap-1.5">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 flex-shrink-0"
                          :class="currentStep > 1
                              ? 'bg-indigo-600 text-white'
-                             : currentStep === 1
-                                 ? 'bg-indigo-600 text-white ring-4 ring-indigo-100'
-                                 : 'bg-slate-200 text-slate-500'">
+                             : 'bg-indigo-600 text-white ring-4 ring-indigo-100'">
                         <svg x-show="currentStep > 1" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
                         </svg>
@@ -227,34 +227,15 @@
                 {{-- Step 2 --}}
                 <div class="flex flex-col items-center gap-1.5">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 flex-shrink-0"
-                         :class="currentStep > 2
-                             ? 'bg-indigo-600 text-white'
-                             : currentStep === 2
-                                 ? 'bg-indigo-600 text-white ring-4 ring-indigo-100'
-                                 : 'bg-slate-200 text-slate-500'">
-                        <svg x-show="currentStep > 2" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                        </svg>
-                        <span x-show="currentStep <= 2">2</span>
-                    </div>
-                    <span class="text-[10px] font-semibold whitespace-nowrap transition-colors duration-300"
-                          :class="currentStep >= 2 ? 'text-indigo-600' : 'text-slate-400'">Billing</span>
-                </div>
-
-                <div class="step-line mx-2 mb-4"
-                     :class="currentStep > 2 ? 'bg-indigo-600' : 'bg-slate-200'"></div>
-
-                {{-- Step 3 --}}
-                <div class="flex flex-col items-center gap-1.5">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 flex-shrink-0"
-                         :class="currentStep === 3
+                         :class="currentStep === 2
                              ? 'bg-indigo-600 text-white ring-4 ring-indigo-100'
                              : 'bg-slate-200 text-slate-500'">
-                        <span>3</span>
+                        <span>2</span>
                     </div>
                     <span class="text-[10px] font-semibold whitespace-nowrap transition-colors duration-300"
-                          :class="currentStep === 3 ? 'text-indigo-600' : 'text-slate-400'">Payment</span>
+                          :class="currentStep === 2 ? 'text-indigo-600' : 'text-slate-400'">Billing & Payment</span>
                 </div>
+
             </div>
 
             {{-- ── Step header ── --}}
@@ -282,9 +263,9 @@
             </div>
             @endif
 
-            {{-- ═══════════════════════════════════
+            {{-- ════════════════════════════════
                  FORM
-            ═══════════════════════════════════ --}}
+            ════════════════════════════════ --}}
             <form x-ref="regForm"
                   action="{{ url('/register') }}"
                   method="POST"
@@ -296,7 +277,14 @@
                 {{-- ════════════════════════════
                      STEP 1 — Account info
                 ════════════════════════════ --}}
-                <div x-show="currentStep === 1" class="step-enter space-y-5">
+                <div x-show="currentStep === 1"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-x-3"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-3"
+                     class="space-y-5">
 
                     {{-- Organization Name --}}
                     <div>
@@ -342,6 +330,7 @@
                                 </div>
                             </template>
                         </div>
+                        <p x-show="serverErrors.subdomain" x-cloak x-text="serverErrors.subdomain && serverErrors.subdomain[0]" class="err-msg fade-up status-slide"></p>
                         @error('subdomain')<p class="err-msg fade-up">{{ $message }}</p>@enderror
                     </div>
 
@@ -354,6 +343,7 @@
                                :class="emailError ? 'field-error' : ''"
                                class="field-input w-full px-4 py-3 rounded-xl text-sm" required>
                         <p x-show="emailError" x-cloak x-text="emailError" class="err-msg fade-up"></p>
+                        <p x-show="!emailError && serverErrors.email" x-cloak x-text="serverErrors.email && serverErrors.email[0]" class="err-msg fade-up"></p>
                         @error('email')<p x-show="!emailError" class="err-msg fade-up">{{ $message }}</p>@enderror
                     </div>
 
@@ -397,289 +387,338 @@
                 </div>{{-- /step 1 --}}
 
                 {{-- ════════════════════════════
-                     STEP 2 — Billing address
+                     STEP 2 — Billing + Payment
                 ════════════════════════════ --}}
-                <div x-show="currentStep === 2" x-cloak class="step-enter space-y-5">
+                <div x-show="currentStep === 2"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-x-3"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-3"
+                     x-cloak
+                     class="space-y-5">
 
-                    {{-- Cardholder name --}}
-                    <div>
-                        <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="cardholder_name">Name on card</label>
-                        <input id="cardholder_name" name="cardholder_name" type="text" autocomplete="cc-name"
-                               placeholder="Full name as it appears on your card"
-                               x-model="cardholderName"
-                               :class="step2Touched && !cardholderName.trim() ? 'field-error' : ''"
-                               class="field-input w-full px-4 py-3 rounded-xl text-sm">
-                        <p x-show="step2Touched && !cardholderName.trim()" x-cloak class="err-msg fade-up">Name on card is required</p>
-                        @error('cardholder_name')<p class="err-msg fade-up">{{ $message }}</p>@enderror
-                    </div>
-
-                    {{-- Address line 1 --}}
-                    <div>
-                        <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_line1">Street address</label>
-                        <input id="billing_line1" name="billing_line1" type="text" autocomplete="billing address-line1"
-                               placeholder="123 Main Street"
-                               x-model="billingLine1"
-                               :class="step2Touched && !billingLine1.trim() ? 'field-error' : ''"
-                               class="field-input w-full px-4 py-3 rounded-xl text-sm">
-                        <p x-show="step2Touched && !billingLine1.trim()" x-cloak class="err-msg fade-up">Street address is required</p>
-                        @error('billing_line1')<p class="err-msg fade-up">{{ $message }}</p>@enderror
-                    </div>
-
-                    {{-- Address line 2 --}}
-                    <div>
-                        <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_line2">
-                            Apartment, suite, etc. <span class="text-slate-400 font-normal">(optional)</span>
-                        </label>
-                        <input id="billing_line2" name="billing_line2" type="text" autocomplete="billing address-line2"
-                               placeholder="Unit 4B"
-                               x-model="billingLine2"
-                               class="field-input w-full px-4 py-3 rounded-xl text-sm">
-                    </div>
-
-                    {{-- City + ZIP (2 columns) --}}
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_city">City</label>
-                            <input id="billing_city" name="billing_city" type="text" autocomplete="billing address-level2"
-                                   placeholder="Manila"
-                                   x-model="billingCity"
-                                   :class="step2Touched && !billingCity.trim() ? 'field-error' : ''"
-                                   class="field-input w-full px-4 py-3 rounded-xl text-sm">
-                            <p x-show="step2Touched && !billingCity.trim()" x-cloak class="err-msg fade-up">Required</p>
-                            @error('billing_city')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                    {{-- Plan summary bar --}}
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-semibold text-indigo-900 leading-none">{{ $plan->name }}</p>
+                                @if($plan->effectiveTrialDays() > 0)
+                                <p class="text-[11px] text-indigo-600/75 mt-0.5 leading-none">{{ $plan->effectiveTrialDays() }}-day free trial</p>
+                                @endif
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_zip">ZIP / Postal code</label>
-                            <input id="billing_zip" name="billing_zip" type="text" autocomplete="billing postal-code"
-                                   placeholder="1000"
-                                   x-model="billingZip"
-                                   :class="step2Touched && !billingZip.trim() ? 'field-error' : ''"
-                                   class="field-input w-full px-4 py-3 rounded-xl text-sm">
-                            <p x-show="step2Touched && !billingZip.trim()" x-cloak class="err-msg fade-up">Required</p>
-                            @error('billing_zip')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                        <div class="text-right">
+                            <p class="text-[17px] font-bold text-indigo-900 leading-none">
+                                @if($plan->effectiveTrialDays() > 0) $0 today
+                                @else ${{ number_format((float)$plan->price_monthly, 0) }}
+                                @endif
+                            </p>
+                            @if($plan->effectiveTrialDays() > 0)
+                            <p class="text-[10px] text-indigo-500 mt-0.5">then ${{ number_format((float)$plan->price_monthly, 0) }}/mo</p>
+                            @endif
                         </div>
                     </div>
 
-                    {{-- State + Country (2 columns) --}}
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_state">
-                                State / Province <span class="text-slate-400 font-normal">(optional)</span>
-                            </label>
-                            <input id="billing_state" name="billing_state" type="text" autocomplete="billing address-level1"
-                                   placeholder="Metro Manila"
-                                   x-model="billingState"
-                                   class="field-input w-full px-4 py-3 rounded-xl text-sm">
+                    {{-- ── Section: Billing Address ── --}}
+                    <div>
+                        <p class="section-label">Billing Address</p>
+                        <div class="space-y-4">
+
+                            {{-- Address line 1 --}}
+                            <div>
+                                <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_line1">Street address</label>
+                                <input id="billing_line1" name="billing_line1" type="text" autocomplete="billing address-line1"
+                                       placeholder="123 Main Street"
+                                       x-model="billingLine1"
+                                       :class="step2Touched && !billingLine1.trim() ? 'field-error' : ''"
+                                       class="field-input w-full px-4 py-3 rounded-xl text-sm">
+                                <p x-show="step2Touched && !billingLine1.trim()" x-cloak class="err-msg fade-up">Street address is required</p>
+                                @error('billing_line1')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                            </div>
+
+                            {{-- Address line 2 --}}
+                            <div>
+                                <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_line2">
+                                    Apt, suite, etc. <span class="text-slate-400 font-normal">(optional)</span>
+                                </label>
+                                <input id="billing_line2" name="billing_line2" type="text" autocomplete="billing address-line2"
+                                       placeholder="Unit 4B"
+                                       x-model="billingLine2"
+                                       class="field-input w-full px-4 py-3 rounded-xl text-sm">
+                            </div>
+
+                            {{-- City + ZIP --}}
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_city">City</label>
+                                    <input id="billing_city" name="billing_city" type="text" autocomplete="billing address-level2"
+                                           placeholder="Manila"
+                                           x-model="billingCity"
+                                           :class="step2Touched && !billingCity.trim() ? 'field-error' : ''"
+                                           class="field-input w-full px-4 py-3 rounded-xl text-sm">
+                                    <p x-show="step2Touched && !billingCity.trim()" x-cloak class="err-msg fade-up">Required</p>
+                                    @error('billing_city')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_zip">ZIP / Postal</label>
+                                    <input id="billing_zip" name="billing_zip" type="text" autocomplete="billing postal-code"
+                                           placeholder="1000"
+                                           x-model="billingZip"
+                                           :class="step2Touched && !billingZip.trim() ? 'field-error' : ''"
+                                           class="field-input w-full px-4 py-3 rounded-xl text-sm">
+                                    <p x-show="step2Touched && !billingZip.trim()" x-cloak class="err-msg fade-up">Required</p>
+                                    @error('billing_zip')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+
+                            {{-- State + Country --}}
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_state">
+                                        State <span class="text-slate-400 font-normal">(opt.)</span>
+                                    </label>
+                                    <input id="billing_state" name="billing_state" type="text" autocomplete="billing address-level1"
+                                           placeholder="Metro Manila"
+                                           x-model="billingState"
+                                           class="field-input w-full px-4 py-3 rounded-xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_country">Country</label>
+                                    <select id="billing_country" name="billing_country" autocomplete="billing country"
+                                            x-model="billingCountry"
+                                            class="field-input w-full px-4 py-3 rounded-xl text-sm cursor-pointer">
+                                        <optgroup label="Common">
+                                            <option value="PH">Philippines</option>
+                                            <option value="US">United States</option>
+                                            <option value="GB">United Kingdom</option>
+                                            <option value="AU">Australia</option>
+                                            <option value="CA">Canada</option>
+                                            <option value="SG">Singapore</option>
+                                            <option value="MY">Malaysia</option>
+                                            <option value="ID">Indonesia</option>
+                                            <option value="TH">Thailand</option>
+                                            <option value="VN">Vietnam</option>
+                                            <option value="NG">Nigeria</option>
+                                            <option value="KE">Kenya</option>
+                                            <option value="ZA">South Africa</option>
+                                            <option value="IN">India</option>
+                                        </optgroup>
+                                        <optgroup label="All Countries">
+                                            <option value="AF">Afghanistan</option>
+                                            <option value="AL">Albania</option>
+                                            <option value="DZ">Algeria</option>
+                                            <option value="AO">Angola</option>
+                                            <option value="AR">Argentina</option>
+                                            <option value="AT">Austria</option>
+                                            <option value="BD">Bangladesh</option>
+                                            <option value="BE">Belgium</option>
+                                            <option value="BR">Brazil</option>
+                                            <option value="CM">Cameroon</option>
+                                            <option value="CL">Chile</option>
+                                            <option value="CN">China</option>
+                                            <option value="CO">Colombia</option>
+                                            <option value="CD">Congo (DRC)</option>
+                                            <option value="CR">Costa Rica</option>
+                                            <option value="HR">Croatia</option>
+                                            <option value="CZ">Czech Republic</option>
+                                            <option value="DK">Denmark</option>
+                                            <option value="DO">Dominican Republic</option>
+                                            <option value="EC">Ecuador</option>
+                                            <option value="EG">Egypt</option>
+                                            <option value="ET">Ethiopia</option>
+                                            <option value="FI">Finland</option>
+                                            <option value="FR">France</option>
+                                            <option value="GH">Ghana</option>
+                                            <option value="DE">Germany</option>
+                                            <option value="GT">Guatemala</option>
+                                            <option value="HU">Hungary</option>
+                                            <option value="IL">Israel</option>
+                                            <option value="IT">Italy</option>
+                                            <option value="JM">Jamaica</option>
+                                            <option value="JP">Japan</option>
+                                            <option value="JO">Jordan</option>
+                                            <option value="KR">South Korea</option>
+                                            <option value="KW">Kuwait</option>
+                                            <option value="LB">Lebanon</option>
+                                            <option value="MX">Mexico</option>
+                                            <option value="MA">Morocco</option>
+                                            <option value="MM">Myanmar</option>
+                                            <option value="NL">Netherlands</option>
+                                            <option value="NZ">New Zealand</option>
+                                            <option value="NO">Norway</option>
+                                            <option value="PK">Pakistan</option>
+                                            <option value="PE">Peru</option>
+                                            <option value="PL">Poland</option>
+                                            <option value="PT">Portugal</option>
+                                            <option value="QA">Qatar</option>
+                                            <option value="RO">Romania</option>
+                                            <option value="RW">Rwanda</option>
+                                            <option value="SA">Saudi Arabia</option>
+                                            <option value="SL">Sierra Leone</option>
+                                            <option value="ES">Spain</option>
+                                            <option value="LK">Sri Lanka</option>
+                                            <option value="SE">Sweden</option>
+                                            <option value="CH">Switzerland</option>
+                                            <option value="TW">Taiwan</option>
+                                            <option value="TZ">Tanzania</option>
+                                            <option value="TR">Turkey</option>
+                                            <option value="UG">Uganda</option>
+                                            <option value="UA">Ukraine</option>
+                                            <option value="AE">United Arab Emirates</option>
+                                            <option value="UY">Uruguay</option>
+                                            <option value="VE">Venezuela</option>
+                                            <option value="ZM">Zambia</option>
+                                            <option value="ZW">Zimbabwe</option>
+                                        </optgroup>
+                                    </select>
+                                    @error('billing_country')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+
                         </div>
-                        <div>
-                            <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="billing_country">Country</label>
-                            <select id="billing_country" name="billing_country" autocomplete="billing country"
-                                    x-model="billingCountry"
-                                    class="field-input w-full px-4 py-3 rounded-xl text-sm cursor-pointer">
-                                <optgroup label="Common">
-                                    <option value="PH">Philippines</option>
-                                    <option value="US">United States</option>
-                                    <option value="GB">United Kingdom</option>
-                                    <option value="AU">Australia</option>
-                                    <option value="CA">Canada</option>
-                                    <option value="SG">Singapore</option>
-                                    <option value="MY">Malaysia</option>
-                                    <option value="ID">Indonesia</option>
-                                    <option value="TH">Thailand</option>
-                                    <option value="VN">Vietnam</option>
-                                    <option value="NG">Nigeria</option>
-                                    <option value="KE">Kenya</option>
-                                    <option value="ZA">South Africa</option>
-                                    <option value="IN">India</option>
-                                </optgroup>
-                                <optgroup label="All Countries">
-                                    <option value="AF">Afghanistan</option>
-                                    <option value="AL">Albania</option>
-                                    <option value="DZ">Algeria</option>
-                                    <option value="AO">Angola</option>
-                                    <option value="AR">Argentina</option>
-                                    <option value="AT">Austria</option>
-                                    <option value="BD">Bangladesh</option>
-                                    <option value="BE">Belgium</option>
-                                    <option value="BR">Brazil</option>
-                                    <option value="CM">Cameroon</option>
-                                    <option value="CL">Chile</option>
-                                    <option value="CN">China</option>
-                                    <option value="CO">Colombia</option>
-                                    <option value="CD">Congo (DRC)</option>
-                                    <option value="CR">Costa Rica</option>
-                                    <option value="HR">Croatia</option>
-                                    <option value="CZ">Czech Republic</option>
-                                    <option value="DK">Denmark</option>
-                                    <option value="DO">Dominican Republic</option>
-                                    <option value="EC">Ecuador</option>
-                                    <option value="EG">Egypt</option>
-                                    <option value="ET">Ethiopia</option>
-                                    <option value="FI">Finland</option>
-                                    <option value="FR">France</option>
-                                    <option value="GH">Ghana</option>
-                                    <option value="DE">Germany</option>
-                                    <option value="GT">Guatemala</option>
-                                    <option value="HU">Hungary</option>
-                                    <option value="IL">Israel</option>
-                                    <option value="IT">Italy</option>
-                                    <option value="JM">Jamaica</option>
-                                    <option value="JP">Japan</option>
-                                    <option value="JO">Jordan</option>
-                                    <option value="KR">South Korea</option>
-                                    <option value="KW">Kuwait</option>
-                                    <option value="LB">Lebanon</option>
-                                    <option value="MX">Mexico</option>
-                                    <option value="MA">Morocco</option>
-                                    <option value="MM">Myanmar</option>
-                                    <option value="NL">Netherlands</option>
-                                    <option value="NZ">New Zealand</option>
-                                    <option value="NO">Norway</option>
-                                    <option value="PK">Pakistan</option>
-                                    <option value="PE">Peru</option>
-                                    <option value="PL">Poland</option>
-                                    <option value="PT">Portugal</option>
-                                    <option value="QA">Qatar</option>
-                                    <option value="RO">Romania</option>
-                                    <option value="RW">Rwanda</option>
-                                    <option value="SA">Saudi Arabia</option>
-                                    <option value="SL">Sierra Leone</option>
-                                    <option value="ES">Spain</option>
-                                    <option value="LK">Sri Lanka</option>
-                                    <option value="SE">Sweden</option>
-                                    <option value="CH">Switzerland</option>
-                                    <option value="TW">Taiwan</option>
-                                    <option value="TZ">Tanzania</option>
-                                    <option value="TR">Turkey</option>
-                                    <option value="UG">Uganda</option>
-                                    <option value="UA">Ukraine</option>
-                                    <option value="AE">United Arab Emirates</option>
-                                    <option value="UY">Uruguay</option>
-                                    <option value="VE">Venezuela</option>
-                                    <option value="ZM">Zambia</option>
-                                    <option value="ZW">Zimbabwe</option>
-                                </optgroup>
-                            </select>
-                            @error('billing_country')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                    </div>
+
+                    {{-- ── Section: Payment Details ── --}}
+                    <div>
+                        <p class="section-label">Payment Details</p>
+                        <div class="space-y-4">
+
+                            {{-- Name on card --}}
+                            <div>
+                                <label class="block text-[13px] font-semibold text-slate-700 mb-1.5" for="cardholder_name">Name on card</label>
+                                <input id="cardholder_name" name="cardholder_name" type="text" autocomplete="cc-name"
+                                       placeholder="Full name as it appears on your card"
+                                       x-model="cardholderName"
+                                       :class="step2Touched && !cardholderName.trim() ? 'field-error' : ''"
+                                       class="field-input w-full px-4 py-3 rounded-xl text-sm">
+                                <p x-show="step2Touched && !cardholderName.trim()" x-cloak class="err-msg fade-up">Name on card is required</p>
+                                @error('cardholder_name')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+                            </div>
+
+                            {{-- Card label row --}}
+                            <div>
+                                <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Card details</label>
+
+                                {{-- Already-confirmed PM (carried over from a previous server error) --}}
+                                <div x-show="hasExistingPaymentMethod" x-cloak
+                                     class="flex items-center justify-between px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                                    <div class="flex items-center gap-2.5">
+                                        <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span class="text-[13px] font-semibold text-emerald-800">Card already saved</span>
+                                    </div>
+                                    <button type="button" @click="clearPaymentMethod"
+                                            class="text-[12px] text-slate-500 hover:text-slate-800 font-medium underline decoration-dotted flex-shrink-0 ml-3">
+                                        Change
+                                    </button>
+                                </div>
+
+                                {{--
+                                    Stripe card element section.
+                                    IMPORTANT: x-ref controls show/hide via style.display in JS —
+                                    we deliberately avoid x-show here so Alpine never sets
+                                    display:none on #card-element after Stripe mounts its iframe.
+                                --}}
+                                <div x-ref="stripeSection" style="display:none">
+                                    {{--
+                                        x-ignore tells Alpine to leave this node's subtree alone.
+                                        Stripe owns this iframe; Alpine touching it breaks the mount.
+                                    --}}
+                                    <div x-ignore>
+                                        <div id="card-element" class="stripe-field"></div>
+                                    </div>
+
+                                    {{-- These siblings are outside x-ignore so Alpine can drive them --}}
+                                    <p x-show="cardError" x-cloak x-text="cardError" class="err-msg fade-up"></p>
+                                    @error('payment_method_id')<p class="err-msg fade-up">{{ $message }}</p>@enderror
+
+                                    <div x-show="stripeLoading" x-cloak class="flex items-center gap-2 mt-2.5">
+                                        <svg class="w-4 h-4 text-slate-400 animate-spin flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                                        </svg>
+                                        <span class="text-[12px] text-slate-400">Loading secure payment form…</span>
+                                    </div>
+
+                                    <div x-show="stripeInitError" x-cloak class="mt-2.5 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                        <p class="text-[12.5px] text-red-700 font-medium" x-text="stripeInitError"></p>
+                                        <button type="button" @click="retryStripeInit"
+                                                class="mt-1.5 text-[12px] text-red-600 font-semibold underline hover:no-underline">
+                                            Try again
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Trust badges --}}
+                            <div class="flex items-center justify-center gap-4 py-3 border-y border-slate-200/70">
+                                <span class="flex items-center gap-1.5" style="font-size:11px;color:#94a3b8;">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
+                                    256-bit SSL
+                                </span>
+                                <span class="w-px h-3 bg-slate-200 flex-shrink-0"></span>
+                                <span class="flex items-center gap-1.5" style="font-size:11px;color:#94a3b8;">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944z" clip-rule="evenodd"/></svg>
+                                    Powered by Stripe
+                                </span>
+                                <span class="w-px h-3 bg-slate-200 flex-shrink-0"></span>
+                                <span class="flex items-center gap-1.5" style="font-size:11px;color:#94a3b8;">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+                                    Cancel anytime
+                                </span>
+                            </div>
+
                         </div>
                     </div>
 
                 </div>{{-- /step 2 --}}
 
                 {{-- ════════════════════════════
-                     STEP 3 — Card / Payment
-                ════════════════════════════ --}}
-                <div x-show="currentStep === 3" x-cloak class="step-enter space-y-5">
-
-                    {{-- Plan summary --}}
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
-                        <div>
-                            <p class="text-[13px] font-semibold text-slate-800">{{ $plan->name }}</p>
-                            @if($plan->effectiveTrialDays() > 0)
-                            <p class="text-[11.5px] text-slate-500 mt-0.5">
-                                {{ $plan->effectiveTrialDays() }}-day free trial, then
-                                @if($plan->isFree()) free forever
-                                @else ${{ number_format((float)$plan->price_monthly, 0) }}/mo
-                                @endif
-                            </p>
-                            @else
-                            <p class="text-[11.5px] text-slate-500 mt-0.5">Billed monthly, cancel anytime</p>
-                            @endif
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[18px] font-bold text-slate-900">
-                                @if($plan->effectiveTrialDays() > 0) $0 today
-                                @else ${{ number_format((float)$plan->price_monthly, 0) }}
-                                @endif
-                            </p>
-                            @if($plan->effectiveTrialDays() > 0)
-                            <p class="text-[10.5px] text-slate-400">due today</p>
-                            @endif
-                        </div>
-                    </div>
-
-                    {{-- Card element --}}
-                    <div>
-                        <label class="block text-[13px] font-semibold text-slate-700 mb-1.5">Card details</label>
-                        <div id="card-element" class="stripe-field"
-                             :class="{'focused': cardFocused, 'has-error': cardError}"></div>
-                        <p x-show="cardError" x-cloak x-text="cardError" class="err-msg fade-up"></p>
-                        @error('payment_method_id')<p class="err-msg fade-up">{{ $message }}</p>@enderror
-
-                        {{-- Stripe loading spinner --}}
-                        <div x-show="stripeLoading" x-cloak class="flex items-center gap-2 mt-2">
-                            <svg class="w-4 h-4 text-slate-400 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
-                            </svg>
-                            <span class="text-[12px] text-slate-400">Loading secure payment form…</span>
-                        </div>
-                    </div>
-
-                    {{-- Trust badges --}}
-                    <div class="flex items-center justify-center gap-4 py-3 border-y border-slate-200/70">
-                        <span class="flex items-center gap-1.5" style="font-size:11px;color:#94a3b8;">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
-                            256-bit SSL
-                        </span>
-                        <span class="w-px h-3 bg-slate-200 flex-shrink-0"></span>
-                        <span class="flex items-center gap-1.5" style="font-size:11px;color:#94a3b8;">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944z" clip-rule="evenodd"/></svg>
-                            Powered by Stripe
-                        </span>
-                        <span class="w-px h-3 bg-slate-200 flex-shrink-0"></span>
-                        <span class="flex items-center gap-1.5" style="font-size:11px;color:#94a3b8;">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-                            Cancel anytime
-                        </span>
-                    </div>
-
-                </div>{{-- /step 3 --}}
-
-                {{-- ════════════════════════════
                      Navigation buttons
                 ════════════════════════════ --}}
-                <div class="mt-6 flex gap-3">
+                <div class="mt-7 flex gap-3">
 
-                    {{-- Back button --}}
+                    {{-- Back --}}
                     <button type="button"
                             x-show="currentStep > 1"
                             x-cloak
                             @click="prevStep"
                             :disabled="loading"
-                            class="flex items-center gap-1.5 px-5 py-[13px] rounded-xl border-1.5 border-slate-200 bg-white text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-colors flex-shrink-0">
+                            class="flex items-center gap-1.5 px-5 py-[13px] rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-colors flex-shrink-0 disabled:opacity-50">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
                         </svg>
                         Back
                     </button>
 
-                    {{-- Next — steps 1 & 2 --}}
+                    {{-- Continue — step 1 only --}}
                     <button type="button"
-                            x-show="currentStep < 3"
+                            x-show="currentStep === 1"
                             @click="nextStep"
                             :disabled="loading"
-                            :class="{
-                                'opacity-50 cursor-not-allowed': (currentStep === 1 && !step1Valid) || (currentStep === 2 && !step2Valid),
-                                'btn-primary': true
-                            }"
-                            class="flex-1 flex items-center justify-center gap-2 py-[13px] px-6 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-md shadow-indigo-600/20">
-                        <span x-text="currentStep === 1 ? 'Continue to Billing' : 'Continue to Payment'"></span>
+                            :class="{ 'opacity-50 cursor-not-allowed': !step1Valid }"
+                            class="btn-primary flex-1 flex items-center justify-center gap-2 py-[13px] px-6 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-md shadow-indigo-600/20">
+                        <span>Continue to Billing &amp; Payment</span>
                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                         </svg>
                     </button>
 
-                    {{-- Create Account — step 3 --}}
+                    {{-- Create Account — step 2 --}}
                     <button type="button"
-                            x-show="currentStep === 3"
+                            x-show="currentStep === 2"
                             x-cloak
                             @click="handleFinalSubmit"
-                            :disabled="loading || !cardComplete"
-                            :class="{
-                                'opacity-50 cursor-not-allowed': !cardComplete || loading,
-                                'btn-primary': true
-                            }"
-                            class="flex-1 flex items-center justify-center gap-2 py-[13px] px-6 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-md shadow-indigo-600/20">
+                            :disabled="loading || !cardComplete || stripeLoading || !!stripeInitError"
+                            :class="{ 'opacity-50 cursor-not-allowed': !cardComplete || loading || stripeLoading || !!stripeInitError }"
+                            class="btn-primary flex-1 flex items-center justify-center gap-2 py-[13px] px-6 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-md shadow-indigo-600/20">
                         <svg x-show="loading" x-cloak class="w-4 h-4 animate-spin flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
                         </svg>
@@ -689,7 +728,7 @@
                 </div>
 
                 {{-- Legal --}}
-                <p x-show="currentStep === 3" x-cloak class="mt-3 text-center leading-relaxed" style="font-size:11px;color:#94a3b8;">
+                <p x-show="currentStep === 2" x-cloak class="mt-3 text-center leading-relaxed" style="font-size:11px;color:#94a3b8;">
                     By signing up you agree to our
                     <a href="#" class="text-indigo-500 hover:underline">Terms of Service</a> and
                     <a href="#" class="text-indigo-500 hover:underline">Privacy Policy</a>.
@@ -722,8 +761,8 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('registrationForm', () => ({
 
-        /* ── Steps ── */
-        currentStep: {{ $errors->any() ? 1 : 1 }},
+        /* ── Step ── */
+        currentStep: {{ $errors->hasAny(['cardholder_name','billing_line1','billing_city','billing_zip','billing_country','payment_method_id']) ? 2 : 1 }},
 
         /* ── Step 1 ── */
         orgName:         @json(old('org_name', '')),
@@ -734,11 +773,11 @@ document.addEventListener('alpine:init', () => {
         showPassword:    false,
         orgNameTouched:  false,
         emailTouched:    false,
-        subStatus:  null,
+        subStatus:       null,
         _prevAutoSubdomain: @json(old('subdomain', '')),
-        _subTimer:  null,
+        _subTimer:       null,
 
-        /* ── Step 2 ── */
+        /* ── Step 2 address ── */
         cardholderName: @json(old('cardholder_name', '')),
         billingLine1:   @json(old('billing_line1', '')),
         billingLine2:   @json(old('billing_line2', '')),
@@ -748,15 +787,19 @@ document.addEventListener('alpine:init', () => {
         billingCountry: @json(old('billing_country', 'PH')),
         step2Touched:   false,
 
-        /* ── Step 3 / Stripe ── */
-        stripeInstance: null,
-        cardElement:    null,
-        cardComplete:   false,
-        cardError:      '',
-        cardFocused:    false,
-        stripeLoading:  false,
+        /* ── Stripe ── */
+        stripeInstance:  null,
+        cardElement:     null,
+        cardComplete:    false,
+        cardError:       '',
+        cardFocused:     false,
+        stripeLoading:   false,
+        stripeInitError: '',
         setupClientSecret: null,
-        paymentMethodId: '',
+        paymentMethodId: @json(old('payment_method_id', '')),
+
+        /* ── Step 1 server-side errors (from AJAX pre-validation) ── */
+        serverErrors: {},
 
         /* ── Global ── */
         loading: false,
@@ -766,23 +809,33 @@ document.addEventListener('alpine:init', () => {
             if (this.email)     this.emailTouched = true;
             if (this.orgName)   this.orgNameTouched = true;
             if (this.subdomain.length >= 2) this.checkSubdomain();
+
+            // If a confirmed PM was carried over from a previous server error,
+            // mark it complete so the submit button enables immediately.
+            if (this.paymentMethodId.startsWith('pm_')) {
+                this.cardComplete = true;
+            }
+
+            // Returning from a billing/payment server error — already on step 2
+            if (this.currentStep === 2) {
+                this.$nextTick(() => {
+                    if (!this.hasExistingPaymentMethod) this.initStripe();
+                    // If we have an existing PM, keep stripeSection hidden (not needed)
+                });
+            }
         },
 
         /* ════════════════════
-           Step titles
+           Titles
         ════════════════════ */
         get stepTitle() {
-            return ['Create your account', 'Billing address', 'Secure your account'][this.currentStep - 1];
+            return ['Create your account', 'Billing & Payment'][this.currentStep - 1];
         },
         get stepSubtitle() {
             const trialDays = {{ $plan->effectiveTrialDays() }};
             if (this.currentStep === 1) return 'Set up your organization on FaithStack.';
-            if (this.currentStep === 2) return 'Enter your billing address. This is linked to your card.';
-            if (this.currentStep === 3) {
-                if (trialDays > 0) return `Your card will not be charged for ${trialDays} days. Cancel anytime before your trial ends.`;
-                return 'Add your card to complete registration. Payments are secured by Stripe.';
-            }
-            return '';
+            if (trialDays > 0) return `Your card won't be charged for ${trialDays} days. Cancel anytime before your trial ends.`;
+            return 'Complete your billing details to finish registration. Payments secured by Stripe.';
         },
 
         /* ════════════════════
@@ -797,12 +850,15 @@ document.addEventListener('alpine:init', () => {
                 && this.password === this.confirmPassword
                 && this.confirmPassword.length > 0;
         },
-        get step2Valid() {
+        get step2AddressValid() {
             return this.cardholderName.trim().length >= 2
                 && this.billingLine1.trim().length >= 3
                 && this.billingCity.trim().length >= 2
                 && this.billingZip.trim().length >= 2
                 && this.billingCountry.length === 2;
+        },
+        get hasExistingPaymentMethod() {
+            return this.paymentMethodId.startsWith('pm_');
         },
 
         /* ════════════════════
@@ -823,7 +879,7 @@ document.addEventListener('alpine:init', () => {
         get strengthTextColor(){ return ['','#dc2626','#d97706','#2563eb','#059669'][this.passwordStrength] || '#94a3b8'; },
 
         /* ════════════════════
-           Validation helpers
+           Inline validation
         ════════════════════ */
         get orgNameError() {
             if (!this.orgNameTouched) return '';
@@ -850,81 +906,147 @@ document.addEventListener('alpine:init', () => {
            Navigation
         ════════════════════ */
         async nextStep() {
-            if (this.currentStep === 1) {
-                this.orgNameTouched = true;
-                this.emailTouched   = true;
-                if (!this.step1Valid) return;
-            }
-            if (this.currentStep === 2) {
-                this.step2Touched = true;
-                if (!this.step2Valid) return;
-            }
-            this.currentStep++;
-            if (this.currentStep === 3) {
-                await this.$nextTick();
-                await this.initStripe();
-            }
+            if (this.currentStep !== 1) return;
+
+            this.orgNameTouched = true;
+            this.emailTouched   = true;
+            this.serverErrors   = {};
+            if (!this.step1Valid) return;
+
+            // AJAX pre-validate uniqueness so a server reload never clears the password
+            this.loading = true;
+            try {
+                const resp = await fetch('/register/validate-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        org_name:              this.orgName,
+                        subdomain:             this.subdomain,
+                        email:                 this.email,
+                        password:              this.password,
+                        password_confirmation: this.confirmPassword,
+                    }),
+                });
+
+                if (resp.status === 422) {
+                    const body = await resp.json();
+                    this.serverErrors = body.errors || {};
+                    this.loading = false;
+                    return;
+                }
+                // Any unexpected error: allow through (server will re-validate on submit)
+            } catch (_) { /* network error — allow through */ }
+
+            this.loading = false;
+            this.currentStep = 2;
+            await this.$nextTick();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // initStripe() shows stripeSection itself, so only call when no existing PM
+            if (!this.hasExistingPaymentMethod) await this.initStripe();
         },
 
         prevStep() {
             if (this.currentStep > 1) this.currentStep--;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
 
         /* ════════════════════
            Stripe init
         ════════════════════ */
         async initStripe() {
-            if (this.cardElement) return; // already mounted
-            this.stripeLoading = true;
+            if (this.cardElement) return;
+            this.stripeLoading   = true;
+            this.stripeInitError = '';
+
+            // Show the Stripe section before fetching so the #card-element
+            // is in a visible, laid-out state when Stripe mounts into it.
+            if (this.$refs.stripeSection) {
+                this.$refs.stripeSection.style.display = 'block';
+            }
 
             try {
-                const resp = await fetch('/register/setup-intent');
+                const resp = await fetch('/register/setup-intent', {
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                if (!resp.ok) throw new Error(`Server error ${resp.status}`);
                 const data = await resp.json();
                 if (data.error) throw new Error(data.error);
                 this.setupClientSecret = data.client_secret;
             } catch (e) {
-                this.cardError = 'Could not load payment form. Please go back and try again.';
+                this.stripeInitError = 'Could not load the payment form. ' + (e.message || 'Please try again.');
                 this.stripeLoading = false;
                 return;
             }
 
             this.stripeInstance = Stripe(window.stripeKey);
-            const elements = this.stripeInstance.elements();
+            const elements     = this.stripeInstance.elements();
 
             this.cardElement = elements.create('card', {
                 hidePostalCode: true,
                 style: {
                     base: {
                         fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
-                        fontSize: '14px',
+                        fontSize:   '14px',
                         fontWeight: '400',
-                        color: '#0f172a',
+                        color:      '#0f172a',
                         '::placeholder': { color: '#cbd5e1' },
-                        iconColor: '#6366f1',
+                        iconColor:  '#6366f1',
                     },
                     invalid: { color: '#dc2626', iconColor: '#dc2626' },
                 },
             });
 
+            // Mount AFTER a rAF so the browser has fully painted the container
+            await new Promise(r => requestAnimationFrame(r));
             this.cardElement.mount('#card-element');
 
-            this.cardElement.on('focus',  () => { this.cardFocused = true; });
-            this.cardElement.on('blur',   () => { this.cardFocused = false; });
+            // Apply focused/error CSS classes directly — never via Alpine bindings
+            // inside x-ignore, because Alpine won't touch that subtree.
+            const cardEl = document.getElementById('card-element');
+            this.cardElement.on('focus',  () => cardEl.classList.add('focused'));
+            this.cardElement.on('blur',   () => cardEl.classList.remove('focused'));
             this.cardElement.on('change', (e) => {
                 this.cardError    = e.error ? e.error.message : '';
                 this.cardComplete = e.complete;
+                cardEl.classList.toggle('has-error', !!e.error);
             });
 
             this.stripeLoading = false;
+        },
+
+        async retryStripeInit() {
+            this.cardElement       = null;
+            this.setupClientSecret = null;
+            await this.initStripe();
+        },
+
+        clearPaymentMethod() {
+            this.paymentMethodId   = '';
+            this.cardComplete      = false;
+            this.cardElement       = null;
+            this.setupClientSecret = null;
+            this.$nextTick(() => this.initStripe());
         },
 
         /* ════════════════════
            Final submit
         ════════════════════ */
         async handleFinalSubmit() {
-            if (!this.cardComplete || this.loading) return;
+            this.step2Touched = true;
+            if (!this.step2AddressValid || !this.cardComplete || this.loading) return;
+
             this.loading   = true;
             this.cardError = '';
+
+            // Reuse already-confirmed payment method from a previous server-side error
+            if (this.hasExistingPaymentMethod) {
+                await this.$nextTick(); // ensure hidden input is synced before submit
+                this.$refs.regForm.submit();
+                return;
+            }
 
             try {
                 const { setupIntent, error } = await this.stripeInstance.confirmCardSetup(
@@ -954,7 +1076,12 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
+                // BUG FIX: Alpine's reactivity is async. Setting paymentMethodId
+                // and immediately calling submit() would submit the form before
+                // Alpine syncs the value to the hidden input. $nextTick waits for
+                // Alpine to flush all pending DOM updates first.
                 this.paymentMethodId = setupIntent.payment_method;
+                await this.$nextTick();
                 this.$refs.regForm.submit();
 
             } catch (err) {

@@ -148,4 +148,71 @@ class StripeService
 
         return Subscription::create($params);
     }
+
+    // ─── Saved-card upgrade helpers ───────────────────────────────────────────
+
+    /**
+     * Retrieve the customer's default payment method (card brand + last4).
+     * Returns null if the customer has no default PM on file.
+     */
+    public function getDefaultPaymentMethod(string $customerId): ?PaymentMethod
+    {
+        try {
+            $customer = \Stripe\Customer::retrieve([
+                'id'     => $customerId,
+                'expand' => ['invoice_settings.default_payment_method'],
+            ]);
+
+            $pm = $customer->invoice_settings->default_payment_method ?? null;
+
+            // May be an expanded object or just an ID string
+            if (is_string($pm)) {
+                return PaymentMethod::retrieve($pm);
+            }
+
+            return $pm instanceof PaymentMethod ? $pm : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Upgrade a customer to a new Stripe price, reusing their saved payment method.
+     *
+     * - If a trialing/active subscription exists → swap the price and end any trial immediately.
+     * - If no subscription exists → create a new one charged today.
+     */
+    public function upgradeSubscription(string $customerId, string $newPriceId, string $paymentMethodId): Subscription
+    {
+        // Look for an existing subscription that can be swapped
+        $existing = Subscription::all([
+            'customer' => $customerId,
+            'status'   => 'all',
+            'limit'    => 10,
+            'expand'   => ['data.items'],
+        ]);
+
+        $activeSub = collect($existing->data)
+            ->first(fn ($s) => in_array($s->status, ['trialing', 'active', 'past_due'], true));
+
+        if ($activeSub) {
+            // Swap price — end trial immediately so the user is charged now
+            return Subscription::update($activeSub->id, [
+                'items' => [[
+                    'id'    => $activeSub->items->data[0]->id,
+                    'price' => $newPriceId,
+                ]],
+                'trial_end'              => 'now',
+                'proration_behavior'     => 'create_prorations',
+                'default_payment_method' => $paymentMethodId,
+            ]);
+        }
+
+        // No existing subscription — create fresh, charge immediately
+        return Subscription::create([
+            'customer'               => $customerId,
+            'items'                  => [['price' => $newPriceId]],
+            'default_payment_method' => $paymentMethodId,
+        ]);
+    }
 }

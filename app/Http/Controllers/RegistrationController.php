@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -86,6 +87,39 @@ class RegistrationController extends Controller
             Log::error('Could not create SetupIntent during registration', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Could not initialise payment form. Please try again.'], 500);
         }
+    }
+
+    // ─── AJAX step-1 validation (prevents full-page reload for account errors) ──
+
+    /**
+     * POST /register/validate-account
+     * Validates step-1 fields (uniqueness checks) via AJAX before the user
+     * advances to step 2, so a server error never clears their password.
+     */
+    public function validateAccount(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'org_name'  => ['required', 'string', 'min:2', 'max:80'],
+            'subdomain' => [
+                'required', 'string', 'min:2', 'max:63',
+                'regex:/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/',
+                Rule::unique('tenants', 'subdomain'),
+                Rule::notIn(self::RESERVED_SUBDOMAINS),
+            ],
+            'email'    => ['required', 'email', 'max:191', Rule::unique('tenants', 'email')],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'subdomain.regex'    => 'Subdomain may only contain lowercase letters, numbers, and hyphens.',
+            'subdomain.not_in'   => 'That subdomain is reserved. Please choose another.',
+            'subdomain.unique'   => 'That subdomain is already taken.',
+            'email.unique'       => 'An account with that email already exists.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        return response()->json(['ok' => true]);
     }
 
     // ─── Registration submit ──────────────────────────────────────────────────

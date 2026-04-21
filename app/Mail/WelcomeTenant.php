@@ -21,8 +21,9 @@ class WelcomeTenant extends Mailable
 
     public function envelope(): Envelope
     {
+        $name = $this->tenant->name;
         return new Envelope(
-            subject: "Welcome to FaithStack! Your site is ready.",
+            subject: "Welcome to FaithStack, {$name} — your site is live",
         );
     }
 

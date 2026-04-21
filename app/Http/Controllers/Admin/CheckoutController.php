@@ -128,6 +128,51 @@ class CheckoutController extends Controller
             ->with('error', 'Checkout was cancelled. No charges were made.');
     }
 
+    /**
+     * POST /admin/billing/stripe/upgrade-saved
+     * Upgrade using the customer's existing default payment method — no card entry needed.
+     */
+    public function upgradeWithSavedCard(Request $request): JsonResponse
+    {
+        $request->validate(['plan_slug' => ['required', 'string', 'exists:plans,slug']]);
+
+        $tenant = app('tenant');
+        $plan   = Plan::where('slug', $request->plan_slug)->where('is_active', true)->firstOrFail();
+
+        if (! $tenant->stripe_customer_id) {
+            return response()->json(['error' => 'No payment method on file. Please add a card first.'], 422);
+        }
+
+        if (! $plan->stripe_price_id) {
+            return response()->json(['error' => 'This plan is not available for purchase online.'], 422);
+        }
+
+        try {
+            $pm = $this->stripe->getDefaultPaymentMethod($tenant->stripe_customer_id);
+
+            if (! $pm) {
+                return response()->json(['error' => 'No default payment method found. Please add a card.'], 422);
+            }
+
+            $this->stripe->upgradeSubscription(
+                customerId:      $tenant->stripe_customer_id,
+                newPriceId:      $plan->stripe_price_id,
+                paymentMethodId: $pm->id,
+            );
+
+            $this->subscription->activate($tenant, $plan, 'stripe');
+
+            return response()->json([
+                'success'  => true,
+                'message'  => "You're now on the {$plan->name} plan.",
+                'redirect' => route('admin.billing'),
+            ]);
+
+        } catch (\Throwable $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
     /** POST /admin/billing/stripe/intent — create a PaymentIntent, return client_secret. */
     public function createIntent(Request $request): JsonResponse
     {
