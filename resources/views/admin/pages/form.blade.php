@@ -766,6 +766,7 @@ function renderPreview() {
     const form = document.getElementById('page-form');
     const body = new FormData(form);
     body.set('_token', CSRF_TOKEN);
+    body.delete('_method'); // strip PUT/PATCH spoofing — preview is always POST
 
     fetch(PREVIEW_URL, {
         method:  'POST',
