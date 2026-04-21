@@ -427,6 +427,46 @@
         </div>
     </div>
 
+    {{-- Theme picker bar --}}
+    <div style="padding:8px 12px;background:white;border-bottom:1px solid #e2e8f0;flex-shrink:0;
+                display:flex;align-items:center;gap:8px">
+        <svg style="width:14px;height:14px;color:#6366f1;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+        </svg>
+        <span style="font-size:.75rem;font-weight:600;color:#475569;white-space:nowrap">Theme:</span>
+        <select id="preview-theme-select"
+                onchange="schedulePreviewUpdate()"
+                style="flex:1;font-size:.75rem;border:1px solid #e2e8f0;border-radius:7px;
+                       padding:5px 8px;color:#1e293b;background:white;cursor:pointer;
+                       focus:outline:none;min-width:0">
+            <option value="">— Current ({{ $tenant->theme->name ?? 'Default' }}) —</option>
+            @php $grouped = $themes->groupBy('category'); @endphp
+            @foreach($grouped as $category => $categoryThemes)
+                <optgroup label="{{ ucfirst($category) }}">
+                    @foreach($categoryThemes as $t)
+                        <option value="{{ $t->id }}" {{ optional($tenant->theme)->id == $t->id ? 'selected' : '' }}>
+                            {{ $t->name }}
+                        </option>
+                    @endforeach
+                </optgroup>
+            @endforeach
+        </select>
+        {{-- Apply to page button --}}
+        <button type="button" id="preview-apply-theme-btn"
+                onclick="applyThemeToPage()"
+                title="Save this theme to the page"
+                style="flex-shrink:0;padding:5px 10px;border-radius:7px;border:1px solid #e2e8f0;
+                       background:white;font-size:.75rem;font-weight:600;color:#6366f1;cursor:pointer;
+                       white-space:nowrap;display:flex;align-items:center;gap:4px"
+                onmouseover="this.style.background='#eef2ff';this.style.borderColor='#6366f1'"
+                onmouseout="this.style.background='white';this.style.borderColor='#e2e8f0'">
+            <svg style="width:11px;height:11px" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            Apply
+        </button>
+    </div>
+
     {{-- Loading bar --}}
     <div id="preview-loading"
          style="height:3px;background:linear-gradient(90deg,#4f46e5,#7c3aed,#4f46e5);
@@ -768,6 +808,10 @@ function renderPreview() {
     body.set('_token', CSRF_TOKEN);
     body.delete('_method'); // strip PUT/PATCH spoofing — preview is always POST
 
+    const themeId = document.getElementById('preview-theme-select')?.value;
+    if (themeId) body.set('_preview_theme_id', themeId);
+    else         body.delete('_preview_theme_id');
+
     fetch(PREVIEW_URL, {
         method:  'POST',
         body,
@@ -785,6 +829,40 @@ function renderPreview() {
             setIframeSrcdoc('<p style="font-family:sans-serif;padding:2rem;color:#ef4444">Preview failed. Check your console.</p>');
         }
     });
+}
+
+// Injects a hidden theme_id input into the main save form so clicking
+// "Save Changes" also persists the previewed theme to the page.
+function applyThemeToPage() {
+    const select  = document.getElementById('preview-theme-select');
+    const themeId = select?.value;
+    const form    = document.getElementById('page-form');
+    if (!form) return;
+
+    // Remove any previous injected input
+    form.querySelector('input[name="_applied_theme_id"]')?.remove();
+
+    if (themeId) {
+        const hidden = document.createElement('input');
+        hidden.type  = 'hidden';
+        hidden.name  = '_applied_theme_id';
+        hidden.value = themeId;
+        form.appendChild(hidden);
+    }
+
+    // Visual feedback on the button
+    const btn = document.getElementById('preview-apply-theme-btn');
+    const label = select?.options[select.selectedIndex]?.text ?? 'theme';
+    if (btn) {
+        btn.style.background   = '#eef2ff';
+        btn.style.borderColor  = '#6366f1';
+        btn.innerHTML = `<svg style="width:11px;height:11px" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Applied`;
+        setTimeout(() => {
+            btn.innerHTML = `<svg style="width:11px;height:11px" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Apply`;
+            btn.style.background  = 'white';
+            btn.style.borderColor = '#e2e8f0';
+        }, 2000);
+    }
 }
 
 // ── Wire up live-update listeners ─────────────────────────────────────────────

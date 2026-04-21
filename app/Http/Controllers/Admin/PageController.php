@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Models\Theme;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +21,11 @@ class PageController extends Controller
 
     public function create(): View
     {
-        return view('admin.pages.form', ['page' => new Page(), 'tenant' => app('tenant')]);
+        return view('admin.pages.form', [
+            'page'   => new Page(),
+            'tenant' => app('tenant'),
+            'themes' => Theme::orderBy('category')->orderBy('name')->get(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -31,6 +36,7 @@ class PageController extends Controller
         Page::create([
             ...$validated,
             'tenant_id' => $tenant->id,
+            'theme_id'  => $this->resolveAppliedTheme($request),
             'content'   => $this->buildContent($request),
         ]);
 
@@ -41,7 +47,11 @@ class PageController extends Controller
     {
         $this->authorizePage($page);
 
-        return view('admin.pages.form', ['page' => $page, 'tenant' => app('tenant')]);
+        return view('admin.pages.form', [
+            'page'   => $page,
+            'tenant' => app('tenant'),
+            'themes' => Theme::orderBy('category')->orderBy('name')->get(),
+        ]);
     }
 
     public function update(Request $request, Page $page): RedirectResponse
@@ -52,10 +62,13 @@ class PageController extends Controller
 
         $updateData = $validated;
 
-        // Only overwrite content when the form actually submits sections.
-        // Status-only toggles (is_published) must not touch stored content.
         if ($request->has('sections') || $request->has('footer_enabled')) {
             $updateData['content'] = $this->buildContent($request);
+        }
+
+        $appliedTheme = $this->resolveAppliedTheme($request);
+        if ($appliedTheme !== false) {
+            $updateData['theme_id'] = $appliedTheme;
         }
 
         $page->update($updateData);
@@ -83,7 +96,11 @@ class PageController extends Controller
             'content'      => $this->buildContent($request),
         ]);
 
-        $theme = $tenant->theme;
+        // Allow the preview panel to override the active theme
+        $previewThemeId = $request->input('_preview_theme_id');
+        $theme = $previewThemeId
+            ? Theme::find($previewThemeId) ?? $tenant->theme
+            : $tenant->theme;
 
         try {
             if ($theme && $theme->view_path) {
@@ -163,5 +180,21 @@ class PageController extends Controller
     private function authorizePage(Page $page): void
     {
         abort_unless($page->tenant_id === app('tenant')->id, 403);
+    }
+
+    /**
+     * Returns the theme_id to save, or false if no theme was applied via preview.
+     * Returns null if the user explicitly cleared the theme override.
+     */
+    private function resolveAppliedTheme(Request $request): int|null|false
+    {
+        if (! $request->has('_applied_theme_id')) {
+            return false; // not present — don't touch theme_id
+        }
+
+        $id = $request->input('_applied_theme_id');
+        if (! $id) return null;
+
+        return Theme::where('id', $id)->value('id');
     }
 }
