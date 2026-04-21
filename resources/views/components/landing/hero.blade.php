@@ -64,12 +64,25 @@
                     </a>
                 </div>
 
-                {{-- Trust --}}
-                <div class="reveal flex flex-wrap gap-x-6 gap-y-2 mt-10 text-xs text-white/22" data-delay="6">
-                    @foreach(['No credit card', '5-minute setup', 'Cancel anytime'] as $b)
-                    <span class="flex items-center gap-1.5">
-                        <svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-                        {{ $b }}
+                {{-- Trust chips --}}
+                <div class="reveal flex flex-wrap items-center gap-3 mt-10" data-delay="6">
+                    @foreach([
+                        ['label' => 'No charge today', 'icon' => 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z'],
+                        ['label' => '5-minute setup',  'icon' => 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z'],
+                        ['label' => 'Cancel anytime',  'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    ] as $chip)
+                    <span class="inline-flex items-center gap-2 pl-1.5 pr-3.5 py-1.5 rounded-full text-xs font-semibold text-white/90
+                                 bg-white/[0.06] border border-white/[0.10]"
+                          style="box-shadow:0 0 12px rgba(74,222,128,.08)">
+                        {{-- Icon pill --}}
+                        <span class="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
+                              style="background:rgba(74,222,128,.15);box-shadow:0 0 8px 1px rgba(74,222,128,.35)">
+                            <svg style="width:11px;height:11px;color:#4ade80;filter:drop-shadow(0 0 3px rgba(74,222,128,.7))"
+                                 fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $chip['icon'] }}"/>
+                            </svg>
+                        </span>
+                        {{ $chip['label'] }}
                     </span>
                     @endforeach
                 </div>
