@@ -21,9 +21,17 @@
             <a href="{{ route('page.show', $page->slug) }}" target="_blank"
                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-teal-600 bg-teal-50 border border-teal-200 hover:bg-teal-100 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                Preview
+                Live Site
             </a>
         @endif
+        <button type="button" id="preview-toggle-btn" onclick="togglePreview()"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span id="preview-toggle-label">Preview</span>
+        </button>
     </div>
 @endsection
 
@@ -80,41 +88,56 @@
             </div>
 
             {{-- Sections Builder --}}
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Page Sections</h3>
-                    <span class="text-xs text-gray-400">Drag to reorder (coming soon)</span>
-                </div>
+            @php $sections = old('sections', $page->getSections()); @endphp
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-                <div id="sections-container" class="space-y-3">
-                    @php $sections = old('sections', $page->getSections()); @endphp
-                    @foreach($sections as $i => $section)
-                        @include('admin.pages.partials.section-row', ['section' => $section, 'index' => $i])
-                    @endforeach
-                </div>
-
-                {{-- Empty state --}}
-                <div id="sections-empty" class="{{ count($sections) > 0 ? 'hidden' : '' }} py-8 text-center">
-                    <div class="w-12 h-12 rounded-xl bg-gray-50 text-gray-300 flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/40">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Page Sections</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Drag to reorder · Click to expand</p>
                     </div>
-                    <p class="text-sm text-gray-400">No sections yet. Add one below.</p>
+                    <span id="sections-count-badge"
+                          class="{{ count($sections) > 0 ? '' : 'hidden' }} px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold">
+                        {{ count($sections) }} section{{ count($sections) !== 1 ? 's' : '' }}
+                    </span>
                 </div>
 
-                {{-- Add section --}}
-                <div class="mt-5 pt-5 border-t border-gray-100">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Add Section</p>
+                {{-- Canvas --}}
+                <div class="p-4">
+                    <div id="sections-container" class="space-y-2.5">
+                        @foreach($sections as $i => $section)
+                            @include('admin.pages.partials.section-row', ['section' => $section, 'index' => $i])
+                        @endforeach
+                    </div>
+
+                    {{-- Empty state --}}
+                    <div id="sections-empty"
+                         class="{{ count($sections) > 0 ? 'hidden' : '' }} py-12 text-center rounded-xl border-2 border-dashed border-gray-200 mt-1">
+                        <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-400">No sections yet</p>
+                        <p class="text-xs text-gray-300 mt-1">Click a section type below to add your first block</p>
+                    </div>
+                </div>
+
+                {{-- Add section toolbar --}}
+                <div class="px-4 pb-4 pt-2 border-t border-gray-100 bg-gray-50/30">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Add Section</p>
                     <div class="flex flex-wrap gap-2">
                         @foreach([
-                            'hero'       => ['label' => 'Hero',       'icon' => '🏠'],
-                            'text'       => ['label' => 'Text',       'icon' => '📝'],
-                            'image_text' => ['label' => 'Image + Text','icon' => '🖼'],
-                            'gallery'    => ['label' => 'Gallery',    'icon' => '🎨'],
-                            'cta'        => ['label' => 'Call to Action','icon' => '📣'],
+                            'hero'       => ['label' => 'Hero',           'icon' => '🏠'],
+                            'text'       => ['label' => 'Text',           'icon' => '📝'],
+                            'image_text' => ['label' => 'Image + Text',   'icon' => '🖼'],
+                            'gallery'    => ['label' => 'Gallery',        'icon' => '🎨'],
+                            'cta'        => ['label' => 'Call to Action', 'icon' => '📣'],
                         ] as $type => $meta)
                             <button type="button"
                                     onclick="addSection('{{ $type }}')"
-                                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold border border-gray-200 rounded-xl text-gray-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-all duration-150">
+                                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold border border-gray-200 rounded-xl text-gray-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-all duration-150 active:scale-95">
                                 <span>{{ $meta['icon'] }}</span>
                                 {{ $meta['label'] }}
                             </button>
@@ -334,138 +357,452 @@
     </div>
 </form>
 
+{{-- ══════════════════════════════════════════════════
+     LIVE PREVIEW PANEL
+     Fixed right drawer, slides in on toggle
+     ══════════════════════════════════════════════════ --}}
+<div id="preview-panel"
+     style="position:fixed;top:0;right:0;bottom:0;width:520px;z-index:50;
+            display:flex;flex-direction:column;background:#f8fafc;
+            border-left:1px solid #e2e8f0;box-shadow:-8px 0 40px rgba(0,0,0,.1);
+            transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
+
+    {{-- Panel header --}}
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:12px 16px;background:white;border-bottom:1px solid #e2e8f0;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span id="preview-pulse"
+                  style="display:inline-block;width:8px;height:8px;border-radius:50%;
+                         background:#10b981;box-shadow:0 0 0 0 rgba(16,185,129,.4);
+                         animation:pulse-ring 2s ease-out infinite"></span>
+            <span style="font-size:.8125rem;font-weight:600;color:#1e293b">Live Preview</span>
+        </div>
+
+        {{-- Device switcher --}}
+        <div style="display:flex;align-items:center;gap:8px">
+            <div style="display:flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;font-size:.75rem">
+                <button type="button" id="btn-device-desktop" onclick="setDevice('desktop')"
+                        style="padding:5px 10px;background:#4f46e5;color:white;border:none;cursor:pointer;
+                               display:inline-flex;align-items:center;gap:4px;font-size:.75rem;font-weight:500">
+                    <svg style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+                    </svg>
+                    Desktop
+                </button>
+                <button type="button" id="btn-device-mobile" onclick="setDevice('mobile')"
+                        style="padding:5px 10px;background:white;color:#64748b;border:none;cursor:pointer;
+                               display:inline-flex;align-items:center;gap:4px;font-size:.75rem;font-weight:500">
+                    <svg style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1" fill="currentColor"/>
+                    </svg>
+                    Mobile
+                </button>
+            </div>
+            <button type="button" onclick="togglePreview()"
+                    style="padding:6px;border-radius:8px;border:none;background:transparent;cursor:pointer;color:#94a3b8"
+                    onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                <svg style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    {{-- Browser address bar --}}
+    <div style="padding:8px 12px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:8px;background:white;
+                    border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px">
+            <div style="display:flex;gap:5px;flex-shrink:0">
+                <span style="width:10px;height:10px;border-radius:50%;background:#fc5c65;display:inline-block"></span>
+                <span style="width:10px;height:10px;border-radius:50%;background:#ffd32a;display:inline-block"></span>
+                <span style="width:10px;height:10px;border-radius:50%;background:#05c46b;display:inline-block"></span>
+            </div>
+            <svg style="width:12px;height:12px;color:#94a3b8;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span id="preview-url-bar"
+                  style="font-size:.7rem;color:#64748b;font-family:monospace;truncate;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">
+                {{ request()->getHost() }}/{{ $page->slug ?? '…' }}
+            </span>
+        </div>
+    </div>
+
+    {{-- Loading bar --}}
+    <div id="preview-loading"
+         style="height:3px;background:linear-gradient(90deg,#4f46e5,#7c3aed,#4f46e5);
+                background-size:200% 100%;animation:preview-shimmer 1.2s linear infinite;
+                display:none;flex-shrink:0"></div>
+
+    {{-- Viewport wrapper (for mobile scale) --}}
+    <div style="flex:1;overflow:hidden;position:relative;background:#e5e7eb" id="preview-viewport-wrap">
+        {{-- Desktop: full-width iframe --}}
+        <iframe id="preview-iframe-desktop"
+                style="width:100%;height:100%;border:none;display:block;background:white"
+                srcdoc=""></iframe>
+
+        {{-- Mobile: phone-frame iframe (hidden until device=mobile) --}}
+        <div id="preview-mobile-wrap"
+             style="display:none;align-items:flex-start;justify-content:center;overflow-y:auto;height:100%;padding:20px">
+            <div style="width:390px;border-radius:44px;overflow:hidden;flex-shrink:0;
+                        box-shadow:0 0 0 10px #1e293b, 0 0 0 12px #334155, 0 24px 60px rgba(0,0,0,.4);
+                        position:relative">
+                {{-- Phone notch --}}
+                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);
+                            width:120px;height:28px;background:#1e293b;border-radius:0 0 18px 18px;z-index:2"></div>
+                <iframe id="preview-iframe-mobile"
+                        style="width:390px;height:780px;border:none;display:block;background:white"
+                        srcdoc=""></iframe>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{{-- Overlay backdrop (mobile) --}}
+<div id="preview-backdrop"
+     onclick="togglePreview()"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:49"></div>
+
+<style>
+.sortable-ghost  { opacity: .4; }
+.sortable-drag   { box-shadow: 0 20px 40px rgba(0,0,0,.15); transform: rotate(0.5deg) scale(.99); }
+
+@keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0   rgba(16,185,129,.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(16,185,129,0);  }
+    100% { box-shadow: 0 0 0 0   rgba(16,185,129,0);  }
+}
+@keyframes preview-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
+// ─── Constants ────────────────────────────────────────────────────────────────
 let sectionIndex = {{ count($sections) }};
 
-// Auto-slug from title on new pages
-@if(!$page->exists)
-document.getElementById('page-title').addEventListener('input', function() {
-    const slug = this.value
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-');
-    document.getElementById('page-slug').value = slug;
-});
-@endif
+const FI = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all';
+const FL = 'block text-xs font-medium text-gray-600 mb-1';
 
-function updateEmptyState() {
-    const container = document.getElementById('sections-container');
-    const empty = document.getElementById('sections-empty');
-    if (container.children.length === 0) {
-        empty.classList.remove('hidden');
+const SECTION_META = {
+    hero:       { icon: '🏠', label: 'Hero',          badge: 'bg-indigo-100 text-indigo-700' },
+    text:       { icon: '📝', label: 'Text',          badge: 'bg-sky-100 text-sky-700' },
+    image_text: { icon: '🖼', label: 'Image + Text',  badge: 'bg-violet-100 text-violet-700' },
+    gallery:    { icon: '🎨', label: 'Gallery',       badge: 'bg-rose-100 text-rose-700' },
+    cta:        { icon: '📣', label: 'Call to Action','badge': 'bg-amber-100 text-amber-700' },
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Auto-slug on new pages
+    @if(!$page->exists)
+    document.getElementById('page-title').addEventListener('input', function () {
+        document.getElementById('page-slug').value = this.value
+            .toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+    });
+    @endif
+
+    // Drag-and-drop reordering
+    Sortable.create(document.getElementById('sections-container'), {
+        handle:     '.drag-handle',
+        animation:  180,
+        easing:     'cubic-bezier(0.25, 1, 0.5, 1)',
+        ghostClass: 'sortable-ghost',
+        dragClass:  'sortable-drag',
+        onEnd:      reindexSections,
+    });
+
+    syncUI();
+});
+
+// ─── State helpers ────────────────────────────────────────────────────────────
+function syncUI() {
+    const count = document.querySelectorAll('#sections-container [data-section]').length;
+    document.getElementById('sections-empty').classList.toggle('hidden', count > 0);
+
+    const badge = document.getElementById('sections-count-badge');
+    if (count > 0) {
+        badge.textContent = `${count} section${count !== 1 ? 's' : ''}`;
+        badge.classList.remove('hidden');
     } else {
-        empty.classList.add('hidden');
+        badge.classList.add('hidden');
     }
 }
 
-const sectionTemplates = {
-    hero: `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Title</label>
-                <input type="text" name="sections[INDEX][title]" placeholder="Welcome to our community"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Subtitle</label>
-                <input type="text" name="sections[INDEX][subtitle]" placeholder="A place of hope and belonging"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Button Text</label>
-                <input type="text" name="sections[INDEX][button_text]" placeholder="Learn More"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Button URL</label>
-                <input type="text" name="sections[INDEX][button_url]" placeholder="/about"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-        </div>`,
+// Called by SortableJS after every drag — fixes all name="sections[n][…]"
+// attributes to match the new visual order so the form submits correctly.
+function reindexSections() {
+    document.querySelectorAll('#sections-container [data-section]').forEach((card, i) => {
+        card.dataset.index = i;
+        card.querySelectorAll('[name^="sections["]').forEach(el => {
+            el.name = el.name.replace(/sections\[\d+\]/, `sections[${i}]`);
+        });
+    });
+    sectionIndex = document.querySelectorAll('#sections-container [data-section]').length;
+}
 
-    text: `
-        <div>
-            <label class="text-xs font-medium text-gray-600 mb-1 block">Heading</label>
-            <input type="text" name="sections[INDEX][heading]" placeholder="Section heading"
-                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
+function removeSection(btn) {
+    btn.closest('[data-section]').remove();
+    reindexSections();
+    syncUI();
+}
+
+// Updates the grey preview text in the card header as the user types.
+function updatePreview(input) {
+    const label = input.closest('[data-section]')?.querySelector('[data-preview-label]');
+    if (label) label.textContent = input.value;
+}
+
+// ─── Section field templates ──────────────────────────────────────────────────
+function buildFields(type, idx, d) {
+    d = d || {};
+    const v = (key) => (d[key] || '').toString().replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const input  = (name, placeholder, extra='') =>
+        `<input type="text" name="sections[${idx}][${name}]" value="${v(name)}" placeholder="${placeholder}" ${extra} class="${FI}">`;
+    const url    = (name, placeholder) =>
+        `<input type="url" name="sections[${idx}][${name}]" value="${v(name)}" placeholder="${placeholder}" class="${FI}">`;
+    const label  = (text) => `<label class="${FL}">${text}</label>`;
+    const field  = (lbl, inner) => `<div>${label(lbl)}${inner}</div>`;
+    const grid   = (cols) => `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${cols}</div>`;
+
+    switch (type) {
+        case 'hero': return grid(
+            field('Title',       input('title',       'Welcome to our community', 'data-preview-src oninput="updatePreview(this)"')) +
+            field('Subtitle',    input('subtitle',    'A place of hope and belonging')) +
+            field('Button Text', input('button_text', 'Learn More')) +
+            field('Button URL',  input('button_url',  '/about'))
+        );
+        case 'text': return (
+            field('Heading', input('heading', 'Section heading', 'data-preview-src oninput="updatePreview(this)"')) +
+            field('Content', `<textarea name="sections[${idx}][content]" rows="4" placeholder="Your content here…" class="${FI} resize-none">${v('content')}</textarea>`)
+        );
+        case 'image_text': return (
+            field('Heading',   input('heading', 'About Us', 'data-preview-src oninput="updatePreview(this)"')) +
+            field('Body Text', `<textarea name="sections[${idx}][text]" rows="3" placeholder="Describe your organization…" class="${FI} resize-none">${v('text')}</textarea>`) +
+            field('Image URL', url('image', 'https://example.com/image.jpg'))
+        );
+        case 'gallery': return (
+            field('Heading', input('heading', 'Our Gallery', 'data-preview-src oninput="updatePreview(this)"')) +
+            field('Image URLs <span class="font-normal text-gray-400">(one per line)</span>',
+                `<textarea name="sections[${idx}][images]" rows="4" placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg" class="${FI} font-mono text-xs resize-none">${v('images')}</textarea>`)
+        );
+        case 'cta': return grid(
+            field('Heading',     input('heading',     'Ready to get started?', 'data-preview-src oninput="updatePreview(this)"')) +
+            field('Sub-text',    input('subtext',     'Join us this Sunday')) +
+            field('Button Text', input('button_text', 'Get Involved')) +
+            field('Button URL',  input('button_url',  '/contact'))
+        );
+        default: return '';
+    }
+}
+
+// ─── Card builder ─────────────────────────────────────────────────────────────
+function buildSectionCard(type, idx, data) {
+    const meta        = SECTION_META[type] || { icon: '📄', label: type, badge: 'bg-gray-100 text-gray-600' };
+    const previewText = (data && (data.title || data.heading)) || '';
+    const fields      = buildFields(type, idx, data);
+    const badgeText   = type.replace('_', '+');
+
+    return `
+<div data-section data-index="${idx}"
+     class="flex border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow"
+     x-data="{ open: true }">
+
+    <button type="button" tabindex="-1"
+            class="drag-handle flex items-center px-2.5 bg-gray-50 border-r border-gray-200 cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:text-indigo-400 text-gray-300 transition-colors touch-none"
+            title="Drag to reorder">
+        <svg class="w-3.5 h-3.5 pointer-events-none" fill="currentColor" viewBox="0 0 16 16">
+            <circle cx="5" cy="3" r="1.3"/><circle cx="11" cy="3" r="1.3"/>
+            <circle cx="5" cy="8" r="1.3"/><circle cx="11" cy="8" r="1.3"/>
+            <circle cx="5" cy="13" r="1.3"/><circle cx="11" cy="13" r="1.3"/>
+        </svg>
+    </button>
+
+    <div class="flex-1 min-w-0">
+        <div @click="open = !open"
+             class="flex items-center gap-2.5 px-4 py-2.5 bg-gray-50/80 border-b border-gray-100 cursor-pointer hover:bg-gray-100/60 transition-colors select-none">
+            <span class="text-base leading-none flex-shrink-0">${meta.icon}</span>
+            <span class="text-xs font-semibold text-gray-700 flex-shrink-0">${meta.label}</span>
+            <span data-preview-label class="text-xs text-gray-400 italic truncate flex-1 min-w-0">${previewText}</span>
+            <div class="flex items-center gap-2 ml-auto flex-shrink-0">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${meta.badge}">${badgeText}</span>
+                <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
         </div>
-        <div>
-            <label class="text-xs font-medium text-gray-600 mb-1 block">Content</label>
-            <textarea name="sections[INDEX][content]" rows="4" placeholder="Your content here..."
-                      class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 resize-none"></textarea>
-        </div>`,
 
-    image_text: `
-        <div>
-            <label class="text-xs font-medium text-gray-600 mb-1 block">Heading</label>
-            <input type="text" name="sections[INDEX][heading]" placeholder="About Us"
-                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0 -translate-y-0.5"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="p-4 space-y-3">
+            <input type="hidden" name="sections[${idx}][type]" value="${type}">
+            ${fields}
+            <div class="flex justify-end pt-2 border-t border-gray-100 mt-1">
+                <button type="button" onclick="removeSection(this)"
+                        class="inline-flex items-center gap-1.5 text-xs text-red-400 hover:text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Remove section
+                </button>
+            </div>
         </div>
-        <div>
-            <label class="text-xs font-medium text-gray-600 mb-1 block">Text</label>
-            <textarea name="sections[INDEX][text]" rows="3" placeholder="Describe your organization..."
-                      class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 resize-none"></textarea>
-        </div>
-        <div>
-            <label class="text-xs font-medium text-gray-600 mb-1 block">Image URL</label>
-            <input type="url" name="sections[INDEX][image]" placeholder="https://example.com/image.jpg"
-                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-        </div>`,
+    </div>
+</div>`;
+}
 
-    gallery: `
-        <div>
-            <label class="text-xs font-medium text-gray-600 mb-1 block">Heading</label>
-            <input type="text" name="sections[INDEX][heading]" placeholder="Our Gallery"
-                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-        </div>
-        <div>
-            <label class="text-xs font-medium text-gray-600 mb-1 block">Image URLs <span class="text-gray-400">(one per line)</span></label>
-            <textarea name="sections[INDEX][images]" rows="4" placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg"
-                      class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 resize-none"></textarea>
-        </div>`,
+// ─── Public: called by "Add Section" buttons ──────────────────────────────────
+function addSection(type, data) {
+    const idx       = sectionIndex++;
+    const container = document.getElementById('sections-container');
+    container.insertAdjacentHTML('beforeend', buildSectionCard(type, idx, data || {}));
 
-    cta: `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Heading</label>
-                <input type="text" name="sections[INDEX][heading]" placeholder="Ready to get started?"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Sub-text</label>
-                <input type="text" name="sections[INDEX][subtext]" placeholder="Join us this Sunday"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Button Text</label>
-                <input type="text" name="sections[INDEX][button_text]" placeholder="Get Involved"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-            <div>
-                <label class="text-xs font-medium text-gray-600 mb-1 block">Button URL</label>
-                <input type="text" name="sections[INDEX][button_url]" placeholder="/contact"
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400">
-            </div>
-        </div>`
-};
+    const newCard = container.lastElementChild;
+    // Boot Alpine on the dynamically inserted card
+    if (typeof Alpine !== 'undefined' && Alpine.initTree) {
+        Alpine.initTree(newCard);
+    }
 
-const sectionLabels = {
-    hero: '🏠 Hero',
-    text: '📝 Text',
-    image_text: '🖼 Image + Text',
-    gallery: '🎨 Gallery',
-    cta: '📣 Call to Action',
-};
+    syncUI();
+    newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-// Footer toolbar helpers
+// ─── Live Preview ─────────────────────────────────────────────────────────────
+
+let _previewOpen   = false;
+let _previewTimer  = null;
+let _previewDevice = 'desktop';
+let _previewCtrl   = null;   // AbortController for in-flight fetch
+
+const PREVIEW_URL = '{{ route("admin.pages.preview") }}';
+const CSRF_TOKEN  = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
+function togglePreview() {
+    _previewOpen = !_previewOpen;
+    const panel    = document.getElementById('preview-panel');
+    const backdrop = document.getElementById('preview-backdrop');
+    const btn      = document.getElementById('preview-toggle-btn');
+    const label    = document.getElementById('preview-toggle-label');
+    const mainEl   = document.querySelector('main.overflow-y-auto') || document.querySelector('main');
+
+    panel.style.transform  = _previewOpen ? 'translateX(0)' : 'translateX(100%)';
+    backdrop.style.display = _previewOpen && window.innerWidth < 1024 ? 'block' : 'none';
+
+    if (mainEl) {
+        mainEl.style.transition   = 'padding-right .3s cubic-bezier(.4,0,.2,1)';
+        mainEl.style.paddingRight = _previewOpen ? '540px' : '';
+    }
+
+    if (btn) {
+        btn.style.background  = _previewOpen ? '#4f46e5' : '';
+        btn.style.color       = _previewOpen ? 'white'   : '';
+        btn.style.borderColor = _previewOpen ? '#4f46e5' : '';
+    }
+    if (label) label.textContent = _previewOpen ? 'Close Preview' : 'Preview';
+
+    if (_previewOpen) renderPreview();
+}
+
+function setDevice(device) {
+    _previewDevice = device;
+    const btnD      = document.getElementById('btn-device-desktop');
+    const btnM      = document.getElementById('btn-device-mobile');
+    const desktopIf = document.getElementById('preview-iframe-desktop');
+    const mobileWrap= document.getElementById('preview-mobile-wrap');
+
+    const on  = 'background:#4f46e5;color:white';
+    const off = 'background:white;color:#64748b';
+
+    if (device === 'mobile') {
+        desktopIf.style.display   = 'none';
+        mobileWrap.style.display  = 'flex';
+        btnD.style.cssText       += ';' + off;
+        btnM.style.cssText       += ';' + on;
+    } else {
+        desktopIf.style.display   = 'block';
+        mobileWrap.style.display  = 'none';
+        btnD.style.cssText       += ';' + on;
+        btnM.style.cssText       += ';' + off;
+    }
+    renderPreview();
+}
+
+function schedulePreviewUpdate() {
+    if (!_previewOpen) return;
+    clearTimeout(_previewTimer);
+    _previewTimer = setTimeout(renderPreview, 400);
+}
+
+function setPreviewLoading(on) {
+    const bar = document.getElementById('preview-loading');
+    if (bar) bar.style.display = on ? 'block' : 'none';
+}
+
+function setIframeSrcdoc(html) {
+    const slug   = document.getElementById('page-slug')?.value || '';
+    const urlBar = document.getElementById('preview-url-bar');
+    if (urlBar) urlBar.textContent = '{{ request()->getHost() }}/' + (slug || '…');
+
+    const id = _previewDevice === 'mobile' ? 'preview-iframe-mobile' : 'preview-iframe-desktop';
+    const iframe = document.getElementById(id);
+    if (iframe) iframe.srcdoc = html;
+}
+
+function renderPreview() {
+    if (!_previewOpen) return;
+
+    // Cancel any in-flight request
+    if (_previewCtrl) _previewCtrl.abort();
+    _previewCtrl = new AbortController();
+
+    setPreviewLoading(true);
+
+    const form = document.getElementById('page-form');
+    const body = new FormData(form);
+    body.set('_token', CSRF_TOKEN);
+
+    fetch(PREVIEW_URL, {
+        method:  'POST',
+        body,
+        signal:  _previewCtrl.signal,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(r => r.text())
+    .then(html => {
+        setPreviewLoading(false);
+        setIframeSrcdoc(html);
+    })
+    .catch(err => {
+        if (err.name !== 'AbortError') {
+            setPreviewLoading(false);
+            setIframeSrcdoc('<p style="font-family:sans-serif;padding:2rem;color:#ef4444">Preview failed. Check your console.</p>');
+        }
+    });
+}
+
+// ── Wire up live-update listeners ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('sections-container').addEventListener('input',  schedulePreviewUpdate);
+    document.getElementById('sections-container').addEventListener('change', schedulePreviewUpdate);
+    document.getElementById('page-title')?.addEventListener('input', schedulePreviewUpdate);
+    document.getElementById('page-slug') ?.addEventListener('input', schedulePreviewUpdate);
+
+    new MutationObserver(schedulePreviewUpdate)
+        .observe(document.getElementById('sections-container'), { childList: true, subtree: false });
+});
+
+// ─── Footer toolbar helpers (unchanged) ──────────────────────────────────────
 function wrapSelection(openTag, closeTag) {
     const el = document.getElementById('footer-content-input');
     if (!el) return;
-    const start = el.selectionStart, end = el.selectionEnd;
-    const selected = el.value.substring(start, end);
-    const replacement = openTag + (selected || 'text') + closeTag;
-    el.setRangeText(replacement, start, end, 'end');
+    const s = el.selectionStart, e = el.selectionEnd;
+    el.setRangeText(openTag + (el.value.substring(s, e) || 'text') + closeTag, s, e, 'end');
     el.dispatchEvent(new Event('input'));
     el.focus();
 }
@@ -474,38 +811,10 @@ function insertTag(id, openTag, closeTag) {
     const el = document.getElementById(id);
     if (!el) return;
     const pos = el.selectionStart;
-    const replacement = openTag + closeTag;
-    el.setRangeText(replacement, pos, pos, 'end');
+    el.setRangeText(openTag + closeTag, pos, pos, 'end');
     el.selectionStart = el.selectionEnd = pos + openTag.length;
     el.dispatchEvent(new Event('input'));
     el.focus();
-}
-
-function addSection(type) {
-    const container = document.getElementById('sections-container');
-    const idx = sectionIndex++;
-    const label = sectionLabels[type] || type;
-    const html = `
-        <div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm" x-data="{ collapsed: false }">
-            <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200 cursor-pointer" @click="collapsed = !collapsed">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-gray-500 tracking-wider">${label}</span>
-                    <svg :class="collapsed ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                </div>
-                <button type="button" @click.stop="$event.currentTarget.closest('[x-data]').remove(); updateEmptyState()"
-                    class="text-xs font-medium text-red-400 hover:text-red-600 transition-colors px-2 py-0.5 rounded hover:bg-red-50">
-                    Remove
-                </button>
-            </div>
-            <div x-show="!collapsed" x-transition class="p-4">
-                <input type="hidden" name="sections[${idx}][type]" value="${type}">
-                <div class="space-y-3">
-                    ${sectionTemplates[type].replace(/INDEX/g, idx)}
-                </div>
-            </div>
-        </div>`;
-    container.insertAdjacentHTML('beforeend', html);
-    updateEmptyState();
 }
 </script>
 @endsection

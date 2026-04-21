@@ -71,6 +71,45 @@ class PageController extends Controller
         return redirect()->route('admin.pages.index')->with('success', 'Page deleted.');
     }
 
+    public function preview(Request $request): \Illuminate\Http\Response
+    {
+        $tenant = app('tenant');
+
+        $page = new Page([
+            'tenant_id'    => $tenant->id,
+            'title'        => $request->input('title', 'Preview'),
+            'slug'         => $request->input('slug', 'preview'),
+            'is_published' => true,
+            'content'      => $this->buildContent($request),
+        ]);
+
+        $theme = $tenant->theme;
+
+        try {
+            if ($theme && $theme->view_path) {
+                $html = view($theme->view_path . '.layout', [
+                    'page'        => $page,
+                    'theme'       => $theme,
+                    'config'      => $theme->config ?? [],
+                    'content'     => $page->content ?? [],
+                    'tenant'      => $tenant,
+                    'navItems'    => $tenant->navigation,
+                    'themeSlug'   => $tenant->getThemeSlug(),
+                    'themeConfig' => $theme->config ?? [],
+                ])->render();
+            } else {
+                $html = view('themes.' . $tenant->getThemeSlug() . '.layouts.app', [
+                    'page'   => $page,
+                    'tenant' => $tenant,
+                ])->render();
+            }
+        } catch (\Throwable $e) {
+            $html = '<p style="font-family:sans-serif;padding:2rem;color:#ef4444">Preview error: ' . e($e->getMessage()) . '</p>';
+        }
+
+        return response($html)->header('Content-Type', 'text/html');
+    }
+
     // ─── Private helpers ──────────────────────────────────────────────────────
 
     private function validatePage(Request $request, int $tenantId, ?int $ignoreId = null): array

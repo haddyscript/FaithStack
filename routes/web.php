@@ -90,6 +90,7 @@ $tenantRoutes = function () {
 
             Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
+            Route::post('/pages/preview', [Admin\PageController::class, 'preview'])->name('pages.preview');
             Route::resource('pages', Admin\PageController::class);
 
             Route::get('/navigation',                    [Admin\NavigationController::class, 'index'])->name('navigation.index');

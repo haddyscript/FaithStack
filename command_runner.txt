@@ -56,3 +56,11 @@ format : http://{tenants->subdomain}.faithstack.test/admin/login
 
 # Add to your server's crontab (once only):
 * * * * * cd /path/to/faithstack && php artisan schedule:run >> /dev/null 2>&1
+
+
+
+
+
+https://faithstack-main-pp7ylp.free.laravel.cloud/webhooks/stripe
+- checkout.session.completed
+- invoice.paid
