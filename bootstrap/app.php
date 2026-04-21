@@ -32,7 +32,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($request->is('superadmin*')) {
                     return redirect()->guest(route('superadmin.login'));
                 }
-                return redirect()->guest(route('admin.login'));
+
+                // In path mode the admin.login route requires {tenant_slug}.
+                // URL::defaults is set by IdentifyTenant when the tenant was
+                // resolved; if it was not (unlikely for auth errors), fall back
+                // to the raw path so the user at least gets a valid response.
+                try {
+                    return redirect()->guest(route('admin.login'));
+                } catch (\Throwable) {
+                    $slug = $request->route('tenant_slug') ?? '';
+                    return redirect()->guest($slug ? "/{$slug}/admin/login" : '/');
+                }
             }
         });
     })->create();

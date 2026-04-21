@@ -11,34 +11,45 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Landing page — root domain only, no tenant context
+| Tenant mode
+|
+| 'subdomain' (default) — local dev / production with wildcard DNS (Forge, DO)
+|   faithstack.test/          → landing + registration + webhooks
+|   faithstack.test/superadmin → super admin
+|   church1.faithstack.test/  → tenant site
+|
+| 'path' — single-domain deployments (Laravel Cloud free, shared hosting)
+|   faithstack-main.laravel.cloud/            → landing + registration + webhooks
+|   faithstack-main.laravel.cloud/superadmin  → super admin
+|   faithstack-main.laravel.cloud/{slug}/     → tenant site
+|
+| Route NAMES are identical in both modes. In path mode, IdentifyTenant
+| sets URL::defaults(['tenant_slug' => …]) so every route() call inside
+| tenant context auto-injects the slug — no controller/view changes needed.
 |--------------------------------------------------------------------------
 */
-Route::domain(config('app.base_domain', 'faithstack.test'))->group(function () {
+$tenantMode = config('app.tenant_mode', 'subdomain');
+
+// ── Non-tenant routes (landing, registration, webhooks) ──────────────────
+// Defined as a closure so they can be wrapped in Route::domain() for
+// subdomain mode or registered at root level for path mode.
+$rootRoutes = function () {
     Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
-    // Public self-serve registration
     Route::get('/register',                   [RegistrationController::class, 'show'])->name('register');
     Route::post('/register',                  [RegistrationController::class, 'store'])->name('register.store');
     Route::get('/register/check-subdomain',   [RegistrationController::class, 'checkSubdomain'])->name('register.check-subdomain');
     Route::get('/register/setup-intent',      [RegistrationController::class, 'setupIntent'])->name('register.setup-intent');
     Route::post('/register/validate-account', [RegistrationController::class, 'validateAccount'])->name('register.validate-account');
 
-    // Payment webhooks — no CSRF, no auth, no tenant context
+    // No CSRF, no auth, no tenant context
     Route::post('/webhooks/stripe', [Webhook\StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
     Route::post('/webhooks/paypal', [Webhook\PayPalWebhookController::class, 'handle'])->name('webhooks.paypal');
-});
+};
 
-/*
-|--------------------------------------------------------------------------
-| Super-admin routes — root domain only, no tenant context
-|--------------------------------------------------------------------------
-*/
-Route::domain(config('app.base_domain', 'faithstack.test'))
-    ->prefix('superadmin')
-    ->name('superadmin.')
-    ->group(function () {
-
+// ── Super-admin routes ────────────────────────────────────────────────────
+$superadminRoutes = function () {
+    Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::get('/login', [SuperAdmin\AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [SuperAdmin\AuthController::class, 'login']);
 
@@ -51,83 +62,95 @@ Route::domain(config('app.base_domain', 'faithstack.test'))
                 ->name('tenants.toggle-subscription');
         });
     });
+};
 
-/*
-|--------------------------------------------------------------------------
-| All routes are wrapped in the 'tenant' middleware which resolves the
-| current tenant from the subdomain and shares it with views.
-|--------------------------------------------------------------------------
-*/
+// ── Tenant routes ─────────────────────────────────────────────────────────
+// Registered under {tenant}.base_domain (subdomain mode) or
+// under /{tenant_slug}/… (path mode). Names are identical either way.
+$tenantRoutes = function () {
 
-Route::middleware(['tenant'])->group(function () {
-
-    // ── Subscription expired fallback ─────────────────────────────────────
     Route::get('/expired', fn () => view('errors.subscription_expired'))
         ->name('subscription.expired');
 
-    // ── Public frontend (exact routes first) ─────────────────────────────
     Route::middleware(['subscription'])->group(function () {
-
-        // Homepage
         Route::get('/', [PageController::class, 'home'])->name('home');
-
-        // Donation form
         Route::get('/donate', [DonationController::class, 'create'])->name('donate');
         Route::post('/donate', [DonationController::class, 'store'])->name('donate.store');
-
-        // /{slug} is registered AFTER admin routes (see bottom of file)
     });
 
-    // ── Admin panel ───────────────────────────────────────────────────────
     Route::prefix('admin')->name('admin.')->group(function () {
 
-        // Guest routes (no auth required)
         Route::middleware('guest')->group(function () {
             Route::get('/login', [Admin\AuthController::class, 'showLogin'])->name('login');
             Route::post('/login', [Admin\AuthController::class, 'login']);
         });
 
-        // Authenticated + subscription required
         Route::middleware(['auth', 'subscription'])->group(function () {
             Route::post('/logout', [Admin\AuthController::class, 'logout'])->name('logout');
 
             Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
-            // Pages CRUD
             Route::resource('pages', Admin\PageController::class);
 
-            // Navigation
-            Route::get('/navigation', [Admin\NavigationController::class, 'index'])->name('navigation.index');
-            Route::post('/navigation', [Admin\NavigationController::class, 'store'])->name('navigation.store');
-            Route::put('/navigation/{navigation}', [Admin\NavigationController::class, 'update'])->name('navigation.update');
-            Route::delete('/navigation/{navigation}', [Admin\NavigationController::class, 'destroy'])->name('navigation.destroy');
+            Route::get('/navigation',                    [Admin\NavigationController::class, 'index'])->name('navigation.index');
+            Route::post('/navigation',                   [Admin\NavigationController::class, 'store'])->name('navigation.store');
+            Route::put('/navigation/{navigation}',       [Admin\NavigationController::class, 'update'])->name('navigation.update');
+            Route::delete('/navigation/{navigation}',    [Admin\NavigationController::class, 'destroy'])->name('navigation.destroy');
 
-            // Themes
-            Route::get('/themes', [Admin\ThemeController::class, 'index'])->name('themes.index');
-            Route::post('/themes/activate', [Admin\ThemeController::class, 'activate'])->name('themes.activate');
+            Route::get('/themes',            [Admin\ThemeController::class, 'index'])->name('themes.index');
+            Route::post('/themes/activate',  [Admin\ThemeController::class, 'activate'])->name('themes.activate');
 
-            // Settings
-            Route::get('/settings', [Admin\SettingsController::class, 'index'])->name('settings');
-            Route::put('/settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
+            Route::get('/settings',  [Admin\SettingsController::class, 'index'])->name('settings');
+            Route::put('/settings',  [Admin\SettingsController::class, 'update'])->name('settings.update');
 
             Route::get('/billing', [Admin\BillingController::class, 'index'])->name('billing');
 
-            // Checkout
-            Route::post('/billing/upgrade',           [Admin\CheckoutController::class, 'upgrade'])->name('billing.upgrade');
-            Route::get('/billing/stripe/success',     [Admin\CheckoutController::class, 'stripeSuccess'])->name('billing.stripe.success');
-            Route::get('/billing/paypal/capture',     [Admin\CheckoutController::class, 'paypalCapture'])->name('billing.paypal.capture');
-            Route::get('/billing/cancel',             [Admin\CheckoutController::class, 'cancel'])->name('billing.cancel');
+            Route::post('/billing/upgrade',              [Admin\CheckoutController::class, 'upgrade'])->name('billing.upgrade');
+            Route::get('/billing/stripe/success',        [Admin\CheckoutController::class, 'stripeSuccess'])->name('billing.stripe.success');
+            Route::get('/billing/paypal/capture',        [Admin\CheckoutController::class, 'paypalCapture'])->name('billing.paypal.capture');
+            Route::get('/billing/cancel',                [Admin\CheckoutController::class, 'cancel'])->name('billing.cancel');
             Route::post('/billing/stripe/intent',        [Admin\CheckoutController::class, 'createIntent'])->name('billing.stripe.intent');
             Route::post('/billing/stripe/confirm',       [Admin\CheckoutController::class, 'confirmPayment'])->name('billing.stripe.confirm');
             Route::post('/billing/stripe/upgrade-saved', [Admin\CheckoutController::class, 'upgradeWithSavedCard'])->name('billing.stripe.upgrade-saved');
 
-            // Donations (read-only in admin)
             Route::get('/donations', [Admin\DonationController::class, 'index'])->name('donations.index');
         });
     });
 
-    // ── Slug catch-all — MUST be last so it never shadows /admin/* ────────
+    // Slug catch-all — MUST be last
     Route::middleware(['subscription'])->group(function () {
         Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
     });
-});
+};
+
+// ═════════════════════════════════════════════════════════════════════════
+// SUBDOMAIN MODE  (default — local dev + wildcard DNS production)
+// ═════════════════════════════════════════════════════════════════════════
+if ($tenantMode !== 'path') {
+
+    Route::domain(config('app.base_domain', 'faithstack.test'))->group(function () use ($rootRoutes, $superadminRoutes) {
+        $rootRoutes();
+        $superadminRoutes();
+    });
+
+    Route::middleware(['tenant'])->group($tenantRoutes);
+
+// ═════════════════════════════════════════════════════════════════════════
+// PATH MODE  (single-domain — Laravel Cloud, shared hosting)
+//
+// URLs become:  /church1/admin/billing  instead of  church1.faithstack.test/admin/billing
+//
+// IdentifyTenant reads the {tenant_slug} route parameter and calls
+// URL::defaults(['tenant_slug' => …]) so all downstream route() helpers
+// generate correct URLs without any controller or view changes.
+// ═════════════════════════════════════════════════════════════════════════
+} else {
+
+    $rootRoutes();
+    $superadminRoutes();
+
+    Route::prefix('{tenant_slug}')
+        ->middleware(['tenant'])
+        ->group($tenantRoutes);
+
+}

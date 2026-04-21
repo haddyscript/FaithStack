@@ -32,11 +32,10 @@ class PayPalService
     /** Create a PayPal Order and return the full response (includes 'links'). */
     public function createOrder(Tenant $tenant, Plan $plan): array
     {
-        $token      = $this->accessToken();
-        $price      = number_format((float) $plan->price_monthly, 2, '.', '');
-        $scheme     = request()->isSecure() ? 'https' : 'http';
-        $baseDomain = config('app.base_domain', 'faithstack.test');
-        $sub        = $tenant->subdomain;
+        $token = $this->accessToken();
+        $price = number_format((float) $plan->price_monthly, 2, '.', '');
+
+        [$returnUrl, $cancelUrl] = $this->callbackUrls($tenant);
 
         $response = Http::withToken($token)
             ->post("{$this->baseUrl}/v2/checkout/orders", [
@@ -52,8 +51,8 @@ class PayPalService
                 'application_context' => [
                     'brand_name'  => 'FaithStack',
                     'user_action' => 'PAY_NOW',
-                    'return_url'  => "{$scheme}://{$sub}.{$baseDomain}/admin/billing/paypal/capture",
-                    'cancel_url'  => "{$scheme}://{$sub}.{$baseDomain}/admin/billing/cancel",
+                    'return_url'  => $returnUrl,
+                    'cancel_url'  => $cancelUrl,
                 ],
             ]);
 
@@ -62,6 +61,30 @@ class PayPalService
         }
 
         return $response->json();
+    }
+
+    /**
+     * Return [returnUrl, cancelUrl] aware of subdomain vs path-prefix mode.
+     * In path mode, URL::defaults(['tenant_slug' => …]) set by IdentifyTenant
+     * means route() automatically includes the slug.
+     */
+    private function callbackUrls(Tenant $tenant): array
+    {
+        if (config('app.tenant_mode', 'subdomain') === 'path') {
+            return [
+                route('admin.billing.paypal.capture'),
+                route('admin.billing.cancel'),
+            ];
+        }
+
+        $scheme     = request()->isSecure() ? 'https' : 'http';
+        $baseDomain = config('app.base_domain', 'faithstack.test');
+        $sub        = $tenant->subdomain;
+
+        return [
+            "{$scheme}://{$sub}.{$baseDomain}/admin/billing/paypal/capture",
+            "{$scheme}://{$sub}.{$baseDomain}/admin/billing/cancel",
+        ];
     }
 
     /** Capture an approved order and return the full response. */

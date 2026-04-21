@@ -23,9 +23,7 @@ class StripeService
 
     public function createCheckoutSession(Tenant $tenant, Plan $plan): Session
     {
-        $scheme     = request()->isSecure() ? 'https' : 'http';
-        $baseDomain = config('app.base_domain', 'faithstack.test');
-        $sub        = $tenant->subdomain;
+        [$successUrl, $cancelUrl] = $this->checkoutCallbackUrls($tenant);
 
         return Session::create([
             'mode'                  => 'subscription',
@@ -45,9 +43,38 @@ class StripeService
                 ],
             ],
             'customer_email' => $tenant->email,
-            'success_url'    => "{$scheme}://{$sub}.{$baseDomain}/admin/billing/stripe/success?session_id={CHECKOUT_SESSION_ID}",
-            'cancel_url'     => "{$scheme}://{$sub}.{$baseDomain}/admin/billing/cancel",
+            'success_url'    => $successUrl . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url'     => $cancelUrl,
         ]);
+    }
+
+    /**
+     * Return [successUrl, cancelUrl] for the current tenant, aware of
+     * whether the app is running in subdomain or path-prefix tenant mode.
+     *
+     * In path mode, URL::defaults(['tenant_slug' => …]) was already set by
+     * IdentifyTenant, so route() generates the correct prefixed URL.
+     *
+     * In subdomain mode we build the URL manually because Laravel's URL
+     * generator has no way to inject the subdomain into the host.
+     */
+    public function checkoutCallbackUrls(Tenant $tenant): array
+    {
+        if (config('app.tenant_mode', 'subdomain') === 'path') {
+            return [
+                route('admin.billing.stripe.success'),
+                route('admin.billing.cancel'),
+            ];
+        }
+
+        $scheme     = request()->isSecure() ? 'https' : 'http';
+        $baseDomain = config('app.base_domain', 'faithstack.test');
+        $sub        = $tenant->subdomain;
+
+        return [
+            "{$scheme}://{$sub}.{$baseDomain}/admin/billing/stripe/success",
+            "{$scheme}://{$sub}.{$baseDomain}/admin/billing/cancel",
+        ];
     }
 
     public function retrieveSession(string $sessionId): Session
