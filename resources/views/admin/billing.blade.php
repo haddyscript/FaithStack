@@ -57,9 +57,10 @@
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl pointer-events-auto overflow-hidden" @click.stop>
 
             {{-- ── Header ── --}}
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-700 p-6">
-                <div class="flex items-start justify-between">
-                    <div>
+            <div class="bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 p-6 relative overflow-hidden">
+                <div class="absolute inset-0 opacity-[0.07] pointer-events-none" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:22px 22px"></div>
+                <div class="relative flex items-start justify-between">
+                    <div class="flex-1 min-w-0">
                         {{-- Back breadcrumb (card step only) --}}
                         <div class="flex items-center gap-1.5 mb-2" x-show="step === 'card'">
                             <button @click="step = 'select'" class="text-indigo-200 hover:text-white text-xs flex items-center gap-1 transition-colors">
@@ -68,11 +69,24 @@
                             </button>
                             <span class="text-indigo-300 text-xs">/ Enter Card</span>
                         </div>
+
+                        {{-- confirm: value-prop headline --}}
+                        <p class="text-indigo-300 text-[10px] font-bold uppercase tracking-[0.15em] mb-1.5"
+                           x-show="step === 'confirm'">Ready to upgrade</p>
                         <p class="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1"
-                           x-show="step !== 'success'">Upgrading to</p>
-                        <h2 class="text-white text-xl font-bold"
-                            x-text="step === 'success' ? 'You\'re all set!' : selectedPlanName"></h2>
-                        <p class="text-indigo-200 text-sm mt-1" x-show="step !== 'success'">
+                           x-show="step !== 'confirm' && step !== 'success'">Upgrading to</p>
+
+                        <h2 class="text-white font-bold leading-tight"
+                            :class="step === 'confirm' ? 'text-2xl' : 'text-xl'"
+                            x-text="step === 'success' ? 'You\'re all set!' : (step === 'confirm' ? 'Unlock Full Power' : selectedPlanName)"></h2>
+
+                        {{-- confirm sub-headline --}}
+                        <p class="text-indigo-200 text-sm mt-1.5 font-medium" x-show="step === 'confirm'">
+                            <span x-text="selectedPlanName"></span> plan ·
+                            <span class="text-white font-bold">$<span x-text="selectedPlanPrice"></span></span><span class="text-indigo-300 font-normal">/mo</span>
+                        </p>
+                        {{-- other steps sub-headline --}}
+                        <p class="text-indigo-200 text-sm mt-1" x-show="step !== 'confirm' && step !== 'success'">
                             $<span x-text="selectedPlanPrice"></span>/month — billed monthly
                         </p>
                     </div>
@@ -90,31 +104,49 @@
             ════════════════════════════════════════ --}}
             <div x-show="step === 'confirm'" class="p-6">
 
-                {{-- Saved card pill --}}
-                <div class="flex items-center gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl mb-5">
-                    <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4.5 h-4.5 text-white w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
-                        </svg>
+                {{-- Plan features list --}}
+                <div class="mb-5" x-show="selectedPlanFeatures.length > 0">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em] mb-3">What you're unlocking</p>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+                        <template x-for="feat in selectedPlanFeatures" :key="feat">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4.5 h-4.5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0" style="width:18px;height:18px">
+                                    <svg style="width:10px;height:10px" fill="currentColor" class="text-emerald-600" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <span class="text-slate-700 text-xs font-medium leading-tight" x-text="feat"></span>
+                            </div>
+                        </template>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-slate-800 font-semibold text-sm">{{ $cardBrand ?? 'Card' }} ending in {{ $cardLast4 ?? '••••' }}</p>
-                        <p class="text-slate-400 text-xs mt-0.5">Saved from registration</p>
-                    </div>
-                    <button @click="step = 'select'"
-                            class="text-xs text-indigo-500 hover:text-indigo-700 font-semibold flex-shrink-0 transition-colors">
-                        Change
-                    </button>
                 </div>
 
-                {{-- What you're paying --}}
-                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-indigo-900 font-semibold text-sm" x-text="selectedPlanName"></p>
-                            <p class="text-indigo-500 text-xs mt-0.5">Billed monthly · Cancel anytime</p>
+                <div class="border-t border-slate-100 mb-5" x-show="selectedPlanFeatures.length > 0"></div>
+
+                {{-- Payment method — "selected" state --}}
+                <div class="mb-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em] mb-2">Payment Method</p>
+                    <div class="flex items-center gap-3 p-3 bg-indigo-50 border-2 border-indigo-200 rounded-xl" style="box-shadow:0 0 0 3px rgba(99,102,241,.08)">
+                        {{-- Selected indicator --}}
+                        <div class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-indigo-600/40">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/>
+                            </svg>
                         </div>
-                        <p class="text-indigo-900 font-bold text-lg">$<span x-text="selectedPlanPrice"></span><span class="text-xs font-normal text-indigo-400">/mo</span></p>
+                        {{-- Card icon --}}
+                        <div class="w-8 h-8 rounded-lg bg-white shadow-sm border border-slate-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-slate-800 font-semibold text-sm">{{ $cardBrand ?? 'Card' }} ···· {{ $cardLast4 ?? '••••' }}</p>
+                            <p class="text-slate-400 text-xs mt-0.5">Saved · Ready to use</p>
+                        </div>
+                        <button @click="step = 'select'"
+                                class="text-xs text-indigo-500 hover:text-indigo-700 font-semibold flex-shrink-0 transition-colors px-2.5 py-1 hover:bg-indigo-100 rounded-lg">
+                            Edit
+                        </button>
                     </div>
                 </div>
 
@@ -126,23 +158,47 @@
                     <p x-text="payError" class="text-red-700 text-sm"></p>
                 </div>
 
-                {{-- Confirm button --}}
+                {{-- Trust row --}}
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <span class="flex items-center gap-1 text-[11px] text-slate-400">
+                        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                        </svg>
+                        Secure checkout
+                    </span>
+                    <span class="text-slate-200 select-none">|</span>
+                    <span class="flex items-center gap-1 text-[11px] text-slate-400">
+                        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Cancel anytime
+                    </span>
+                    <span class="text-slate-200 select-none">|</span>
+                    <span class="flex items-center gap-1 text-[11px] text-slate-400">
+                        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33"/>
+                        </svg>
+                        No hidden fees
+                    </span>
+                </div>
+
+                {{-- Shimmer CTA --}}
                 <button @click="confirmWithSavedCard()"
                         :disabled="loading"
-                        :class="loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-indigo-500 hover:-translate-y-0.5'"
-                        class="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/25 transition-all duration-200">
+                        :class="loading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5'"
+                        class="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-xl font-bold text-sm text-white transition-all duration-200 btn-shimmer shadow-lg shadow-indigo-600/30 hover:shadow-xl hover:shadow-indigo-600/40">
                     <svg x-show="loading" class="w-4 h-4 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
-                    <svg x-show="!loading" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg x-show="!loading" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <span x-text="loading ? 'Processing…' : 'Confirm Upgrade — $' + selectedPlanPrice + '/mo'"></span>
                 </button>
 
                 <p class="mt-3 text-center text-xs text-slate-400">
-                    You'll be charged $<span x-text="selectedPlanPrice"></span> today. Cancel anytime from this page.
+                    Charged $<span x-text="selectedPlanPrice"></span> today · Cancel anytime · No long-term commitment
                 </p>
             </div>
 
@@ -263,6 +319,12 @@
     </div>
 </div>
 
+@php
+    $plansForJs = $plans->map(function ($p) {
+        return ['slug' => $p->slug, 'features' => array_slice($p->features ?? [], 0, 4)];
+    })->values()->toArray();
+@endphp
+
 <script>
 function checkoutModal() {
     return {
@@ -275,6 +337,14 @@ function checkoutModal() {
         loading: false,
 
         hasSavedCard: {{ $hasCard ? 'true' : 'false' }},
+
+        // Plan feature data for the confirm modal
+        _plans: @json($plansForJs),
+
+        get selectedPlanFeatures() {
+            const p = this._plans.find(p => p.slug === this.selectedPlanSlug);
+            return p ? p.features : [];
+        },
 
         selectedPlanSlug:  '',
         selectedPlanName:  '',
