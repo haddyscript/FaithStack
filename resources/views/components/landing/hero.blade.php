@@ -112,7 +112,7 @@
                         <div class="bg-[#0d0d14] aspect-[4/3] flex flex-col overflow-hidden">
 
                             {{-- Nav --}}
-                            <div class="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
+                            <div class="mockup-nav-drop flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
                                 <div class="flex items-center gap-2">
                                     <div class="w-5 h-5 rounded-md bg-indigo-600"></div>
                                     <div class="w-20 h-2 rounded-full bg-white/18"></div>
@@ -126,7 +126,7 @@
                             </div>
 
                             {{-- Hero --}}
-                            <div class="flex-1 flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-[#0d0d14] via-indigo-950/40 to-[#0d0d14]">
+                            <div class="mockup-content-drop flex-1 flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-[#0d0d14] via-indigo-950/40 to-[#0d0d14]">
                                 <div class="w-52 h-3 rounded-full bg-white/70"></div>
                                 <div class="w-40 h-3 rounded-full bg-white/40"></div>
                                 <div class="w-32 h-2 rounded-full bg-white/18 mt-1"></div>
@@ -150,7 +150,7 @@
                     </div>
 
                     {{-- Floating chips (float-chip CSS animation, no JS parallax) --}}
-                    <div class="float-chip absolute -left-10 top-[38%] bg-white rounded-2xl px-3.5 py-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] text-xs font-semibold text-slate-800 flex items-center gap-2 border border-slate-100/80" style="--dur:6.5s;--rot:-2deg">
+                    <div class="theme-applied-chip absolute -left-10 top-[38%] bg-white rounded-2xl px-3.5 py-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] text-xs font-semibold text-slate-800 flex items-center gap-2 border border-slate-100/80" style="--dur:6.5s;--rot:-2deg">
                         <div class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[9px] font-bold">✓</div>
                         Theme applied!
                     </div>

@@ -384,10 +384,50 @@
         }
         .float-chip { animation: floatChip var(--dur,6s) ease-in-out infinite; will-change: transform; }
 
+        /* ── Theme Applied chip: Tetris magnetic-drop entrance ── */
+        @keyframes tetrisDrop {
+            0%   { transform: translateY(-280px) rotate(var(--rot,0deg)); opacity: 0; }
+            12%  { opacity: 1; }
+            78%  { transform: translateY(8px) rotate(var(--rot,0deg)); }
+            91%  { transform: translateY(-3px) rotate(var(--rot,0deg)); }
+            100% { transform: translateY(0) rotate(var(--rot,0deg)); }
+        }
+        @keyframes impactShake {
+            0%   { transform: translate(0,   0)   rotate(var(--rot,0deg)); }
+            11%  { transform: translate(-3px, 2px) rotate(var(--rot,0deg)); }
+            22%  { transform: translate( 3px,-2px) rotate(var(--rot,0deg)); }
+            33%  { transform: translate(-3px, 1px) rotate(var(--rot,0deg)); }
+            44%  { transform: translate( 2px,-2px) rotate(var(--rot,0deg)); }
+            55%  { transform: translate(-2px, 2px) rotate(var(--rot,0deg)); }
+            66%  { transform: translate( 2px,-1px) rotate(var(--rot,0deg)); }
+            77%  { transform: translate(-1px, 1px) rotate(var(--rot,0deg)); }
+            88%  { transform: translate( 1px, 0)   rotate(var(--rot,0deg)); }
+            100% { transform: translate(0,   0)   rotate(var(--rot,0deg)); }
+        }
+        .theme-applied-chip {
+            animation:
+                tetrisDrop  0.65s cubic-bezier(0.22,1,0.36,1) 0.4s  both,
+                impactShake 0.32s linear                       1.05s both,
+                floatChip   var(--dur,6.5s) ease-in-out        1.37s infinite;
+            will-change: transform;
+        }
+        .mockup-nav-drop {
+            animation:
+                tetrisDrop  0.50s cubic-bezier(0.22,1,0.36,1) 0.65s both,
+                impactShake 0.26s linear                       1.15s both;
+            will-change: transform;
+        }
+        .mockup-content-drop {
+            animation:
+                tetrisDrop  0.55s cubic-bezier(0.22,1,0.36,1) 0.85s both,
+                impactShake 0.28s linear                       1.40s both;
+            will-change: transform;
+        }
+
         /* ── Reduce motion ── */
         @media (prefers-reduced-motion: reduce) {
             .reveal, .word-reveal, .blob, .mockup-float, .grad-animate, .pulse-glow, .magnetic,
-            .ticker-track, .float-chip, .btn-spring {
+            .ticker-track, .float-chip, .theme-applied-chip, .mockup-nav-drop, .mockup-content-drop, .btn-spring {
                 animation: none !important; transition: none !important;
                 opacity: 1 !important; transform: none !important;
             }
