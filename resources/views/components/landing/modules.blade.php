@@ -81,8 +81,8 @@
                     <h3 class="font-semibold text-white text-sm mb-1.5 leading-snug">Member Management</h3>
                     <p class="text-xs leading-relaxed" style="color: rgba(255,255,255,0.55)">Track profiles, groups, and member journeys from one unified CRM.</p>
                 </div>
-                {{-- Animated border glow --}}
-                <div class="absolute inset-0 rounded-2xl pointer-events-none" style="box-shadow: 0 0 30px rgba(99,102,241,0.12), inset 0 0 0 1px rgba(129,140,248,0.35)"></div>
+                {{-- Animated border glow — opacity driven by CSS @keyframes crmGlowPulse (no paint) --}}
+                <div class="js-crm-glow absolute inset-0 rounded-2xl pointer-events-none" style="box-shadow: 0 0 30px rgba(99,102,241,0.12), inset 0 0 0 1px rgba(129,140,248,0.35)"></div>
             </div>
 
             {{-- 3 - Giving / Payments --}}
