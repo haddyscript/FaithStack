@@ -68,7 +68,7 @@
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
                           style="background: rgba(99,102,241,0.25); color: #a5b4fc; border: 1px solid rgba(129,140,248,0.3)">
                         <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 inline-block animate-pulse"></span>
-                        
+                        Ongoing
                     </span>
                 </div>
                 <div class="relative z-10">
