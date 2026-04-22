@@ -49,10 +49,6 @@
                         </div>
                     </div>
 
-                    {{-- Lighting shimmer on hover --}}
-                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                         style="background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);"></div>
-
                     {{-- Overlay --}}
                     <div class="theme-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20 flex flex-col items-center justify-center gap-3">
                         <span class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-semibold shadow-2xl transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300">
@@ -81,6 +77,9 @@
                         @endforeach
                     </div>
                 </div>
+
+                {{-- Mouse-tracking glare overlay (JS-driven via [data-tilt] handler) --}}
+                <div class="tilt-glare absolute inset-0 pointer-events-none rounded-2xl" style="z-index:5;"></div>
 
             </div>
             @endforeach

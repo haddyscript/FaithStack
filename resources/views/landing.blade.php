@@ -279,11 +279,14 @@
         .feature-icon { transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
 
         /* ── Theme card tilt & hover ── */
-        .theme-card { will-change: transform; transform-style: preserve-3d; }
+        .theme-card { will-change: transform; transform-style: preserve-3d; transition: box-shadow 0.4s ease; }
         .theme-preview-img { transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
         .theme-card:hover .theme-preview-img { transform: scale(1.05); }
         .theme-overlay { transition: opacity 0.35s ease; opacity: 0; }
         .theme-card:hover .theme-overlay { opacity: 1; }
+
+        /* ── Glare: base state; JS writes the radial-gradient + opacity ── */
+        .tilt-glare { opacity: 0; transition: opacity 0.35s ease; mix-blend-mode: overlay; }
 
         /* ── Pricing card hover glow ── */
         .pricing-card { will-change: transform; }
@@ -452,6 +455,7 @@
         /* Perspective context for 3D card rotations.
            Applied to grid containers — safe, doesn't affect fixed elements. */
         #features .grid,
+        #themes .grid,
         #modules .grid,
         #how-it-works .grid {
             perspective: 1400px;
@@ -675,32 +679,48 @@
             });
         }
 
-        // ── Card 3D tilt (desktop only) ──────────────────────────────────
+        // ── Card 3D tilt + mouse-tracking glare (desktop only) ──────────
         if (!isMobile) {
             document.querySelectorAll('[data-tilt]').forEach(card => {
                 const intensity = parseFloat(card.dataset.tilt) || 8;
+                const glare     = card.querySelector('.tilt-glare');
                 let tiltRaf = null, tx = 0, ty = 0, cx = 0, cy = 0;
-
-                card.addEventListener('mousemove', (e) => {
-                    const r = card.getBoundingClientRect();
-                    tx = ((e.clientX - r.left) / r.width  - 0.5) * intensity;
-                    ty = ((e.clientY - r.top)  / r.height - 0.5) * intensity;
-                });
+                let cardRect = null;
 
                 card.addEventListener('mouseenter', () => {
+                    cardRect = card.getBoundingClientRect(); // cache once per enter
+                    if (glare) glare.style.opacity = '1';
                     function animate() {
-                        cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
-                        card.style.transform = `perspective(900px) rotateX(${-cy}deg) rotateY(${cx}deg) translateZ(8px)`;
+                        cx += (tx - cx) * 0.1;
+                        cy += (ty - cy) * 0.1;
+                        const lift = Math.sqrt(cx * cx + cy * cy) / intensity;
+                        card.style.transform  = `perspective(900px) rotateX(${-cy}deg) rotateY(${cx}deg) translateZ(10px)`;
+                        card.style.boxShadow  = `0 ${20 + lift * 28}px ${50 + lift * 25}px rgba(0,0,0,${(0.08 + lift * 0.14).toFixed(3)}), 0 4px 12px rgba(0,0,0,0.06)`;
                         tiltRaf = requestAnimationFrame(animate);
                     }
                     tiltRaf = requestAnimationFrame(animate);
-                });
+                }, { passive: true });
+
+                card.addEventListener('mousemove', (e) => {
+                    if (!cardRect) return;
+                    tx = ((e.clientX - cardRect.left) / cardRect.width  - 0.5) * intensity;
+                    ty = ((e.clientY - cardRect.top)  / cardRect.height - 0.5) * intensity;
+                    if (glare) {
+                        const gx = ((e.clientX - cardRect.left) / cardRect.width)  * 100;
+                        const gy = ((e.clientY - cardRect.top)  / cardRect.height) * 100;
+                        glare.style.background = `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.08) 38%, transparent 62%)`;
+                    }
+                }, { passive: true });
+
                 card.addEventListener('mouseleave', () => {
                     if (tiltRaf) cancelAnimationFrame(tiltRaf);
+                    cardRect = null;
+                    if (glare) { glare.style.opacity = '0'; glare.style.background = ''; }
                     tx = 0; ty = 0; cx = 0; cy = 0;
+                    card.style.boxShadow  = '';
                     card.style.transform  = '';
-                    card.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1)';
-                    setTimeout(() => card.style.transition = '', 500);
+                    card.style.transition = 'transform 0.55s cubic-bezier(0.23,1,0.32,1), box-shadow 0.55s ease';
+                    setTimeout(() => card.style.transition = '', 560);
                 });
             });
         }
