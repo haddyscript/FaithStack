@@ -1,0 +1,71 @@
+Prompt: Landing Page Enhancement – Core Modules Section (Updated)
+
+Enhance the landing page at http://faithstack.test/
+ to clearly highlight the platform’s core modules and value proposition.
+
+🎯 Objective
+
+Add a visually compelling “Core Modules” section that communicates the full capabilities of the platform, helping users quickly understand what they get.
+
+🧩 Section: “Everything You Need to Run Your Church”
+
+Create a new section on the landing page (preferably after the Hero or before Pricing).
+
+Content:
+
+Display the following modules:
+
+Website Builder
+Member Management (CRM) (mark as “Ongoing” or “Coming Soon”)
+Giving / Payments
+Events
+Sermons / Media
+Messaging (Email Only)
+Prayer Requests
+Volunteer Management
+Attendance Tracking
+Analytics Dashboard
+
+🎨 UI / UX Requirements:
+Use a grid layout (3x3 or responsive equivalent)
+Each module should have:
+Icon (use Lucide or similar)
+Title
+Short 1-line description (auto-generate if needed)
+Add hover effects (scale, glow, or subtle elevation)
+Include on-scroll animations (fade-up or staggered reveal)
+Highlight “Member Management (CRM)” with:
+Badge: “Ongoing” or “In Development”
+Slight visual emphasis (border, glow, or different background)
+
+✨ “Wow Factor” Enhancements :
+Add subtle micro-interactions:
+Hover = slight zoom + icon animation
+
+Optional:
+Gradient backgrounds per card
+Light glassmorphism or soft shadows
+Ensure smooth transitions (no jank)
+
+📱 Responsiveness :
+Desktop: 3–4 columns
+Tablet: 2 columns
+Mobile: 1 column (stacked, clean spacing)
+
+🧠 Copy Tone :
+Modern, SaaS-style
+Clear and benefit-driven (not technical)
+Example:
+“Send announcements and updates directly to your members’ inbox.”
+
+⚙️ Constraints :
+Messaging module must be Email only (no SMS support for now)
+Do NOT mention SMS anywhere in the UI
+Do NOT modify backend logic
+Focus on frontend/UI improvements only
+Keep it consistent with existing design system
+
+✅ Expected Outcome:
+Users immediately understand the platform is an all-in-one church management system
+Increased perceived value before they reach the Pricing section
+Stronger conversion intent

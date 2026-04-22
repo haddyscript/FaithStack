@@ -1,0 +1,11 @@
+List the core modules such as: 
+- Website Builder
+- Member Management (CRM) - Done (implemented)
+- Giving / Payments
+- Events
+- Sermons / Media
+- Messaging (Email + SMS)
+- Prayer Requests
+- Volunteer Management
+- Attendance Tracking
+- Analytics Dashboard

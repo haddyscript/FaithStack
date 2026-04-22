@@ -115,6 +115,29 @@ $tenantRoutes = function () {
             Route::post('/billing/stripe/upgrade-saved', [Admin\CheckoutController::class, 'upgradeWithSavedCard'])->name('billing.stripe.upgrade-saved');
 
             Route::get('/donations', [Admin\DonationController::class, 'index'])->name('donations.index');
+
+            // ── CRM: Members ────────────────────────────────────────────────
+            Route::post('/members/bulk',                          [Admin\MemberController::class, 'bulkAction'])->name('members.bulk');
+            Route::post('/members/{member}/notes',                [Admin\MemberController::class, 'addNote'])->name('members.notes.store');
+            Route::delete('/members/activities/{activity}',       [Admin\MemberController::class, 'deleteActivity'])->name('members.activities.destroy');
+            Route::post('/members/{member}/sync-groups',          [Admin\MemberController::class, 'syncGroups'])->name('members.sync-groups');
+            Route::post('/members/{member}/toggle-tag/{tag}',     [Admin\MemberController::class, 'toggleTag'])->name('members.toggle-tag');
+            Route::resource('members', Admin\MemberController::class);
+
+            // ── CRM: Groups & Tags ──────────────────────────────────────────
+            Route::get('/groups',                 [Admin\GroupController::class, 'index'])->name('groups.index');
+            Route::post('/groups',                [Admin\GroupController::class, 'store'])->name('groups.store');
+            Route::put('/groups/{group}',         [Admin\GroupController::class, 'update'])->name('groups.update');
+            Route::delete('/groups/{group}',      [Admin\GroupController::class, 'destroy'])->name('groups.destroy');
+            Route::post('/tags',                  [Admin\GroupController::class, 'storeTag'])->name('tags.store');
+            Route::put('/tags/{tag}',             [Admin\GroupController::class, 'updateTag'])->name('tags.update');
+            Route::delete('/tags/{tag}',          [Admin\GroupController::class, 'destroyTag'])->name('tags.destroy');
+
+            // ── CRM: Custom Fields ──────────────────────────────────────────
+            Route::get('/member-fields',                         [Admin\CustomFieldController::class, 'index'])->name('member-fields.index');
+            Route::post('/member-fields',                        [Admin\CustomFieldController::class, 'store'])->name('member-fields.store');
+            Route::put('/member-fields/{customField}',           [Admin\CustomFieldController::class, 'update'])->name('member-fields.update');
+            Route::delete('/member-fields/{customField}',        [Admin\CustomFieldController::class, 'destroy'])->name('member-fields.destroy');
         });
     });
 

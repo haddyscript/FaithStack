@@ -11,6 +11,7 @@
     $hasTheme     = (bool) $tenant->theme;
     $hasPages     = $stats['pages'] > 0;
     $hasPublished = $stats['published'] > 0;
+    $hasMembers   = $stats['members_total'] > 0;
 
     $trialDaysLeft = null;
     if ($isOnTrial && $tenant->subscription_ends_at) {
@@ -18,28 +19,28 @@
     }
 
     $checklist = [
-        ['done' => $hasTheme,     'label' => 'Choose a theme',    'url' => route('admin.themes.index'),  'desc' => 'Pick a design for your site'],
-        ['done' => $hasPages,     'label' => 'Create a page',     'url' => route('admin.pages.create'),  'desc' => 'Add your first piece of content'],
-        ['done' => $hasPublished, 'label' => 'Publish your site', 'url' => route('admin.pages.index'),   'desc' => 'Make a page live for visitors'],
+        ['done' => $hasTheme,     'label' => 'Choose a theme',      'url' => route('admin.themes.index'),  'desc' => 'Pick a design for your site'],
+        ['done' => $hasPages,     'label' => 'Create a page',        'url' => route('admin.pages.create'),  'desc' => 'Add your first piece of content'],
+        ['done' => $hasPublished, 'label' => 'Publish your site',    'url' => route('admin.pages.index'),   'desc' => 'Make a page live for visitors'],
+        ['done' => $hasMembers,   'label' => 'Add your first member','url' => route('admin.members.create'),'desc' => 'Start building your directory'],
     ];
     $checklistDone  = collect($checklist)->where('done', true)->count();
     $checklistTotal = count($checklist);
     $nextStep       = collect($checklist)->firstWhere('done', false);
     $allDone        = $checklistDone === $checklistTotal;
     $progressPct    = (int) (($checklistDone / $checklistTotal) * 100);
+
+    $memberStatuses = \App\Models\Member::STATUSES;
 @endphp
 
 {{-- ══════════════════════════════════════════════════
      HERO / WELCOME BANNER
      ══════════════════════════════════════════════════ --}}
-<div class="relative overflow-hidden rounded-2xl mb-8"
+<div class="relative overflow-hidden rounded-2xl mb-6"
      style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#4338ca 100%)">
 
-    {{-- Dot-grid overlay --}}
     <div class="absolute inset-0 pointer-events-none"
          style="background-image:radial-gradient(circle,rgba(255,255,255,.055) 1px,transparent 1px);background-size:24px 24px"></div>
-
-    {{-- Glow blobs --}}
     <div class="absolute -top-16 -right-16 w-72 h-72 rounded-full pointer-events-none"
          style="background:radial-gradient(circle,rgba(139,92,246,.22),transparent 70%)"></div>
     <div class="absolute bottom-0 left-1/3 w-48 h-48 rounded-full pointer-events-none"
@@ -59,8 +60,8 @@
                 </div>
 
                 <h2 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">
-                    @if($allDone) Your site is live! 🎉
-                    @else Let's build your site
+                    @if($allDone) Everything is set up! 🎉
+                    @else Welcome back 👋
                     @endif
                 </h2>
                 <p class="text-indigo-300/80 text-sm mb-5">{{ now()->format('l, F j, Y') }}</p>
@@ -99,7 +100,7 @@
 
             {{-- Right: Onboarding checklist --}}
             <div class="lg:w-68 rounded-2xl p-5 flex-shrink-0"
-                 style="width:clamp(220px,280px,100%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)">
+                 style="width:clamp(220px,290px,100%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[10px] font-bold text-white/60 uppercase tracking-widest">Setup Progress</p>
                     <span class="text-xs font-bold text-indigo-200">{{ $checklistDone }}/{{ $checklistTotal }}</span>
@@ -112,8 +113,7 @@
 
                 <div class="space-y-3">
                     @foreach($checklist as $item)
-                    <a href="{{ $item['url'] }}"
-                       class="flex items-center gap-3 group/check">
+                    <a href="{{ $item['url'] }}" class="flex items-center gap-3 group/check">
                         <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors {{ $item['done'] ? 'bg-emerald-400/20' : 'bg-white/10 group-hover/check:bg-white/20' }}">
                             @if($item['done'])
                                 <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -137,9 +137,91 @@
 </div>
 
 {{-- ══════════════════════════════════════════════════
-     STAT CARDS
+     STAT CARDS — 6 metrics in 2 rows
      ══════════════════════════════════════════════════ --}}
-<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+<div class="grid grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+
+    {{-- Total Members --}}
+    <a href="{{ route('admin.members.index') }}"
+       class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-md hover:-translate-y-px transition-all duration-200 block">
+        <div class="flex items-start justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-violet-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                </svg>
+            </div>
+            <span class="text-[11px] font-semibold text-violet-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                View →
+            </span>
+        </div>
+        <p class="text-3xl font-extrabold text-gray-900 leading-none mb-1 tabular-nums"
+           x-data="{ n:0 }"
+           x-init="$nextTick(()=>{ const t={{ $stats['members_total'] }}; if(!t)return; let s=0,iv=setInterval(()=>{s+=t/35;if(s>=t){n=t;clearInterval(iv);}else{n=Math.round(s);}},18); });"
+           x-text="n.toLocaleString()">0</p>
+        <p class="text-xs font-medium text-gray-400">Total Members</p>
+        @if($stats['members_this_month'] > 0)
+        <div class="mt-3 flex items-center gap-1.5">
+            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                +{{ $stats['members_this_month'] }} this month
+            </span>
+        </div>
+        @endif
+    </a>
+
+    {{-- Active Members --}}
+    <a href="{{ route('admin.members.index', ['status' => 'active']) }}"
+       class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-md hover:-translate-y-px transition-all duration-200 block">
+        <div class="flex items-start justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <span class="text-[11px] font-semibold text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                View →
+            </span>
+        </div>
+        <p class="text-3xl font-extrabold text-gray-900 leading-none mb-1 tabular-nums"
+           x-data="{ n:0 }"
+           x-init="$nextTick(()=>{ const t={{ $stats['members_active'] }}; if(!t)return; let s=0,iv=setInterval(()=>{s+=t/35;if(s>=t){n=t;clearInterval(iv);}else{n=Math.round(s);}},18); });"
+           x-text="n.toLocaleString()">0</p>
+        <p class="text-xs font-medium text-gray-400">Active Members</p>
+        @if($stats['members_total'] > 0)
+        <div class="mt-3">
+            <div class="h-1 rounded-full bg-gray-100 overflow-hidden">
+                <div class="h-full bg-emerald-400 rounded-full"
+                     style="width:{{ min(100, ($stats['members_active'] / max(1,$stats['members_total'])) * 100) }}%;transition:width 1s ease"></div>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1">
+                {{ $stats['members_total'] > 0 ? round(($stats['members_active'] / $stats['members_total']) * 100) : 0 }}% of total
+            </p>
+        </div>
+        @endif
+    </a>
+
+    {{-- New Visitors --}}
+    <a href="{{ route('admin.members.index', ['status' => 'visitor']) }}"
+       class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-md hover:-translate-y-px transition-all duration-200 block">
+        <div class="flex items-start justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+            </div>
+            <span class="text-[11px] font-semibold text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                View →
+            </span>
+        </div>
+        <p class="text-3xl font-extrabold text-gray-900 leading-none mb-1 tabular-nums"
+           x-data="{ n:0 }"
+           x-init="$nextTick(()=>{ const t={{ $stats['members_visitor'] + $stats['members_new'] }}; if(!t)return; let s=0,iv=setInterval(()=>{s+=t/35;if(s>=t){n=t;clearInterval(iv);}else{n=Math.round(s);}},18); });"
+           x-text="n.toLocaleString()">0</p>
+        <p class="text-xs font-medium text-gray-400">Visitors & New</p>
+        @if(($stats['members_visitor'] + $stats['members_new']) > 0)
+            <p class="text-[11px] text-blue-500 mt-2 font-medium">→ Follow up</p>
+        @endif
+    </a>
 
     {{-- Total Pages --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-md hover:-translate-y-px transition-all duration-200">
@@ -167,29 +249,6 @@
                 </div>
                 <p class="text-[11px] text-gray-400 mt-1">{{ $stats['published'] }} of {{ $stats['pages'] }} published</p>
             </div>
-        @endif
-    </div>
-
-    {{-- Published --}}
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-md hover:-translate-y-px transition-all duration-200">
-        <div class="flex items-start justify-between mb-4">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity
-                         {{ $stats['published'] > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400' }}">
-                {{ $stats['published'] > 0 ? 'Live' : 'None live' }}
-            </span>
-        </div>
-        <p class="text-3xl font-extrabold text-gray-900 leading-none mb-1 tabular-nums"
-           x-data="{ n:0 }"
-           x-init="$nextTick(()=>{ const t={{ $stats['published'] }}; if(!t)return; let s=0,iv=setInterval(()=>{s+=t/35;if(s>=t){n=t;clearInterval(iv);}else{n=Math.round(s);}},18); });"
-           x-text="n.toLocaleString()">0</p>
-        <p class="text-xs font-medium text-gray-400">Published</p>
-        @if($stats['published'] === 0 && $stats['pages'] > 0)
-            <p class="text-[11px] text-amber-500 mt-2 font-medium">→ Publish a page</p>
         @endif
     </div>
 
@@ -235,6 +294,139 @@
 </div>
 
 {{-- ══════════════════════════════════════════════════
+     MEMBER CRM OVERVIEW PANEL
+     ══════════════════════════════════════════════════ --}}
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
+    <div class="px-5 py-4 border-b border-slate-50 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-800 text-sm">Member CRM</h3>
+                <p class="text-xs text-slate-400">People management overview</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.members.create') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white adm-btn-primary shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Add Member
+            </a>
+            <a href="{{ route('admin.members.index') }}"
+               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">
+                View All
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-50">
+
+        {{-- Status breakdown --}}
+        <div class="p-5">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Membership Breakdown</p>
+            @if($stats['members_total'] === 0)
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                    <div class="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                        </svg>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-600 mb-1">No members yet</p>
+                    <p class="text-xs text-slate-400 mb-3">Start building your member directory today.</p>
+                    <a href="{{ route('admin.members.create') }}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-xl adm-btn-primary">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        Add First Member
+                    </a>
+                </div>
+            @else
+                {{-- Status bars --}}
+                <div class="space-y-3">
+                    @foreach($memberStatuses as $key => $st)
+                    @php
+                        $count  = $stats['members_' . ($key === 'new_member' ? 'new' : $key)] ?? 0;
+                        $pct    = $stats['members_total'] > 0 ? ($count / $stats['members_total']) * 100 : 0;
+                    @endphp
+                    <a href="{{ route('admin.members.index', ['status' => $key]) }}"
+                       class="flex items-center gap-3 group/bar">
+                        <div class="w-24 flex-shrink-0 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $st['color'] }}"></span>
+                            <span class="text-xs text-slate-600 font-medium truncate group-hover/bar:text-indigo-600 transition-colors">{{ $st['label'] }}</span>
+                        </div>
+                        <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-700"
+                                 style="width:{{ $pct }}%;background-color:{{ $st['color'] }}"></div>
+                        </div>
+                        <span class="w-8 text-xs font-bold text-slate-700 text-right tabular-nums flex-shrink-0">{{ $count }}</span>
+                    </a>
+                    @endforeach
+                </div>
+
+                {{-- Shortcut chips --}}
+                <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-50">
+                    <a href="{{ route('admin.groups.index') }}"
+                       class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-lg px-3 py-1.5 transition-colors font-medium">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Manage Groups
+                    </a>
+                    <a href="{{ route('admin.member-fields.index') }}"
+                       class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-lg px-3 py-1.5 transition-colors font-medium">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 7a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        Custom Fields
+                    </a>
+                </div>
+            @endif
+        </div>
+
+        {{-- Recent members --}}
+        <div class="p-5">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Recently Added</p>
+            @if($recentMembers->isEmpty())
+                <div class="flex items-center justify-center py-8">
+                    <p class="text-sm text-slate-400">No members added yet.</p>
+                </div>
+            @else
+                <div class="space-y-2.5">
+                    @foreach($recentMembers as $member)
+                    @php $si = \App\Models\Member::STATUSES[$member->status] ?? ['label' => $member->status, 'color' => '#475569', 'bg' => '#f1f5f9']; @endphp
+                    <a href="{{ route('admin.members.show', $member) }}"
+                       class="flex items-center gap-3 group/member hover:bg-slate-50 rounded-xl p-2 -mx-2 transition-colors">
+                        <div class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-white"
+                             style="background: linear-gradient(135deg, {{ $si['color'] }}cc, {{ $si['color'] }})">
+                            {{ $member->initials }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-slate-700 group-hover/member:text-indigo-600 transition-colors truncate">
+                                {{ $member->full_name }}
+                            </p>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[11px] font-medium" style="color: {{ $si['color'] }}">{{ $si['label'] }}</span>
+                                @if($member->groups->isNotEmpty())
+                                    <span class="text-slate-300">·</span>
+                                    <span class="text-[11px] text-slate-400 truncate">{{ $member->groups->first()->name }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <span class="text-[11px] text-slate-400 flex-shrink-0">{{ $member->created_at->diffForHumans(null, true) }}</span>
+                    </a>
+                    @endforeach
+                </div>
+                <a href="{{ route('admin.members.index') }}"
+                   class="mt-3 flex items-center justify-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 pt-3 border-t border-slate-50 transition-colors">
+                    View all {{ $stats['members_total'] }} member{{ $stats['members_total'] !== 1 ? 's' : '' }}
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            @endif
+        </div>
+
+    </div>
+</div>
+
+{{-- ══════════════════════════════════════════════════
      LOWER GRID: Quick Actions + Sidebar
      ══════════════════════════════════════════════════ --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -242,72 +434,83 @@
     {{-- ── Quick Actions (2/3 col) ──────────────────── --}}
     <div class="lg:col-span-2 space-y-4">
 
-        {{-- Primary actions: big gradient cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {{-- Primary actions --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
             <a href="{{ route('admin.pages.create') }}"
-               class="group relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between min-h-[148px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+               class="group relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[132px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
                style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%)">
-                <div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full pointer-events-none" style="background:rgba(255,255,255,.06)"></div>
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style="background:rgba(255,255,255,.15)">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full pointer-events-none" style="background:rgba(255,255,255,.06)"></div>
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:rgba(255,255,255,.15)">
+                    <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
                 </div>
                 <div>
-                    <p class="text-white font-bold text-base">New Page</p>
+                    <p class="text-white font-bold text-sm">New Page</p>
                     <p class="text-indigo-200 text-xs mt-0.5">Create & publish content</p>
                 </div>
-                <svg class="absolute bottom-5 right-5 w-5 h-5 text-white/25 transition-all group-hover:text-white/55 group-hover:translate-x-0.5"
-                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
+            </a>
+
+            <a href="{{ route('admin.members.create') }}"
+               class="group relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[132px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+               style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%)">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full pointer-events-none" style="background:rgba(255,255,255,.06)"></div>
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:rgba(255,255,255,.15)">
+                    <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-white font-bold text-sm">Add Member</p>
+                    <p class="text-violet-200 text-xs mt-0.5">Add to directory</p>
+                </div>
             </a>
 
             <a href="{{ route('home') }}" target="_blank"
-               class="group relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between min-h-[148px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+               class="group relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[132px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
                style="background:linear-gradient(135deg,#0f766e 0%,#0d9488 100%)">
-                <div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full pointer-events-none" style="background:rgba(255,255,255,.06)"></div>
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style="background:rgba(255,255,255,.15)">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full pointer-events-none" style="background:rgba(255,255,255,.06)"></div>
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:rgba(255,255,255,.15)">
+                    <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                     </svg>
                 </div>
                 <div>
-                    <p class="text-white font-bold text-base">View Site</p>
-                    <p class="text-teal-200 text-xs mt-0.5">Open your public website ↗</p>
+                    <p class="text-white font-bold text-sm">View Site</p>
+                    <p class="text-teal-200 text-xs mt-0.5">Open public website ↗</p>
                 </div>
-                <svg class="absolute bottom-5 right-5 w-5 h-5 text-white/25 transition-all group-hover:text-white/55 group-hover:translate-x-0.5"
-                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
             </a>
         </div>
 
-        {{-- Secondary actions: compact grid --}}
+        {{-- Secondary actions --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">More Actions</p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 @foreach([
-                    ['href' => route('admin.navigation.index'), 'label' => 'Navigation', 'desc' => 'Manage menu', 'bg' => 'bg-blue-50',   'color' => 'text-blue-500',
+                    ['href' => route('admin.members.index'),   'label' => 'Members',    'desc' => 'Directory',   'bg' => 'bg-violet-50', 'color' => 'text-violet-500',
+                     'icon' => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z'],
+                    ['href' => route('admin.groups.index'),    'label' => 'Groups',     'desc' => 'Organize',    'bg' => 'bg-fuchsia-50', 'color' => 'text-fuchsia-500',
+                     'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                    ['href' => route('admin.navigation.index'),'label' => 'Navigation', 'desc' => 'Manage menu', 'bg' => 'bg-blue-50',   'color' => 'text-blue-500',
                      'icon' => 'M4 6h16M4 12h10M4 18h7'],
-                    ['href' => route('admin.themes.index'),     'label' => 'Themes',     'desc' => 'Change design','bg' => 'bg-violet-50', 'color' => 'text-violet-500',
+                    ['href' => route('admin.themes.index'),    'label' => 'Themes',     'desc' => 'Change design','bg' => 'bg-indigo-50', 'color' => 'text-indigo-500',
                      'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
-                    ['href' => route('admin.donations.index'),  'label' => 'Donations',  'desc' => 'View giving',  'bg' => 'bg-rose-50',   'color' => 'text-rose-500',
+                    ['href' => route('admin.donations.index'), 'label' => 'Donations',  'desc' => 'View giving',  'bg' => 'bg-rose-50',   'color' => 'text-rose-500',
                      'icon' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'],
-                    ['href' => route('admin.settings'),         'label' => 'Settings',   'desc' => 'Site & brand', 'bg' => 'bg-gray-100',  'color' => 'text-gray-500',
+                    ['href' => route('admin.settings'),        'label' => 'Settings',   'desc' => 'Site & brand', 'bg' => 'bg-gray-100',  'color' => 'text-gray-500',
                      'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'],
                 ] as $a)
                 <a href="{{ $a['href'] }}"
-                   class="group flex flex-col items-center gap-2 py-4 px-2 rounded-xl hover:bg-gray-50 transition-colors">
-                    <div class="w-10 h-10 rounded-xl {{ $a['bg'] }} flex items-center justify-center group-hover:scale-110 transition-transform duration-150">
-                        <svg class="w-5 h-5 {{ $a['color'] }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                   class="group flex flex-col items-center gap-2 py-3 px-1 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div class="w-9 h-9 rounded-xl {{ $a['bg'] }} flex items-center justify-center group-hover:scale-110 transition-transform duration-150">
+                        <svg class="w-4.5 h-4.5 {{ $a['color'] }}" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $a['icon'] }}"/>
                         </svg>
                     </div>
                     <div class="text-center">
-                        <p class="text-xs font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">{{ $a['label'] }}</p>
-                        <p class="text-[11px] text-gray-400">{{ $a['desc'] }}</p>
+                        <p class="text-xs font-semibold text-gray-700 group-hover:text-gray-900 transition-colors leading-tight">{{ $a['label'] }}</p>
+                        <p class="text-[10px] text-gray-400 leading-tight">{{ $a['desc'] }}</p>
                     </div>
                 </a>
                 @endforeach
@@ -323,7 +526,6 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
             @if($isOnTrial)
-                {{-- Trial header gradient --}}
                 <div class="relative overflow-hidden px-5 pt-5 pb-4"
                      style="background:linear-gradient(135deg,#92400e,#b45309)">
                     <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full pointer-events-none"
@@ -348,7 +550,6 @@
                         @endif
                     @endif
                 </div>
-
                 <div class="px-5 py-4">
                     <p class="text-sm text-gray-500 leading-relaxed mb-3">
                         Unlock custom branding, unlimited pages, and priority support.
@@ -399,8 +600,8 @@
         </div>
 
         {{-- Site info card --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex-1">
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Site Info</p>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Site Overview</p>
 
             <div class="space-y-2.5 mb-4">
                 @if($tenant->email)
@@ -421,18 +622,20 @@
                 @endif
             </div>
 
-            {{-- Page counts --}}
+            {{-- Mini stat grid --}}
             <div class="grid grid-cols-2 gap-2 mb-3">
-                <div class="bg-gray-50 rounded-xl p-3 text-center">
-                    <p class="text-2xl font-extrabold text-gray-800 tabular-nums">{{ $stats['pages'] }}</p>
+                <a href="{{ route('admin.pages.index') }}"
+                   class="bg-gray-50 rounded-xl p-3 text-center hover:bg-indigo-50 transition-colors group">
+                    <p class="text-2xl font-extrabold text-gray-800 tabular-nums group-hover:text-indigo-700 transition-colors">{{ $stats['pages'] }}</p>
                     <p class="text-[11px] font-medium text-gray-400 mt-0.5">Pages</p>
-                </div>
-                <div class="rounded-xl p-3 text-center {{ $stats['published'] > 0 ? 'bg-emerald-50' : 'bg-gray-50' }}">
-                    <p class="text-2xl font-extrabold tabular-nums {{ $stats['published'] > 0 ? 'text-emerald-700' : 'text-gray-400' }}">
-                        {{ $stats['published'] }}
+                </a>
+                <a href="{{ route('admin.members.index') }}"
+                   class="rounded-xl p-3 text-center transition-colors group {{ $stats['members_total'] > 0 ? 'bg-violet-50 hover:bg-violet-100' : 'bg-gray-50 hover:bg-gray-100' }}">
+                    <p class="text-2xl font-extrabold tabular-nums transition-colors {{ $stats['members_total'] > 0 ? 'text-violet-700 group-hover:text-violet-800' : 'text-gray-400' }}">
+                        {{ $stats['members_total'] }}
                     </p>
-                    <p class="text-[11px] font-medium mt-0.5 {{ $stats['published'] > 0 ? 'text-emerald-500' : 'text-gray-400' }}">Published</p>
-                </div>
+                    <p class="text-[11px] font-medium mt-0.5 {{ $stats['members_total'] > 0 ? 'text-violet-500' : 'text-gray-400' }}">Members</p>
+                </a>
             </div>
 
             {{-- Active theme chip --}}
@@ -455,8 +658,8 @@
                 <p class="text-xs font-semibold text-amber-700 group-hover:text-amber-800 transition-colors">Choose a theme →</p>
             </a>
             @endif
-
         </div>
+
     </div>
 
 </div>
