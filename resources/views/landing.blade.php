@@ -158,6 +158,7 @@
                     'build-preview':'Try It Free',
                     'cms-demo':     'See All Features',
                     'how-it-works': 'Start Building',
+                    'modules':      'Explore All Modules',
                     'pricing':      'View Pricing',
                     'testimonials': 'Join 500+ Organizations',
                 },
@@ -454,6 +455,7 @@
     <x-landing.cms-demo />
     <div class="section-sep"></div>
     <x-landing.how-it-works :steps="$steps" />
+    <x-landing.modules />
     <div class="section-sep"></div>
     <x-landing.pricing :plans="$plans" />
     <div class="section-sep"></div>

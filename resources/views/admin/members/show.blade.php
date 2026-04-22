@@ -43,66 +43,70 @@
     {{-- ══ PROFILE HEADER ══════════════════════════════════════════════════════ --}}
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
 
-        {{-- Cover banner --}}
-        <div class="relative h-36"
-             style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4f46e5 70%, #7c3aed 100%)">
-            {{-- Dot mesh pattern --}}
-            <div class="absolute inset-0"
-                 style="background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px); background-size: 22px 22px;"></div>
-            {{-- Ambient blobs --}}
-            <div class="absolute -top-8 -right-8 w-48 h-48 rounded-full pointer-events-none"
-                 style="background: radial-gradient(circle, rgba(139,92,246,.35), transparent 65%)"></div>
-            <div class="absolute bottom-0 left-1/4 w-40 h-40 rounded-full pointer-events-none"
-                 style="background: radial-gradient(circle, rgba(99,102,241,.2), transparent 65%)"></div>
-            <div class="absolute top-4 right-1/3 w-24 h-24 rounded-full pointer-events-none"
-                 style="background: radial-gradient(circle, rgba(167,139,250,.15), transparent 65%)"></div>
-        </div>
+        {{-- Cover banner + avatar wrapper (position:relative so avatar can escape bottom) --}}
+        <div class="relative">
 
-        {{-- Profile content --}}
-        <div class="px-6 pb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12 mb-5">
+            {{-- Cover strip --}}
+            <div class="h-28"
+                 style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4f46e5 70%, #7c3aed 100%)">
+                {{-- Dot mesh --}}
+                <div class="absolute inset-x-0 top-0 h-28"
+                     style="background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px); background-size: 20px 20px;"></div>
+                {{-- Decorative blobs --}}
+                <div class="absolute -top-10 -right-10 w-52 h-52 rounded-full pointer-events-none"
+                     style="background: radial-gradient(circle, rgba(139,92,246,.3), transparent 65%)"></div>
+                <div class="absolute top-2 left-1/3 w-36 h-36 rounded-full pointer-events-none"
+                     style="background: radial-gradient(circle, rgba(99,102,241,.18), transparent 65%)"></div>
+            </div>
 
-                {{-- Avatar (overlapping cover) --}}
-                <div class="w-24 h-24 rounded-2xl ring-4 ring-white flex-shrink-0 flex items-center justify-center text-2xl font-bold text-white shadow-xl"
-                     style="background: linear-gradient(135deg, {{ $statusInfo['color'] }}bb, {{ $statusInfo['color'] }})">
+            {{-- Avatar — absolutely centred on the cover/content seam --}}
+            <div class="absolute left-6 bottom-0 translate-y-1/2 z-10">
+                <div class="w-20 h-20 rounded-2xl ring-4 ring-white flex items-center justify-center text-xl font-bold text-white shadow-lg"
+                     style="background: linear-gradient(135deg, {{ $statusInfo['color'] }}cc, {{ $statusInfo['color'] }})">
                     @if($member->photo_url)
                         <img src="{{ $member->photo_url }}" class="w-full h-full object-cover rounded-2xl" alt="{{ $member->full_name }}">
                     @else
                         {{ $member->initials }}
                     @endif
                 </div>
+            </div>
+        </div>
 
-                {{-- Name + meta --}}
-                <div class="flex-1 min-w-0 sm:pb-1">
-                    <div class="flex flex-wrap items-center gap-2.5 mb-2">
-                        <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ $member->full_name }}</h2>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide"
+        {{-- Profile content — pt-14 gives space for the half-avatar that hangs below --}}
+        <div class="px-6 pt-14 pb-5">
+
+            {{-- Name row --}}
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2.5 mb-1.5">
+                        <h2 class="text-xl font-bold text-slate-900 tracking-tight">{{ $member->full_name }}</h2>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                               style="background-color: {{ $statusInfo['bg'] }}; color: {{ $statusInfo['color'] }}">
                             {{ $statusInfo['label'] }}
                         </span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500">
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
                         @if($member->email)
                             <a href="mailto:{{ $member->email }}" class="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
-                                <svg class="w-4 h-4 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <svg class="w-3.5 h-3.5 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                 {{ $member->email }}
                             </a>
                         @endif
                         @if($member->phone)
                             <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                <svg class="w-3.5 h-3.5 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                 {{ $member->phone }}
                             </span>
                         @endif
                         <span class="flex items-center gap-1.5">
-                            <svg class="w-4 h-4 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <svg class="w-3.5 h-3.5 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             Member since {{ $member->created_at->format('M Y') }}
                         </span>
                     </div>
                 </div>
 
                 {{-- Danger action --}}
-                <div class="sm:pb-1 flex-shrink-0">
+                <div class="flex-shrink-0">
                     <form method="POST" action="{{ route('admin.members.destroy', $member) }}"
                           onsubmit="return confirm('Delete {{ addslashes($member->full_name) }}? This cannot be undone.')">
                         @csrf @method('DELETE')
@@ -117,11 +121,11 @@
 
             {{-- Groups & Tags chips --}}
             @if($member->groups->isNotEmpty() || $member->tags->isNotEmpty())
-            <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-50">
+            <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-50">
                 @foreach($member->groups as $group)
                     <span class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-semibold text-white shadow-sm"
                           style="background-color: {{ $group->color }}">
-                        <svg class="w-3 h-3 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <svg class="w-3 h-3 opacity-75" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         {{ $group->name }}
                     </span>
                 @endforeach
