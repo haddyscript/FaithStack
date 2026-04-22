@@ -1,0 +1,21 @@
+I am working on the member profile view (currently at /admin/members/1). Based on the current UI, I want to enhance the visual design and user experience using a more modern, clean aesthetic. Please implement the following improvements:
+
+1. **Header Refinement**: 
+   - Improve the member cover photo/banner area. Instead of a solid purple block, add support for a subtle gradient or a placeholder pattern. 
+   - Refine the profile avatar integration so it overlaps the cover photo slightly for a more "profile-centric" feel.
+   - Clean up the badge placements (e.g., "New Member", "Youth Group") to ensure consistent padding and typography.
+
+2. **Information Hierarchy**:
+   - Redesign the "Personal Information" card. Instead of simple top-down text, use a structured grid (2 or 3 columns) with subtle icons for Email, Phone, Birthday, and Address to improve readability.
+   - Improve the "Groups" and "Tags" sections on the right sidebar. Use a modern "Pill" design with slightly more padding and a hover state.
+
+3. **Action & Interaction**:
+   - Polish the "Edit" and "Quick Actions" buttons. Ensure they have clear primary/secondary visual distinctions.
+   - The "Delete" button should be styled as a clear danger action (e.g., outline-red that fills on hover).
+   - Ensure consistent border-radius (e.g., 8px or 12px) and soft box-shadows across all cards for a cohesive look.
+
+4. **Visual Polish**:
+   - Use a slightly muted background color for the main page area to make the white cards "pop" more.
+   - Check typography scales—ensure headers are distinct from body text in weight and size.
+
+Please update the relevant view files and any associated CSS/Tailwind classes to reflect these changes.
