@@ -62,13 +62,9 @@
         gsap.set(featureCards, { y: 45, autoAlpha: 0, rotateX: 8, transformOrigin: '50% 0%' });
       }
 
-      // How-it-works steps: each side-slides from its own direction
-      qa('#how-it-works .grid > div').forEach((step, i) => {
-        gsap.set(step, {
-          x:       i % 2 === 0 ? -40 : 40,
-          autoAlpha: 0,
-          rotateY: i % 2 === 0 ? -6  : 6,
-        });
+      // How-it-works steps: all slide up from below (consistent for a horizontal row)
+      qa('#how-it-works .grid > div').forEach(step => {
+        gsap.set(step, { y: 40, autoAlpha: 0 });
       });
 
       // Module cards
@@ -275,26 +271,27 @@
     }
 
     /* ══════════════════════════════════════════════════════════════════════
-       6. HOW-IT-WORKS STEPS — single timeline (no duplicate forEach triggers)
+       6. HOW-IT-WORKS STEPS — all slide up together, tight stagger
+          All three steps use y (not alternating x) so they cascade cleanly
+          left → right. Tighter end point means 03 isn't delayed waiting
+          for you to scroll deep past the section.
     ══════════════════════════════════════════════════════════════════════ */
     const steps = qa('#how-it-works .grid > div');
     if (steps.length) {
       const stepTl = gsap.timeline({
         scrollTrigger: {
           trigger: '#how-it-works .grid',
-          start:   'top 88%',
-          end:     'top 20%',
-          scrub:   2,
+          start:   'top 85%',
+          end:     'top 45%',   // shorter window → all 3 steps finish sooner
+          scrub:   1.5,
           invalidateOnRefresh: true,
         },
       });
       steps.forEach((step, i) => {
-        const xFrom  = i % 2 === 0 ? -40 : 40;
-        const ryFrom = i % 2 === 0 ? -6  : 6;
         stepTl.fromTo(step,
-          { x: xFrom, autoAlpha: 0, rotateY: ryFrom },
-          { x: 0, autoAlpha: 1, rotateY: 0, ease: 'power1.inOut', duration: 0.5, force3D: true },
-          i * 0.18
+          { y: 40, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, ease: 'power2.out', duration: 0.4, force3D: true },
+          i * 0.1   // tight 0.1 offset → 01, 02, 03 appear close together
         );
       });
     }
