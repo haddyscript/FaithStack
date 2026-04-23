@@ -33,11 +33,13 @@ class PageController extends Controller
         $tenant    = app('tenant');
         $validated = $this->validatePage($request, $tenant->id);
 
+        $themeId = $this->resolveAppliedTheme($request);
+
         Page::create([
             ...$validated,
             'tenant_id' => $tenant->id,
-            'theme_id'  => $this->resolveAppliedTheme($request),
             'content'   => $this->buildContent($request),
+            ...($themeId !== false ? ['theme_id' => $themeId] : []),
         ]);
 
         return redirect()->route('admin.pages.index')->with('success', 'Page created.');
