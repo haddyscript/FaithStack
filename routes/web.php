@@ -60,6 +60,8 @@ $superadminRoutes = function () {
             Route::resource('tenants', SuperAdmin\TenantController::class);
             Route::post('/tenants/{tenant}/toggle-subscription', [SuperAdmin\TenantController::class, 'toggleSubscription'])
                 ->name('tenants.toggle-subscription');
+            Route::resource('plans', SuperAdmin\PlanController::class);
+            Route::post('/plans/{plan}/toggle', [SuperAdmin\PlanController::class, 'toggle'])->name('plans.toggle');
         });
     });
 };
