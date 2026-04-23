@@ -15,6 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'tenant_mode' => env('TENANT_MODE', 'subdomain'),
+
+    'base_domain' => env('APP_BASE_DOMAIN', 'faithstack.test'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

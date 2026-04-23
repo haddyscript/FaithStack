@@ -175,8 +175,6 @@ if ($tenantMode !== 'path') {
     $rootRoutes();
     $superadminRoutes();
 
-    Route::prefix('{tenant_slug}')
-        ->middleware(['tenant'])
-        ->group($tenantRoutes);
+    Route::prefix('{tenant_slug}')->middleware(['tenant'])->group($tenantRoutes);
 
 }
