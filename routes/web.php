@@ -62,6 +62,7 @@ $superadminRoutes = function () {
                 ->name('tenants.toggle-subscription');
             Route::resource('plans', SuperAdmin\PlanController::class);
             Route::post('/plans/{plan}/toggle', [SuperAdmin\PlanController::class, 'toggle'])->name('plans.toggle');
+            Route::post('/tenants/{tenant}/impersonate', [SuperAdmin\ImpersonationController::class, 'start'])->name('tenants.impersonate');
         });
     });
 };
@@ -87,8 +88,12 @@ $tenantRoutes = function () {
             Route::post('/login', [Admin\AuthController::class, 'login']);
         });
 
+        // Token consumed here — no auth required (super admin is not yet logged in on this domain)
+        Route::get('/impersonate/{token}', [Admin\ImpersonationController::class, 'enter'])->name('impersonate.enter');
+
         Route::middleware(['auth', 'subscription'])->group(function () {
             Route::post('/logout', [Admin\AuthController::class, 'logout'])->name('logout');
+            Route::post('/impersonate/stop', [Admin\ImpersonationController::class, 'stop'])->name('impersonate.stop');
 
             Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
