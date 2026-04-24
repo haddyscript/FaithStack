@@ -274,7 +274,12 @@
             will-change: transform;
             transform-style: preserve-3d;
         }
-        .feature-card:hover { box-shadow: 0 24px 60px -8px rgba(99,102,241,0.15); border-color: rgba(199,210,254,0.6); }
+        .feature-card:hover {
+            box-shadow: 0 0 0 1.5px var(--card-accent, rgba(99,102,241,0.25)),
+                        0 24px 60px -8px var(--card-glow, rgba(99,102,241,0.12));
+            border-color: transparent;
+            transform: translateY(-6px);
+        }
         .feature-card:hover .feature-icon { transform: scale(1.18) rotate(7deg); }
         .feature-icon { transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
 
