@@ -42,22 +42,22 @@
 
             {{-- Pro / featured card: gradient border wrapper --}}
             @if($plan['featured'])
-            <div class="reveal relative scale-105 z-10" data-delay="{{ $i + 1 }}">
+            <div class="reveal relative scale-105 z-10 pt-5" data-delay="{{ $i + 1 }}">
+                {{-- Badge (outside overflow-hidden so it's never clipped) --}}
+                @if(!empty($plan['badge']))
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg tracking-wide uppercase whitespace-nowrap z-20">
+                    {{ $plan['badge'] }}
+                </div>
+                @endif
+
                 {{-- Glow halo --}}
                 <div class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-indigo-500/25 via-purple-500/20 to-pink-500/15 blur-2xl pointer-events-none"></div>
                 {{-- Gradient border shell --}}
                 <div class="relative p-[1.5px] rounded-[20px] bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 shadow-2xl shadow-indigo-500/30">
                     <div class="relative flex flex-col rounded-[18.5px] bg-gradient-to-b from-indigo-600 to-purple-700 p-8 overflow-hidden">
 
-                        {{-- Badge --}}
-                        @if(!empty($plan['badge']))
-                        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg tracking-wide uppercase whitespace-nowrap">
-                            {{ $plan['badge'] }}
-                        </div>
-                        @endif
-
                         {{-- Name & price --}}
-                        <div class="mb-8 pt-3">
+                        <div class="mb-8">
                             <p class="text-xs font-bold uppercase tracking-widest mb-4 text-indigo-200">{{ $plan['name'] }}</p>
 
                             <div class="flex items-baseline gap-1 mb-2">
