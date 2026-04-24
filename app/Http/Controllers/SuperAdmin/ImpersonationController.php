@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ImpersonationController extends Controller
@@ -17,14 +17,21 @@ class ImpersonationController extends Controller
             ->where('role', 'admin')
             ->firstOrFail();
 
+        // Clean up any stale tokens for this user before issuing a new one
+        DB::table('impersonation_tokens')
+            ->where('user_id', $admin->id)
+            ->orWhere('expires_at', '<', now())
+            ->delete();
+
         $token = Str::random(64);
 
-        // One-time token — consumed on entry, expires in 5 minutes
-        Cache::put("impersonate:{$token}", [
+        DB::table('impersonation_tokens')->insert([
+            'token'           => $token,
             'user_id'         => $admin->id,
             'impersonator_id' => auth()->id(),
             'tenant_name'     => $tenant->name,
-        ], now()->addMinutes(5));
+            'expires_at'      => now()->addMinutes(5),
+        ]);
 
         return redirect()->away($this->tenantImpersonateUrl($tenant, $token));
     }

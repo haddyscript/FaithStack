@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ImpersonationController extends Controller
 {
@@ -16,20 +16,26 @@ class ImpersonationController extends Controller
      */
     public function enter(string $token): RedirectResponse
     {
-        $data = Cache::pull("impersonate:{$token}");
+        $record = DB::table('impersonation_tokens')
+            ->where('token', $token)
+            ->where('expires_at', '>', now())
+            ->first();
 
-        if (! $data) {
+        if (! $record) {
             abort(403, 'This impersonation link is invalid or has already been used.');
         }
 
-        $user = User::findOrFail($data['user_id']);
+        // Consume the token immediately (one-time use)
+        DB::table('impersonation_tokens')->where('token', $token)->delete();
+
+        $user = User::findOrFail($record->user_id);
 
         Auth::login($user);
 
         session([
             'impersonating'   => true,
-            'impersonator_id' => $data['impersonator_id'],
-            'tenant_name'     => $data['tenant_name'],
+            'impersonator_id' => $record->impersonator_id,
+            'tenant_name'     => $record->tenant_name,
         ]);
 
         return redirect()->route('admin.dashboard');
