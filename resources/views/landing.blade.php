@@ -69,7 +69,7 @@
 
             // Interactive Build Preview
             Alpine.data('buildPreview', () => ({
-                theme: 'dark',
+                theme: 'light',
                 type:  'church',
                 animating: false,
                 presets: {
@@ -238,7 +238,7 @@
             content: '';
             position: absolute; inset: 0; z-index: 2; pointer-events: none;
             background: radial-gradient(700px circle at var(--cx) var(--cy),
-                rgba(99,102,241,0.13) 0%, transparent 55%);
+                rgba(99,102,241,0.07) 0%, transparent 55%);
             transition: background 0.1s ease;
         }
 
