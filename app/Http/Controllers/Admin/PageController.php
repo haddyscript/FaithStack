@@ -45,8 +45,9 @@ class PageController extends Controller
         return redirect()->route('admin.pages.index')->with('success', 'Page created.');
     }
 
-    public function edit(Page $page): View
+    public function edit(string $pageId): View
     {
+        $page = Page::findOrFail($pageId);
         $this->authorizePage($page);
 
         return view('admin.pages.form', [
@@ -56,8 +57,9 @@ class PageController extends Controller
         ]);
     }
 
-    public function update(Request $request, Page $page): RedirectResponse
+    public function update(Request $request, string $pageId): RedirectResponse
     {
+        $page = Page::findOrFail($pageId);
         $this->authorizePage($page);
         $tenant    = app('tenant');
         $validated = $this->validatePage($request, $tenant->id, $page->id);
@@ -78,8 +80,9 @@ class PageController extends Controller
         return redirect()->route('admin.pages.index')->with('success', 'Page updated.');
     }
 
-    public function destroy(Page $page): RedirectResponse
+    public function destroy(string $pageId): RedirectResponse
     {
+        $page = Page::findOrFail($pageId);
         $this->authorizePage($page);
         $page->delete();
 

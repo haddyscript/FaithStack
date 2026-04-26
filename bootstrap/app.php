@@ -22,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhooks/stripe',
             'webhooks/paypal',
         ]);
+
+        // Ensure route model binding works in path mode (/{tenant_slug}/…).
+        // In Laravel 13 the web group no longer includes SubstituteBindings by
+        // default; adding it here restores implicit binding for all routes.
+        $middleware->appendToGroup('web', \Illuminate\Routing\Middleware\SubstituteBindings::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Redirect unauthenticated users to the tenant admin login
