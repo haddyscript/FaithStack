@@ -255,8 +255,13 @@ class RegistrationController extends Controller
 
         $baseDomain = config('app.base_domain', 'faithstack.test');
         $scheme     = $request->isSecure() ? 'https' : 'http';
+        $tenantMode = config('app.tenant_mode', 'subdomain');
 
-        return redirect("{$scheme}://{$tenant->subdomain}.{$baseDomain}/admin/login")
+        $loginUrl = $tenantMode === 'path'
+            ? "{$scheme}://{$baseDomain}/{$tenant->subdomain}/admin/login"
+            : "{$scheme}://{$tenant->subdomain}.{$baseDomain}/admin/login";
+
+        return redirect($loginUrl)
             ->with('success', "Welcome to FaithStack! Your {$plan->name} account is ready.");
     }
 }
