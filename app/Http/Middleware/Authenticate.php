@@ -13,6 +13,13 @@ class Authenticate extends Middleware
             return route('superadmin.login');
         }
 
-        return route('admin.login');
+        try {
+            return route('admin.login');
+        } catch (\Throwable) {
+            // In path mode, route('admin.login') requires {tenant_slug} via
+            // URL::defaults — if that wasn't set yet, build the path directly.
+            $slug = $request->route('tenant_slug') ?? '';
+            return $slug ? "/{$slug}/admin/login" : null;
+        }
     }
 }
