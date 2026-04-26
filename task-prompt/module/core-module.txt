@@ -1,5 +1,5 @@
 List the core modules such as: 
-- Website Builder
+- Website Builder - Done (implemented)
 - Member Management (CRM) - Done (implemented)
 - Giving / Payments
 - Events

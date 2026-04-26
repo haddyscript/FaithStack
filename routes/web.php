@@ -5,6 +5,7 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Webhook;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,8 @@ $tenantRoutes = function () {
         Route::get('/', [PageController::class, 'home'])->name('home');
         Route::get('/donate', [DonationController::class, 'create'])->name('donate');
         Route::post('/donate', [DonationController::class, 'store'])->name('donate.store');
+        Route::get('/events', [EventController::class, 'index'])->name('events.index');
+        Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -122,6 +125,9 @@ $tenantRoutes = function () {
             Route::post('/billing/stripe/upgrade-saved', [Admin\CheckoutController::class, 'upgradeWithSavedCard'])->name('billing.stripe.upgrade-saved');
 
             Route::get('/donations', [Admin\DonationController::class, 'index'])->name('donations.index');
+
+            // ── Events ──────────────────────────────────────────────────────
+            Route::resource('events', Admin\EventController::class);
 
             // ── CRM: Members ────────────────────────────────────────────────
             Route::post('/members/bulk',                          [Admin\MemberController::class, 'bulkAction'])->name('members.bulk');

@@ -207,6 +207,13 @@
                 icon="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
             />
 
+            <x-nav-item
+                href="{{ route('admin.events.index') }}"
+                label="Events"
+                :active="request()->routeIs('admin.events.*')"
+                icon="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+
             {{-- Section: Management --}}
             <div class="transition-all duration-200 pt-3 mb-1"
                  :class="sidebarOpen ? 'opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden'">
@@ -338,6 +345,7 @@
             <x-nav-item href="{{ route('admin.pages.index') }}" label="Pages" :active="request()->routeIs('admin.pages.*')" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             <x-nav-item href="{{ route('admin.navigation.index') }}" label="Navigation" :active="request()->routeIs('admin.navigation.*')" icon="M4 6h16M4 12h10M4 18h7"/>
             <x-nav-item href="{{ route('admin.themes.index') }}" label="Themes" :active="request()->routeIs('admin.themes.*')" icon="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+            <x-nav-item href="{{ route('admin.events.index') }}" label="Events" :active="request()->routeIs('admin.events.*')" icon="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             <p class="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Management</p>
             <x-nav-item href="{{ route('admin.members.index') }}" label="Members" :active="request()->routeIs('admin.members.*') || request()->routeIs('admin.groups.*') || request()->routeIs('admin.member-fields.*')" icon="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
             <x-nav-item href="{{ route('admin.donations.index') }}" label="Donations" :active="request()->routeIs('admin.donations.*')" icon="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -406,6 +414,14 @@
                             <div>
                                 <p class="font-semibold text-xs">New Page</p>
                                 <p class="text-xs text-slate-400">Create & publish content</p>
+                            </div>
+                        </a>
+                        <a href="{{ route('admin.events.create') }}" @click="open = false"
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <div>
+                                <p class="font-semibold text-xs">New Event</p>
+                                <p class="text-xs text-slate-400">Create & publish an event</p>
                             </div>
                         </a>
                         <a href="{{ route('admin.members.create') }}" @click="open = false"
