@@ -134,6 +134,7 @@
                             'image_text' => ['label' => 'Image + Text',   'icon' => '🖼'],
                             'gallery'    => ['label' => 'Gallery',        'icon' => '🎨'],
                             'cta'        => ['label' => 'Call to Action', 'icon' => '📣'],
+                            'events'     => ['label' => 'Events',         'icon' => '📅'],
                         ] as $type => $meta)
                             <button type="button"
                                     onclick="addSection('{{ $type }}')"

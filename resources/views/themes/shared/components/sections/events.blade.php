@@ -6,7 +6,7 @@
     $subtext  = $data['subtext']         ?? '';
     $btnText  = $data['button_text']     ?? 'View All Events';
     $btnUrl   = $data['button_url']      ?? route('events.index');
-    $showBtn  = !empty($data['show_view_all'] ?? true);
+    $showBtn  = ($data['show_view_all'] ?? true) && $data['show_view_all'] !== '0';
 
     $spacing = match($config['section_spacing'] ?? 'spacious') {
         'spacious' => 'py-24',

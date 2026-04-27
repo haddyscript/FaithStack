@@ -6,6 +6,7 @@
         'image_text' => ['icon' => '🖼', 'label' => 'Image + Text',  'badge' => 'bg-violet-100 text-violet-700'],
         'gallery'    => ['icon' => '🎨', 'label' => 'Gallery',       'badge' => 'bg-rose-100 text-rose-700'],
         'cta'        => ['icon' => '📣', 'label' => 'Call to Action','badge' => 'bg-amber-100 text-amber-700'],
+        'events'     => ['icon' => '📅', 'label' => 'Events',        'badge' => 'bg-teal-100 text-teal-700'],
     ][$type] ?? ['icon' => '📄', 'label' => ucfirst($type), 'badge' => 'bg-gray-100 text-gray-600'];
 
     $previewText = $section['title'] ?? $section['heading'] ?? '';
@@ -181,6 +182,48 @@
                                value="{{ $section['button_url'] ?? '' }}"
                                placeholder="/contact"
                                class="{{ $fi }}">
+                    </div>
+                </div>
+
+            @elseif($type === 'events')
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="{{ $fl }}">Heading</label>
+                        <input type="text" name="sections[{{ $index }}][heading]"
+                               value="{{ $section['heading'] ?? '' }}"
+                               placeholder="Upcoming Events"
+                               data-preview-src oninput="updatePreview(this)"
+                               class="{{ $fi }}">
+                    </div>
+                    <div>
+                        <label class="{{ $fl }}">Sub-text</label>
+                        <input type="text" name="sections[{{ $index }}][subtext]"
+                               value="{{ $section['subtext'] ?? '' }}"
+                               placeholder="Join us for our next gathering"
+                               class="{{ $fi }}">
+                    </div>
+                    <div>
+                        <label class="{{ $fl }}">Number of events to show</label>
+                        <input type="number" name="sections[{{ $index }}][limit]"
+                               value="{{ $section['limit'] ?? 3 }}"
+                               min="1" max="12"
+                               class="{{ $fi }}">
+                    </div>
+                    <div>
+                        <label class="{{ $fl }}">Button Text</label>
+                        <input type="text" name="sections[{{ $index }}][button_text]"
+                               value="{{ $section['button_text'] ?? '' }}"
+                               placeholder="View All Events"
+                               class="{{ $fi }}">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="hidden" name="sections[{{ $index }}][show_view_all]" value="0">
+                            <input type="checkbox" name="sections[{{ $index }}][show_view_all]" value="1"
+                                   {{ ($section['show_view_all'] ?? true) ? 'checked' : '' }}
+                                   class="rounded border-gray-300 text-indigo-600">
+                            <span class="{{ $fl }} mb-0">Show "View All Events" button</span>
+                        </label>
                     </div>
                 </div>
             @endif

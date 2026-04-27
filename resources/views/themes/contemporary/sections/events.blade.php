@@ -6,7 +6,7 @@
     $subtext = $section['subtext']         ?? '';
     $btnText = $section['button_text']     ?? 'View All Events';
     $btnUrl  = $section['button_url']      ?? route('events.index');
-    $showBtn = $section['show_view_all']   ?? true;
+    $showBtn = ($section['show_view_all'] ?? true) && $section['show_view_all'] !== '0';
 
     $upcomingEvents = Event::forTenant($tenant->id)
         ->published()
