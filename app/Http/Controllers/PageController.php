@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use App\Models\Theme;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PageController extends Controller
@@ -26,13 +27,13 @@ class PageController extends Controller
         return $this->renderPage($page, $tenant);
     }
 
-    public function show(string $slug): View
+    public function show(Request $request, string $slug): View
     {
         $tenant = app('tenant');
 
         $page = Page::forTenant($tenant->id)
             ->published()
-            ->where('slug', $slug)
+            ->where('slug', $request->route('slug', $slug))
             ->firstOrFail();
 
         return $this->renderPage($page, $tenant);
