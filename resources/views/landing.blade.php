@@ -543,6 +543,7 @@
     <x-landing.mobile-preview />
     <div class="section-sep"></div>
     <x-landing.features :features="$features" />
+    <x-landing.video-showcase />
     <div class="section-sep"></div>
     <x-landing.themes :themes="$themes" />
     <div class="section-sep"></div>
