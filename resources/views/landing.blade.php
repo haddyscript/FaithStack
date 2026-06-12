@@ -540,6 +540,7 @@
 
     <x-landing.nav />
     <x-landing.hero />
+    <x-landing.mobile-preview />
     <div class="section-sep"></div>
     <x-landing.features :features="$features" />
     <div class="section-sep"></div>
