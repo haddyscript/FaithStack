@@ -555,7 +555,7 @@
     <x-landing.pricing :plans="$plans" />
     <div class="section-sep"></div>
     <x-landing.testimonials :testimonials="$testimonials" />
-    <div class="section-sep"></div>
+    <x-landing.church-showcase />
     <x-landing.founders />
     <x-landing.activity-ticker />
     <x-landing.final-cta />

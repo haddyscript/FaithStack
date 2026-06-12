@@ -72,7 +72,6 @@
                         ['label' => 'Cancel anytime',  'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
                     ] as $chip)
                     <span class="inline-flex items-center gap-2 pl-1.5 pr-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200">
-                        {{-- Icon pill --}}
                         <span class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 flex-shrink-0">
                             <svg style="width:11px;height:11px;color:#10b981"
                                  fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -122,15 +121,16 @@
                                 <div class="w-16 h-6 rounded-lg bg-indigo-600"></div>
                             </div>
 
-                            {{-- Hero --}}
-                            <div class="mockup-content-drop flex-1 flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-white via-indigo-50/60 to-slate-50">
-                                <div class="w-52 h-3 rounded-full bg-slate-700/70"></div>
-                                <div class="w-40 h-3 rounded-full bg-slate-400/60"></div>
-                                <div class="w-32 h-2 rounded-full bg-slate-300/70 mt-1"></div>
-                                <div class="flex gap-2 mt-3">
-                                    <div class="w-20 h-6 rounded-lg bg-indigo-500"></div>
-                                    <div class="w-20 h-6 rounded-lg border border-slate-200 bg-white"></div>
-                                </div>
+                            {{-- Hero — 3D church animation video --}}
+                            <div class="mockup-content-drop flex-1 relative overflow-hidden bg-slate-950">
+                                <video
+                                    autoplay muted loop playsinline
+                                    preload="auto"
+                                    class="absolute inset-0 w-full h-full object-cover object-center">
+                                    <source src="{{ asset('videos/3D_church_website_animation.mp4') }}" type="video/mp4">
+                                </video>
+                                {{-- Subtle bottom vignette so it blends into the card strip below --}}
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
                             </div>
 
                             {{-- Cards --}}
